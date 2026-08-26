@@ -1,54 +1,107 @@
-# GeoResilience
+# GeoShield AI
 
-An AI-powered landslide early warning, risk monitoring, field verification, and infrastructure impact platform for the North Eastern Region of India.
+GeoShield AI is an integrated, intelligent platform for early warning and landslide risk monitoring. By combining state-of-the-art machine learning models with geospatial intelligence and crowdsourced field evidence, it acts as a proactive shield against natural disasters, enabling rapid response and informed decision-making.
+
+## Problem
+
+The North Eastern Region (NER) of India is highly susceptible to landslides due to its complex terrain, heavy rainfall, and geological vulnerabilities. Early warning systems are crucial to prevent loss of life, mitigate infrastructure damage, and coordinate rapid response. Current systems often fail to fuse static geospatial risks with dynamic weather conditions and real-time field reports into actionable intelligence.
+
+## What GeoShield AI Does
+
+- **Risk Prediction:** Calculates static and geospatial landslide susceptibility.
+- **Temporal Escalation Monitoring:** Detects risk escalation based on sequential weather data.
+- **GIS Visualization:** Interactive dashboard and risk map mapping high-risk zones.
+- **Field Evidence:** Processes geo-tagged hazard reports from citizens and field officers.
+- **Explainability:** Identifies the most influential features behind risk predictions.
+- **Infrastructure Impact:** Assesses the exposure of infrastructure and settlements to landslide risk.
+- **Road Routing:** Uses mapped road networks to find safer available routes.
+- **Terrain-Aware Emergency Corridors:** Computes emergency off-road routes when viable roads are destroyed.
+
+## Core Intelligence
+
+- **XGBoost:** Calculates static landslide risk based on terrain, slope, and historical data.
+- **LSTM:** Monitors temporal risk escalation based on time-series rainfall and soil moisture.
+- **SHAP:** Explains the XGBoost predictions by identifying key driving factors.
+- **Vision and SLM Evidence Processing:** Converts field reports into structured disaster evidence.
+- **Geo-Evidence Fusion Engine:** The core algorithm synthesizing static risk, temporal risk, and field evidence into a single, cohesive risk assessment.
+
+## Architecture
+
+```mermaid
+flowchart TD
+    ENV[Environmental Data] --> GEO[Geospatial Engineering]
+    TER[Terrain Data] --> GEO
+    GEO --> XGB[XGBoost Static Risk]
+    
+    WEA[Weather & Rainfall] --> LSTM[LSTM Temporal Risk]
+    
+    FIELD[Field Reports] --> EVID[Vision/SLM Evidence]
+    
+    XGB --> FUSION[Geo-Evidence Fusion Engine]
+    LSTM --> FUSION
+    EVID --> FUSION
+    
+    FUSION --> INTEL[Impact & Access Intelligence]
+    INTEL --> API[Backend API]
+    API --> UI[Dashboard & Map]
+```
 
 ## Repository Structure
 
-```mermaid
-graph TD
-    A[GeoResilience] --> B[frontend]
-    A --> C[backend]
-    A --> D[ml]
-    A --> E[geospatial]
-    A --> F[shared]
-    A --> G[docs]
+```
+geoshield-ai/
+├── frontend/        # Next.js UI, Map interface, API client, Dashboards
+├── backend/         # FastAPI backend, Orchestration, Fusion Engine, API routes
+├── ml/
+│   ├── data/
+│   │   ├── raw/
+│   │   ├── processed/
+│   │   └── sample/
+│   ├── preprocessing/
+│   ├── models/
+│   │   ├── xgboost/
+│   │   ├── lstm/
+│   │   ├── transformer/
+│   │   └── vision/
+│   ├── training/
+│   ├── inference/
+│   └── evaluation/
+├── geospatial/
+│   ├── data/
+│   │   ├── dem/
+│   │   ├── landcover/
+│   │   ├── boundaries/
+│   │   └── roads/
+│   ├── processing/
+│   └── routing/
+├── shared/
+│   ├── contracts/   # JSON schema contracts
+│   ├── constants/
+│   └── types/
+├── docs/            # Specifications and documentation
+└── scripts/
 ```
 
-- `frontend/`: Next.js React Application
-- `backend/`: FastAPI Backend Services (planned)
-- `ml/`: XGBoost/LightGBM risk prediction models (planned)
-- `geospatial/`: Infrastructure and connectivity analysis tools (planned)
-- `shared/`: API JSON contracts and mock data
-- `docs/`: Team ownership, research, and API docs
+## Technology Stack
 
-## Team Ownership
+| Layer | Technologies |
+| --- | --- |
+| **Frontend** | Next.js, React, Tailwind CSS, TypeScript, Mapbox GL JS |
+| **Backend** | FastAPI, Python, Pydantic, SQLAlchemy |
+| **Machine Learning** | Scikit-learn, XGBoost, TensorFlow/PyTorch, SHAP |
+| **Geospatial** | GDAL, Rasterio, Shapely, NetworkX, OSRM |
+| **Database** | PostgreSQL (PostGIS) |
+| **Deployment** | Docker, Docker Compose, GitHub Actions |
 
-Please refer to [`docs/team-ownership.md`](./docs/team-ownership.md) for module boundaries. 
-- **Hitanshi**: Architecture, Integration, Shared Contracts
-- **Aarya**: Core Frontend (Dashboard, Risk Map)
-- **Fenil**: Field Reporting Frontend
-- **Harshal**: Machine Learning
-- **Purv**: Geospatial Data & Impact
-- **Janhavi**: Research, QA, Demo Scenarios
-
-## Prerequisites
-- Node.js (v18+)
-- Python 3.10+
-- npm or pnpm
-
-## Development Commands
+## Getting Started
 
 ### 1. Frontend
-The frontend has a built-in mock API abstraction, meaning you can develop the UI without running the backend.
-
+The frontend currently supports a mock API abstraction allowing UI development without running the backend.
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
-Visit http://localhost:3000
-
-*To test with real backend APIs once ready, set `NEXT_PUBLIC_USE_MOCK_DATA=false` in `frontend/.env`*
 
 ### 2. Backend (Upcoming)
 ```bash
@@ -59,8 +112,27 @@ pip install -r requirements.txt
 uvicorn app.main:app --reload
 ```
 
-### 3. ML & Geospatial
-Please refer to the respective `README.md` files inside `ml/` and `geospatial/`.
+## API
 
-## Contributing
-Please see `CONTRIBUTING.md` for git workflows and branch naming conventions.
+The backend API specification is documented in [docs/API.md](docs/API.md). Communication between modules strictly occurs through established schemas in `shared/contracts`.
+
+## Documentation
+
+- [PRD (Product Requirements Document)](docs/PRD.md)
+- [TRD (Technical Requirements Document)](docs/TRD.md)
+- [Architecture](docs/ARCHITECTURE.md)
+- [API Specifications](docs/API.md)
+- [Data Specifications](docs/DATA.md)
+- [Development Guidelines](docs/DEVELOPMENT.md)
+- [Team Ownership](docs/team-ownership.md)
+
+## Team Development
+
+Development is strictly siloed by domains to minimize conflicts.
+- **frontend/** is owned by frontend developers.
+- **backend/** is owned by backend and integration developers.
+- **ml/** is owned by ML developers.
+- **geospatial/** is owned by GIS engineers.
+- Changes to **shared/** require cross-team agreement.
+
+Use proper branch prefixes based on the domain (e.g., `feature/frontend-dashboard`, `feature/ml-xgboost`). Code merges require PRs and domain owner approvals.

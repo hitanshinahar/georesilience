@@ -1,0 +1,83 @@
+# Environments
+.env
+.env.local
+.venv
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Node
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Next.js / Frontend builds
+.next/
+out/
+build/
+.swc/
+
+# Machine Learning & Large Files
+# Ignore large model artifacts
+ml/models/**/*.h5
+ml/models/**/*.pt
+ml/models/**/*.pth
+ml/models/**/*.pkl
+ml/models/**/*.joblib
+ml/models/**/*.bin
+!ml/models/**/.gitkeep
+
+# Ignore raw datasets
+geospatial/data/dem/*.tif
+geospatial/data/dem/*.tiff
+geospatial/data/landcover/*.tif
+geospatial/data/boundaries/*.shp
+geospatial/data/boundaries/*.shx
+geospatial/data/boundaries/*.dbf
+geospatial/data/boundaries/*.prj
+ml/data/raw/*
+!ml/data/raw/.gitkeep
+!geospatial/data/dem/.gitkeep
+!geospatial/data/landcover/.gitkeep
+!geospatial/data/boundaries/.gitkeep
+
+# Ensure required sample data is tracked
+!ml/data/sample/
+!geospatial/data/roads/
+!geospatial/data/hospitals/
+!geospatial/data/shelters/
+!geospatial/data/villages/
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
