@@ -1,0 +1,28 @@
+﻿{
+  "regions": [
+    {
+      "id": "sikkim-gangtok",
+      "name": "Gangtok & Pakyong (Sikkim)",
+      "center": { "lat": 27.3389, "lng": 88.6065 },
+      "land_tenure_term": "Khasra / Dag",
+      "languages": ["Nepali", "Bhutia", "Lepcha", "English"],
+      "critical_rainfall_threshold_mm_hr": 65.0
+    },
+    {
+      "id": "meghalaya-shillong",
+      "name": "Shillong & Sohra (Meghalaya)",
+      "center": { "lat": 25.5788, "lng": 91.8933 },
+      "land_tenure_term": "Khasi Syiemship Plot",
+      "languages": ["Khasi", "Garo", "English"],
+      "critical_rainfall_threshold_mm_hr": 110.0
+    },
+    {
+      "id": "mizoram-aizawl",
+      "name": "Aizawl & Champhai (Mizoram)",
+      "center": { "lat": 23.7271, "lng": 92.7176 },
+      "land_tenure_term": "Land Settlement Certificate (LSC)",
+      "languages": ["Mizo", "English"],
+      "critical_rainfall_threshold_mm_hr": 70.0
+    }
+  ]
+}

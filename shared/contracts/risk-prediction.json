@@ -1,0 +1,21 @@
+﻿{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "LandslideRiskPredictionContract",
+  "type": "object",
+  "required": ["static_susceptibility_score", "risk_tier", "top_contributing_factors"],
+  "properties": {
+    "static_susceptibility_score": { "type": "number", "minimum": 0.0, "maximum": 1.0 },
+    "risk_tier": { "type": "string", "enum": ["LOW", "MODERATE", "HIGH"] },
+    "top_contributing_factors": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "feature": { "type": "string" },
+          "contribution": { "type": "number" }
+        }
+      }
+    },
+    "provenance": { "type": "string" }
+  }
+}
