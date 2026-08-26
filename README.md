@@ -123,7 +123,6 @@ The backend API specification is documented in [docs/API.md](docs/API.md). Commu
 - [Architecture](docs/ARCHITECTURE.md)
 - [API Specifications](docs/API.md)
 - [Data Specifications](docs/DATA.md)
-- [Development Guidelines](docs/DEVELOPMENT.md)
 - [Team Ownership](docs/team-ownership.md)
 
 ## Team Development
