@@ -1,0 +1,12 @@
+[
+  "elevation_m",
+  "slope_deg",
+  "aspect_deg",
+  "tri_ruggedness",
+  "plan_curvature",
+  "rainfall_3h_accum_mm",
+  "rainfall_72h_accum_mm",
+  "soil_moisture_saturation_pct",
+  "ground_deformation_proxy_mm_yr",
+  "anthropogenic_load_proxy_kpa"
+]

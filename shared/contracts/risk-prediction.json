@@ -1,34 +1,42 @@
 {
-  "request": {
-    "latitude": 27.3389,
-    "longitude": 88.6065,
-    "rainfall_24h": 148,
-    "rainfall_7d": 420,
-    "soil_moisture": 84,
-    "slope": 42
-  },
-  "response": {
-    "zone_id": "SK-GTK-042",
-    "risk_score": 0.91,
-    "risk_level": "CRITICAL",
-    "confidence": 0.87,
-    "top_factors": [
-      {
-        "name": "24h Rainfall",
-        "impact": 0.32
-      },
-      {
-        "name": "Soil Moisture",
-        "impact": 0.24
-      },
-      {
-        "name": "Slope",
-        "impact": 0.18
-      }
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "LandslideRiskPredictionContract",
+    "type": "object",
+    "required": [
+        "static_susceptibility_score",
+        "risk_tier",
+        "top_contributing_factors"
     ],
-    "recommended_actions": [
-      "Dispatch field verification team",
-      "Monitor affected road corridor"
-    ]
-  }
+    "properties": {
+        "static_susceptibility_score": {
+            "type": "number",
+            "minimum": 0.0,
+            "maximum": 1.0
+        },
+        "risk_tier": {
+            "type": "string",
+            "enum": [
+                "LOW",
+                "MODERATE",
+                "HIGH"
+            ]
+        },
+        "top_contributing_factors": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "feature": {
+                        "type": "string"
+                    },
+                    "contribution": {
+                        "type": "number"
+                    }
+                }
+            }
+        },
+        "provenance": {
+            "type": "string"
+        }
+    }
 }

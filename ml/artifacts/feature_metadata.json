@@ -1,0 +1,52 @@
+{
+  "elevation_m": {
+    "source": "derived",
+    "dataset": "SRTM_DEM_30M",
+    "type": "continuous"
+  },
+  "slope_deg": {
+    "source": "derived",
+    "dataset": "SRTM_DEM_30M",
+    "type": "continuous"
+  },
+  "aspect_deg": {
+    "source": "derived",
+    "dataset": "SRTM_DEM_30M",
+    "type": "continuous"
+  },
+  "tri_ruggedness": {
+    "source": "derived",
+    "dataset": "SRTM_DEM_30M",
+    "type": "continuous"
+  },
+  "plan_curvature": {
+    "source": "derived",
+    "dataset": "SRTM_DEM_30M",
+    "type": "continuous"
+  },
+  "rainfall_3h_accum_mm": {
+    "source": "simulated_proxy",
+    "dataset": "IMD_GPM_Proxy",
+    "type": "continuous"
+  },
+  "rainfall_72h_accum_mm": {
+    "source": "simulated_proxy",
+    "dataset": "Antecedent_Precip_Index",
+    "type": "continuous"
+  },
+  "soil_moisture_saturation_pct": {
+    "source": "simulated_proxy",
+    "dataset": "SMAP_Proxy",
+    "type": "continuous"
+  },
+  "ground_deformation_proxy_mm_yr": {
+    "source": "simulated_proxy",
+    "dataset": "InSAR_Creep_Proxy",
+    "type": "continuous"
+  },
+  "anthropogenic_load_proxy_kpa": {
+    "source": "simulated_proxy",
+    "dataset": "Cadastral_Overburden_Proxy",
+    "type": "continuous"
+  }
+}

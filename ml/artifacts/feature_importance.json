@@ -1,0 +1,38 @@
+[
+  {
+    "feature": "slope_deg",
+    "gain": 1.43
+  },
+  {
+    "feature": "tri_ruggedness",
+    "gain": 1.42
+  },
+  {
+    "feature": "elevation_m",
+    "gain": 1.41
+  },
+  {
+    "feature": "ground_deformation_proxy_mm_yr",
+    "gain": 0.96
+  },
+  {
+    "feature": "rainfall_3h_accum_mm",
+    "gain": 0.95
+  },
+  {
+    "feature": "plan_curvature",
+    "gain": 0.93
+  },
+  {
+    "feature": "rainfall_72h_accum_mm",
+    "gain": 0.65
+  },
+  {
+    "feature": "aspect_deg",
+    "gain": 0.61
+  },
+  {
+    "feature": "soil_moisture_saturation_pct",
+    "gain": 0.55
+  }
+]

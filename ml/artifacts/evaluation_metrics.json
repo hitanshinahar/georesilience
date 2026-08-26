@@ -1,0 +1,9 @@
+{
+  "evaluation_title": "Historical Event Grounded Prototype Evaluation",
+  "validation_strategy": "Spatial Longitude Block Holdout",
+  "precision": 1.0,
+  "recall": 0.3333,
+  "f1_score": 0.5,
+  "roc_auc": 1.0,
+  "test_sample_count": 7
+}

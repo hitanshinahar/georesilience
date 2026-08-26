@@ -1,0 +1,11 @@
+{
+  "explainer_type": "TreeExplainer",
+  "expected_value": 0.020595693960785866,
+  "top_predictive_drivers": [
+    "elevation_m",
+    "slope_deg",
+    "aspect_deg",
+    "tri_ruggedness",
+    "plan_curvature"
+  ]
+}
