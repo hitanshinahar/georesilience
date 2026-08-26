@@ -1,111 +1,63 @@
 # Technical Architecture
 
-The GeoShield AI architecture follows a clear separation of concerns, orchestrated by the central Backend service. 
+The GeoShield AI architecture follows a clear separation of concerns, orchestrated by the central Backend service.
 
-## High-Level Data Flow
+## Information Flow
 
 ```mermaid
 flowchart TD
     %% Data Sources
-    subgraph Data Sources
-        ENV[Environmental Data]
-        TER[Terrain/DEM Data]
-        WEA[Weather & Rainfall]
-        FIELD[Field Reports]
-    end
+    ENV[Environmental and Geospatial Data]
+    HIST[Historical Landslide Data]
+    FIELD[Field Evidence]
 
-    %% Processing & ML Layer
-    subgraph ML & Geospatial
-        GEO[Geospatial Feature Engineering]
-        XGB[XGBoost Static Risk]
-        LSTM[LSTM Temporal Risk]
-        EVID[Vision/SLM Evidence Processing]
-    end
+    %% Feature Engineering
+    ENV --> FEAT[Feature Engineering]
+    HIST --> FEAT
 
-    %% Orchestration & Fusion
-    subgraph Backend Orchestration
-        FUSION[Geo-Evidence Fusion Engine]
-        INTEL[Impact & Access Intelligence]
-        API[FastAPI Gateway]
-    end
+    %% Machine Learning
+    FEAT --> XGB[XGBoost Static Risk]
+    FEAT --> LSTM[LSTM Temporal Risk]
+
+    %% Fusion Engine
+    XGB --> FUSION[Geo-Evidence Fusion]
+    LSTM --> FUSION
+    FIELD --> FUSION
+
+    %% Intelligence & Routing
+    FUSION --> INTEL[Risk and Impact Intelligence]
+    
+    INTEL --> ROAD[Road Routing]
+    INTEL --> TERR[Terrain-Aware Routing]
 
     %% Presentation Layer
-    subgraph Frontend Client
-        UI[Dashboard & Alerts]
-        MAP[Risk Map UI]
-    end
-
-    %% Flows
-    ENV --> GEO
-    TER --> GEO
-    WEA --> LSTM
-    FIELD --> EVID
-    
-    GEO --> XGB
-    
-    XGB --> FUSION
-    LSTM --> FUSION
-    EVID --> FUSION
-    
-    FUSION --> INTEL
-    INTEL --> API
-    API --> UI
-    API --> MAP
+    ROAD --> DASH[Dashboard, Alerts, and Response Prioritization]
+    TERR --> DASH
+    INTEL --> DASH
 ```
 
 ## Module Boundaries
 
 ### Frontend
-- Communicates exclusively with the Backend via REST APIs.
-- Agnostic of ML and Geospatial implementation details.
+Communicates exclusively with the Backend via REST APIs. Agnostic of ML and Geospatial implementation details.
 
 ### Backend
-- Acts as the orchestrator.
-- Queries the ML and Geospatial services internally (or imports modules).
-- Executes the `Geo-Evidence Fusion Engine`.
+Acts as the orchestrator. Queries the ML and Geospatial services internally. Executes the Geo-Evidence Fusion Engine.
 
-### Machine Learning (ML)
-- Receives raw or engineered features.
-- Returns risk predictions and explanations (SHAP).
+### Machine Learning
+Receives raw or engineered features. Returns risk predictions and explanations via SHAP.
 
 ### Geospatial
-- Generates base grids, slope analyses, and cost surfaces.
-- Performs all vector math.
+Generates base grids, slope analyses, and cost surfaces. Performs all vector math.
 
 ## Routing Systems Architecture
 
 GeoShield AI implements two strictly separated routing paradigms:
 
-```mermaid
-flowchart LR
-    REQ[Route Request] --> DECISION{Is Road Network Available?}
-    DECISION -- Yes --> ROAD[Road Routing]
-    DECISION -- No --> TERR[Terrain Routing]
+1. Road Routing
+Road routing operates exclusively on mapped road networks. It uses standard graph algorithms to navigate established infrastructure, taking into account known road closures and high-risk intersections.
 
-    subgraph Road Routing
-        RN[Mapped Road Network]
-        CLOSURES[Road Closures]
-        HIGH_RISK[Risk Intersections]
-        RN --> OR[OSRM / NetworkX]
-        CLOSURES --> OR
-        HIGH_RISK --> OR
-    end
+2. Terrain-Aware Routing
+Terrain-aware routing is separate and uses a terrain cost surface. It is utilized when viable road routes are destroyed or unavailable. It computes an emergency off-road corridor based on slope difficulty, land cover penalties, landslide risk, and impassable barriers. 
 
-    subgraph Terrain Routing
-        SLOPE[Slope Difficulty]
-        LC[Land Cover Penalty]
-        RISK[Landslide Risk Grid]
-        BARRIER[Impassable Barriers]
-        SLOPE --> COST[Cost Surface]
-        LC --> COST
-        RISK --> COST
-        BARRIER --> COST
-        COST --> ASTAR[A* / Dijkstra Algorithm]
-    end
-
-    OR --> RES[Safe Route]
-    ASTAR --> RES
-```
-
-**Crucial Note on Routing Limits:** 
-Standard road routing systems (like OSRM or Google Maps) cannot perform unrestricted off-road pathfinding. Therefore, GeoShield implements custom Terrain Routing using a computed cost surface and A* search for emergency off-road corridors.
+Important: Standard road routing systems such as OSRM cannot perform unrestricted off-road pathfinding. OSRM is strictly limited to the road network. Terrain routing relies on custom A* implementations traversing the cost surface grids.

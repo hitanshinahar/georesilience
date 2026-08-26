@@ -2,44 +2,31 @@
 
 GeoShield AI relies on a variety of environmental, terrain, and crowdsourced datasets.
 
-## Required Datasets & Formats
+## Required Datasets
 
-### Digital Elevation Model (DEM)
-- **Source:** SRTM or local high-resolution LiDAR surveys.
-- **Format:** GeoTIFF.
-- **Usage:** Derivation of slope, aspect, and baseline terrain routing cost.
-
-### Land Cover Data
-- **Source:** Copernicus Global Land Service or local surveys.
-- **Format:** GeoTIFF or Shapefiles.
-- **Usage:** Identifies vegetation density, soil type proxies, and impassable terrain (e.g., deep water bodies).
+### DEM and Terrain Data
+Elevation and slope data derived from Digital Elevation Models. Used for calculating baseline terrain routing cost and static risk features.
 
 ### Rainfall and Soil Moisture
-- **Source:** IMD (Indian Meteorological Department) or satellite estimates (e.g., GPM).
-- **Format:** NetCDF or CSV time-series.
-- **Usage:** Ingested by the LSTM model to compute temporal risk escalation.
+Time-series precipitation and moisture data. Ingested by the LSTM model to compute temporal risk escalation.
 
-### Historical Landslide Data
-- **Source:** GSI (Geological Survey of India) catalogues.
-- **Format:** CSV / GeoJSON.
-- **Usage:** Ground truth for training the XGBoost static risk model.
+### Historical Landslide Records
+Ground truth catalogues for training the XGBoost static risk model.
 
-### Road Networks
-- **Source:** OpenStreetMap (OSM) or regional DOT data.
-- **Format:** Shapefiles / GeoJSON.
-- **Usage:** Graph generation for road-aware routing.
+### Land Cover
+Identifies vegetation density, soil type proxies, and impassable terrain. Used as a penalty layer in terrain routing.
+
+### Road Network Data
+Mapped vector data of established infrastructure for road-aware routing.
 
 ### Field Reports
-- **Source:** GeoShield frontend client.
-- **Format:** JSON (following `shared/contracts/field-report.json`).
-- **Usage:** Real-time ground truth for the Geo-Evidence Fusion Engine.
+Real-time ground truth submitted by users for the Geo-Evidence Fusion Engine.
 
-## Processing Pipeline
-1. **Raw Ingestion:** Files are stored in `geospatial/data/` or `ml/data/raw/`.
-2. **Standardization:** Geospatial scripts reproject all spatial data to a common CRS (e.g., EPSG:4326 or local projected CRS).
-3. **Feature Engineering:** Scripts in `ml/preprocessing/` extract pixel-wise features (slope, aspect, antecedent rainfall) and construct tabular datasets.
-4. **Output:** Cleaned data moves to `ml/data/processed/` for training.
+## Data Categories
 
-## Sample Data Usage
-Currently, the repository relies on **sample data** located in `ml/data/sample/` and mock JSON responses in the frontend. This synthetic data simulates the complex terrain and weather patterns of the NER to facilitate UI and API development while real data pipelines are finalized. 
-*Do not treat sample data as live operational data.*
+Real Data: Production pipelines will connect to active APIs and verified geological surveys.
+Sample Data: The repository currently relies on sample datasets located in ml/data/sample/ and mock JSON responses in the frontend. This facilitates UI and API development while real data pipelines are finalized.
+Synthetic Data: Demo scenarios may use generated data to simulate extreme weather events for testing routing constraints.
+Future Integrations: Automated ingestion of satellite imagery for dynamic land cover updates is a planned future integration.
+
+Important: Do not treat sample data as live operational data.
