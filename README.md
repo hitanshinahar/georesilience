@@ -1,36 +1,66 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# GeoResilience
 
-## Getting Started
+An AI-powered landslide early warning, risk monitoring, field verification, and infrastructure impact platform for the North Eastern Region of India.
 
-First, run the development server:
+## Repository Structure
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+```mermaid
+graph TD
+    A[GeoResilience] --> B[frontend]
+    A --> C[backend]
+    A --> D[ml]
+    A --> E[geospatial]
+    A --> F[shared]
+    A --> G[docs]
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- `frontend/`: Next.js React Application
+- `backend/`: FastAPI Backend Services (planned)
+- `ml/`: XGBoost/LightGBM risk prediction models (planned)
+- `geospatial/`: Infrastructure and connectivity analysis tools (planned)
+- `shared/`: API JSON contracts and mock data
+- `docs/`: Team ownership, research, and API docs
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Team Ownership
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Please refer to [`docs/team-ownership.md`](./docs/team-ownership.md) for module boundaries. 
+- **Hitanshi**: Architecture, Integration, Shared Contracts
+- **Aarya**: Core Frontend (Dashboard, Risk Map)
+- **Fenil**: Field Reporting Frontend
+- **Harshal**: Machine Learning
+- **Purv**: Geospatial Data & Impact
+- **Janhavi**: Research, QA, Demo Scenarios
 
-## Learn More
+## Prerequisites
+- Node.js (v18+)
+- Python 3.10+
+- npm or pnpm
 
-To learn more about Next.js, take a look at the following resources:
+## Development Commands
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### 1. Frontend
+The frontend has a built-in mock API abstraction, meaning you can develop the UI without running the backend.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+cd frontend
+npm install
+npm run dev
+```
+Visit http://localhost:3000
 
-## Deploy on Vercel
+*To test with real backend APIs once ready, set `NEXT_PUBLIC_USE_MOCK_DATA=false` in `frontend/.env`*
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### 2. Backend (Upcoming)
+```bash
+cd backend
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+pip install -r requirements.txt
+uvicorn app.main:app --reload
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### 3. ML & Geospatial
+Please refer to the respective `README.md` files inside `ml/` and `geospatial/`.
+
+## Contributing
+Please see `CONTRIBUTING.md` for git workflows and branch naming conventions.
