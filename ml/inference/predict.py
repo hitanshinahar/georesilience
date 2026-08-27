@@ -2,6 +2,7 @@ import os
 import json
 import pandas as pd
 import xgboost as xgb
+import shap
 
 ARTIFACTS_DIR = os.path.join(os.path.dirname(__file__), "..", "artifacts")
 
@@ -18,10 +19,14 @@ class LandslidePredictor:
         
         with open(feature_path, "r") as f:
             self.features = json.load(f)
+            
+        self.explainer = shap.TreeExplainer(self.model)
 
     def predict_susceptibility(self, input_features: dict) -> dict:
         row = [input_features.get(f, 0.0) for f in self.features]
-        prob = float(self.model.predict_proba(pd.DataFrame([row], columns=self.features))[0, 1])
+        df = pd.DataFrame([row], columns=self.features)
+        
+        prob = float(self.model.predict_proba(df)[0, 1])
 
         if prob >= 0.70:
             tier = "HIGH"
@@ -30,18 +35,28 @@ class LandslidePredictor:
         else:
             tier = "LOW"
 
-        contributions = [
-            {"feature": "slope_deg", "contribution": round(float(input_features.get("slope_deg", 0) / 60.0 * 0.35), 2)},
-            {"feature": "rainfall_72h_accum_mm", "contribution": round(float(input_features.get("rainfall_72h_accum_mm", 0) / 250.0 * 0.30), 2)},
-            {"feature": "soil_moisture_saturation_pct", "contribution": round(float(input_features.get("soil_moisture_saturation_pct", 0) / 100.0 * 0.20), 2)},
-            {"feature": "tri_ruggedness", "contribution": round(float(input_features.get("tri_ruggedness", 0) / 45.0 * 0.15), 2)}
-        ]
-        contributions = sorted(contributions, key=lambda x: x["contribution"], reverse=True)
+        # Calculate SHAP values
+        shap_values = self.explainer.shap_values(df)
+        
+        # Depending on XGBoost version/objective, shap_values might be a list (multiclass) or 2D array
+        if isinstance(shap_values, list):
+            sv = shap_values[1][0]
+        else:
+            sv = shap_values[0]
+
+        contributions = []
+        for i, feature in enumerate(self.features):
+            contributions.append({
+                "feature": feature,
+                "contribution": float(sv[i])
+            })
+            
+        contributions = sorted(contributions, key=lambda x: abs(x["contribution"]), reverse=True)
 
         return {
             "static_susceptibility_score": round(prob, 4),
             "risk_tier": tier,
-            "top_contributing_factors": contributions,
+            "top_contributing_factors": contributions[:5], # Return top 5
             "provenance": "XGBoost_Static_Baseline_v1.0"
         }
 
