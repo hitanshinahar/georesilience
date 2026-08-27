@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import List
+from typing import List, Optional
 
 class StaticFeaturesInput(BaseModel):
     elevation_m: float = Field(0.0)
@@ -41,3 +41,9 @@ class TransformerPredictionResponse(BaseModel):
     temporal_risk_transformer: float
     sequence_length: int
     model_available: bool
+
+class FieldIntelligenceRequest(BaseModel):
+    report_text: str
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
+    source_type: Optional[str] = None
