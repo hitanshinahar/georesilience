@@ -14,7 +14,7 @@ router = APIRouter()
 def fuse_assessments(request: FusionRequest):
     """
     Fuses independent risk assessments from XGBoost, LSTM, Transformer, and SLM Field Intelligence 
-    into a unified confidence-aware final risk assessment.
+    into a unified final risk assessment with evidence coverage.
     """
     try:
         result = fuse_risk_assessments(request)

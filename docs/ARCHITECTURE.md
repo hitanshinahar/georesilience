@@ -55,7 +55,7 @@ flowchart TD
 
 ### 4. Confidence-Aware Risk Fusion Engine
 - **Purpose**: Synthesizes the independent model scores and field evidence into a unified assessment.
-- **Weighting**: Uses prototype heuristics (`base_importance * reliability_factor * availability`). Source reliability factors are **not** statistically calibrated prediction confidence.
+- **Weighting**: Uses prototype heuristics (`base_importance * reliability_factor * availability`). Source reliability factors are **not** statistically calibrated prediction confidence. The output includes an evidence coverage metric, which is not a probability of prediction correctness.
 - **Agreement**: Measures spread across numerical models. High spread triggers manual review.
 - **Field Evidence**: Mapped to a heuristic score representing the strength of concerning on-ground evidence, not the probability of a landslide. Acts as an escalation factor.
 

@@ -7,6 +7,7 @@ import { RiskZone, PriorityIncident, InfrastructureImpact } from '@/types';
 import { MetricsRow } from '@/components/dashboard/MetricsRow';
 import { PriorityIncidents } from '@/components/dashboard/PriorityIncidents';
 import { ZoneIntelligencePanel } from '@/components/dashboard/ZoneIntelligencePanel';
+import { AssessmentDemoPanel } from '@/components/dashboard/AssessmentDemoPanel';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -118,6 +119,47 @@ export default function CommandCenter() {
     }, 2000);
   };
 
+  const handleRunAssessment = async (payload: any) => {
+    const res = await fetch('/api/assessment/analyze', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    if (!res.ok) throw new Error("Assessment failed");
+    return res.json();
+  };
+
+  const handleAssessmentComplete = (result: any) => {
+    // Update map zones with new assessment
+    const targetName = result.location?.name;
+    setZones(prev => prev.map(z => {
+      if (z.name === targetName || (z.name.includes("NH-10") && targetName.includes("NH-10"))) {
+        return {
+          ...z,
+          riskScore: Math.round(result.assessment.final_risk_score * 100),
+          riskLevel: result.assessment.risk_level,
+          evidenceCoverage: Math.round(result.assessment.evidence_coverage * 100),
+          recommendedActions: [result.assessment.recommended_action.replace(/_/g, " "), ...z.recommendedActions.slice(0, 1)],
+          lastUpdated: new Date().toISOString()
+        };
+      }
+      return z;
+    }));
+    
+    // Also select this zone to show intelligence panel updated
+    const updatedZone = zones.find(z => z.name === targetName || (z.name.includes("NH-10") && targetName.includes("NH-10")));
+    if (updatedZone) {
+      setSelectedZone({
+          ...updatedZone,
+          riskScore: Math.round(result.assessment.final_risk_score * 100),
+          riskLevel: result.assessment.risk_level,
+          evidenceCoverage: Math.round(result.assessment.evidence_coverage * 100),
+          recommendedActions: [result.assessment.recommended_action.replace(/_/g, " "), ...updatedZone.recommendedActions.slice(0, 1)],
+          lastUpdated: new Date().toISOString()
+      });
+    }
+  };
+
   return (
     <div className="p-4 h-full flex flex-col">
       <MetricsRow />
@@ -144,8 +186,12 @@ export default function CommandCenter() {
           )}
         </div>
 
-        {/* Right Sidebar - Priority Incidents */}
-        <div className="w-80 flex flex-col gap-4">
+        {/* Right Sidebar - Priority Incidents & Demo Panel */}
+        <div className="w-80 flex flex-col gap-4 overflow-y-auto pr-2 pb-4">
+          <AssessmentDemoPanel 
+            onRunAssessment={handleRunAssessment} 
+            onAssessmentComplete={handleAssessmentComplete} 
+          />
           <PriorityIncidents 
             incidents={incidents} 
             onSelectIncident={handleSelectIncident} 

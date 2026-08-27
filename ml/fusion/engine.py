@@ -2,7 +2,7 @@ from typing import Dict, Any, List
 from .schemas import FusionRequest, FusionResponse
 from .normalizer import normalize_evidence
 from .agreement import calculate_model_agreement
-from .confidence import calculate_fusion_weights_and_confidence
+from .confidence import calculate_fusion_weights_and_coverage
 from .config import RISK_THRESHOLDS, get_recommended_action
 
 def get_risk_level(score: float) -> str:
@@ -22,7 +22,7 @@ def fuse_risk_assessments(request: FusionRequest) -> FusionResponse:
     agreement, requires_review_from_agreement = calculate_model_agreement(sources)
     
     # 3. Calculate weights and fusion confidence
-    weights, fusion_confidence = calculate_fusion_weights_and_confidence(sources)
+    weights, evidence_coverage = calculate_fusion_weights_and_coverage(sources)
     
     # 4. Compute weighted final score
     final_score = 0.0
@@ -78,7 +78,7 @@ def fuse_risk_assessments(request: FusionRequest) -> FusionResponse:
     return FusionResponse(
         final_risk_score=round(final_score, 3),
         risk_level=risk_level,
-        confidence=round(fusion_confidence, 3),
+        evidence_coverage=round(evidence_coverage, 3),
         model_agreement=agreement,
         requires_human_review=requires_review,
         recommended_action=recommended_action,

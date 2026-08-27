@@ -2,12 +2,12 @@ from typing import Dict, Tuple
 from .schemas import EvidenceSource
 from .config import SOURCE_IMPORTANCE
 
-def calculate_fusion_weights_and_confidence(sources: Dict[str, EvidenceSource]) -> Tuple[Dict[str, float], float]:
+def calculate_fusion_weights_and_coverage(sources: Dict[str, EvidenceSource]) -> Tuple[Dict[str, float], float]:
     """
-    Calculates normalized effective weights for all available sources and an overall heuristic confidence.
+    Calculates normalized effective weights for all available sources and an overall evidence coverage.
     effective_weight = base_importance * reliability_factor * availability
     
-    Returns: (normalized_weights_dict, overall_confidence)
+    Returns: (normalized_weights_dict, evidence_coverage)
     """
     effective_weights = {}
     total_effective_weight = 0.0
@@ -32,10 +32,10 @@ def calculate_fusion_weights_and_confidence(sources: Dict[str, EvidenceSource]) 
         for src_name in sources.keys():
             normalized_weights[src_name] = 0.0
             
-    # Calculate overall confidence heuristic.
+    # Calculate evidence coverage.
     # This is roughly the sum of effective weights compared to the theoretical max if all sources were 1.0 reliable.
     max_possible_weight = sum(SOURCE_IMPORTANCE.values())
-    overall_confidence = total_effective_weight / max_possible_weight if max_possible_weight > 0 else 0.0
-    overall_confidence = min(max(overall_confidence, 0.0), 1.0)
+    evidence_coverage = total_effective_weight / max_possible_weight if max_possible_weight > 0 else 0.0
+    evidence_coverage = min(max(evidence_coverage, 0.0), 1.0)
     
-    return normalized_weights, overall_confidence
+    return normalized_weights, evidence_coverage

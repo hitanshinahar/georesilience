@@ -11,7 +11,7 @@ export const MOCK_ZONES: RiskZone[] = [
     longitude: 88.5120,
     riskScore: 91,
     riskLevel: 'CRITICAL',
-    confidence: 87,
+    evidenceCoverage: 87,
     environmentalFactors: {
       rainfall24h: 148,
       rainfall7d: 320,
@@ -41,7 +41,7 @@ export const MOCK_ZONES: RiskZone[] = [
     longitude: 88.5830,
     riskScore: 88,
     riskLevel: 'HIGH',
-    confidence: 82,
+    evidenceCoverage: 82,
     environmentalFactors: {
       rainfall24h: 110,
       rainfall7d: 280,
@@ -68,7 +68,7 @@ export const MOCK_ZONES: RiskZone[] = [
     longitude: 88.6122,
     riskScore: 82,
     riskLevel: 'HIGH',
-    confidence: 76,
+    evidenceCoverage: 76,
     environmentalFactors: {
       rainfall24h: 95,
       rainfall7d: 240,
@@ -95,7 +95,7 @@ export const MOCK_ZONES: RiskZone[] = [
     longitude: 88.6210,
     riskScore: 76,
     riskLevel: 'HIGH',
-    confidence: 62,
+    evidenceCoverage: 62,
     environmentalFactors: {
       rainfall24h: 85,
       rainfall7d: 210,
@@ -120,7 +120,7 @@ export const MOCK_ZONES: RiskZone[] = [
     longitude: 88.5980,
     riskScore: 65,
     riskLevel: 'MODERATE',
-    confidence: 85,
+    evidenceCoverage: 85,
     environmentalFactors: {
       rainfall24h: 50,
       rainfall7d: 150,
@@ -145,7 +145,7 @@ export const MOCK_ZONES: RiskZone[] = [
     longitude: 88.6050,
     riskScore: 45,
     riskLevel: 'LOW',
-    confidence: 90,
+    evidenceCoverage: 90,
     environmentalFactors: {
       rainfall24h: 30,
       rainfall7d: 100,

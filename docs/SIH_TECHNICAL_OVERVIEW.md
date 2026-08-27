@@ -25,7 +25,7 @@ Evaluates transformer architectures for alternative time-series forecasting. It 
 Uses a small, localized Large Language Model (Qwen2.5-0.5B-Instruct) to parse unstructured textual field reports from citizens or officers into structured heuristic evidence (e.g., hazard type, severity, urgency, observations). This enables automated ingestion of human intelligence without requiring manual data entry forms for every scenario.
 
 ## 9. Risk Fusion Differentiator (Phase 5)
-Instead of a naive average, the Geo-Evidence Fusion Engine uses confidence-aware weighting. It normalizes inputs, detects agreement/disagreement among numerical models, and uses field evidence as a heuristic corroboration/escalation factor. It outputs decision-support metrics like `recommended_action` and `requires_human_review`.
+Instead of a naive average, the Geo-Evidence Fusion Engine uses confidence-aware weighting. It normalizes inputs, detects agreement/disagreement among numerical models, and uses field evidence as a heuristic corroboration/escalation factor. It outputs decision-support metrics like `recommended_action`, `requires_human_review`, and `evidence_coverage` (not prediction probability).
 
 ## 10. Explainability
 The system is designed for transparency:

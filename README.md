@@ -55,7 +55,7 @@ Citizen / Field Reports
 2. **LSTM (Phase 2)**: Analyzes 72-hour time-series rainfall and soil moisture to monitor temporal risk escalation. (Currently uses synthetic/demo data).
 3. **Transformer (Phase 3)**: Evaluates transformer architectures for alternative time-series forecasting. (Currently uses synthetic/demo data).
 4. **SLM Field Intelligence (Phase 4)**: Uses local Qwen2.5-0.5B-Instruct to convert unstructured textual field reports into structured heuristic evidence.
-5. **Confidence-Aware Risk Fusion Engine (Phase 5)**: Synthesizes the above predictions into a unified assessment. Uses prototype decision support heuristics for model agreement and field evidence weighting, rather than statistically calibrated probabilities.
+5. **Confidence-Aware Risk Fusion Engine (Phase 5)**: Synthesizes the above predictions into a unified assessment. Uses prototype decision support heuristics for model agreement and field evidence weighting, rather than statistically calibrated probabilities. Evidence coverage represents data availability.
 
 ## Setup
 

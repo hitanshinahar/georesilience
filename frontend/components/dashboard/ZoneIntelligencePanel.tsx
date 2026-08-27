@@ -74,9 +74,9 @@ export function ZoneIntelligencePanel({
             <Progress value={zone.riskScore} className={`h-1.5 mt-2 ${getProgressColor(zone.riskLevel)}`} />
           </div>
           <div className="space-y-1">
-            <div className="text-xs text-muted-foreground">AI Confidence</div>
-            <div className="text-3xl font-bold">{zone.confidence}%</div>
-            <Progress value={zone.confidence} className="h-1.5 mt-2 [&>div]:bg-blue-500" />
+            <div className="text-xs text-muted-foreground">Evidence Coverage</div>
+            <div className="text-3xl font-bold">{zone.evidenceCoverage}%</div>
+            <Progress value={zone.evidenceCoverage} className="h-1.5 mt-2 [&>div]:bg-blue-500" />
           </div>
         </div>
 

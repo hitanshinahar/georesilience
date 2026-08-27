@@ -31,7 +31,7 @@ class EvidenceSource(BaseModel):
 class FusionResponse(BaseModel):
     final_risk_score: float
     risk_level: str
-    confidence: float # Overall fusion confidence heuristic
+    evidence_coverage: float # Overall evidence coverage heuristic
     model_agreement: str
     requires_human_review: bool
     recommended_action: str

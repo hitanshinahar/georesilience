@@ -20,7 +20,7 @@ export interface RiskZone {
   longitude: number;
   riskScore: number; // 0-100
   riskLevel: RiskLevel;
-  confidence: number; // 0-100
+  evidenceCoverage: number; // 0-100
   environmentalFactors: EnvironmentalFactors;
   topFactors: FactorContribution[];
   affectedInfrastructure: string[];

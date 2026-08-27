@@ -10,7 +10,7 @@ The objective is to combine:
 3. **Transformer**: Alternative temporal risk over the same sequence.
 4. **SLM Field Intelligence**: Unstructured citizen/field officer reports converted into structured heuristic intelligence.
 
-The fusion engine produces a unified decision-support assessment, evaluating agreement among models, escalating risk based on corroborating field evidence, and triggering human review when necessary.
+The fusion engine produces a unified decision-support assessment, evaluating agreement among models, escalating risk based on corroborating field evidence, and triggering human review when necessary. Evidence coverage indicates how much of the expected evidence pipeline was available.
 
 ## 2. Architecture
 
@@ -131,7 +131,7 @@ Accepts raw model outputs and runs the fusion engine independently.
 {
   "final_risk_score": 0.87,
   "risk_level": "RED",
-  "confidence": 0.89,
+  "evidence_coverage": 0.89,
   "model_agreement": "high",
   "requires_human_review": false,
   "recommended_action": "field_inspection",

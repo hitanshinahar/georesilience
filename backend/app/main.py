@@ -15,6 +15,8 @@ app.add_middleware(
 app.include_router(risk_router.router, prefix="/api/risk", tags=["Risk"])
 app.include_router(fusion_router.router, prefix="/api/risk", tags=["Fusion"])
 app.include_router(slm_router.router, prefix="/api/field-intelligence", tags=["Intelligence"])
+from app.routers import assessment_router
+app.include_router(assessment_router.router, prefix="/api/assessment", tags=["Assessment"])
 
 @app.get("/health")
 def health_check():
