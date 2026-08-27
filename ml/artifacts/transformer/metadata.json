@@ -1,0 +1,18 @@
+{
+    "model_type": "Transformer",
+    "training_data_type": "synthetic/demo",
+    "training_timestamp": "2026-08-27T07:12:57.657925",
+    "data_limitations": "Prototype temporal model trained on synthetic data. Do not overclaim predictive accuracy.",
+    "input_size": 3,
+    "d_model": 32,
+    "nhead": 4,
+    "num_layers": 2,
+    "dim_feedforward": 64,
+    "dropout": 0.2,
+    "seq_length": 72,
+    "features": [
+        "rainfall_mm",
+        "cumulative_rainfall_mm",
+        "soil_moisture"
+    ]
+}

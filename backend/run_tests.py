@@ -61,6 +61,21 @@ def run_tests():
         print(f"Timeseries invalid response: {response.status_code}")
         assert response.status_code == 422
         
+        print("Testing /api/risk/timeseries/transformer with valid payload...")
+        response = client.post("/api/risk/timeseries/transformer", json={"sequence": seq})
+        print(f"Timeseries Transformer valid response: {response.status_code}")
+        if response.status_code == 200:
+            print(response.json())
+        elif response.status_code == 503:
+            print("Transformer Model missing.")
+        else:
+            print(f"Unexpected: {response.text}")
+
+        print("Testing /api/risk/timeseries/transformer with invalid short payload...")
+        response = client.post("/api/risk/timeseries/transformer", json={"sequence": seq[:10]})
+        print(f"Timeseries Transformer invalid response: {response.status_code}")
+        assert response.status_code == 422
+        
     print("All tests passed!")
 
 if __name__ == "__main__":

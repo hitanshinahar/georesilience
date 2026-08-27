@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
 from typing import Dict, Any
-from app.schemas.schemas import StaticFeaturesInput, RiskPredictionResponse, TimeseriesPredictionRequest, TimeseriesPredictionResponse
+from app.schemas.schemas import StaticFeaturesInput, RiskPredictionResponse, TimeseriesPredictionRequest, TimeseriesPredictionResponse, TransformerPredictionResponse
 import sys
 import os
 
@@ -25,6 +25,15 @@ except Exception as e:
     lstm_predictor = None
     print(f"Error loading LSTM model: {e}")
 
+try:
+    from ml.models.transformer.predict import TransformerPredictor
+    transformer_predictor = TransformerPredictor()
+except FileNotFoundError as e:
+    transformer_predictor = None
+except Exception as e:
+    transformer_predictor = None
+    print(f"Error loading Transformer model: {e}")
+
 router = APIRouter()
 
 @router.post("/predict", response_model=RiskPredictionResponse)
@@ -46,6 +55,20 @@ def predict_timeseries(request: TimeseriesPredictionRequest):
     try:
         seq_dicts = [step.dict() for step in request.sequence]
         result = lstm_predictor.predict_timeseries(seq_dicts)
+        return result
+    except ValueError as ve:
+        raise HTTPException(status_code=422, detail=str(ve))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Prediction error: {str(e)}")
+
+@router.post("/timeseries/transformer", response_model=TransformerPredictionResponse)
+def predict_timeseries_transformer(request: TimeseriesPredictionRequest):
+    if transformer_predictor is None:
+        raise HTTPException(status_code=503, detail="Transformer model artifacts not found. Please train the model first.")
+        
+    try:
+        seq_dicts = [step.dict() for step in request.sequence]
+        result = transformer_predictor.predict_timeseries(seq_dicts)
         return result
     except ValueError as ve:
         raise HTTPException(status_code=422, detail=str(ve))

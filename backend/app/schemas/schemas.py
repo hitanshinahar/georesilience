@@ -37,3 +37,7 @@ class TimeseriesPredictionResponse(BaseModel):
     sequence_length: int
     model_available: bool
 
+class TransformerPredictionResponse(BaseModel):
+    temporal_risk_transformer: float
+    sequence_length: int
+    model_available: bool
