@@ -50,6 +50,8 @@ Computes a cost surface from slope, land cover, and risk grids. Uses A* algorith
 
 ## Geo-Evidence Fusion Engine
 Fuses multiple risk layers. The backend implements this logic, combining the ML inference outputs with validated field reports.
+> [!NOTE]
+> As of Phase 5, the core fusion logic resides in `ml/fusion/engine.py` and implements confidence-aware weighting and model agreement detection, integrated via `backend/app/routers/fusion_router.py`.
 
 ## API Architecture
 Communication strictly follows defined JSON contracts in the shared directory. All interactions are stateless RESTful calls.

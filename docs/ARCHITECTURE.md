@@ -2,62 +2,79 @@
 
 The GeoShield AI architecture follows a clear separation of concerns, orchestrated by the central Backend service.
 
-## Information Flow
+## High-Level Pipeline
 
 ```mermaid
 flowchart TD
     %% Data Sources
     ENV[Environmental and Geospatial Data]
     HIST[Historical Landslide Data]
-    FIELD[Field Evidence]
-
-    %% Feature Engineering
-    ENV --> FEAT[Feature Engineering]
-    HIST --> FEAT
+    FIELD[Citizen / Field Reports]
 
     %% Machine Learning
-    FEAT --> XGB[XGBoost Static Risk]
-    FEAT --> LSTM[LSTM Temporal Risk]
+    ENV --> XGB[XGBoost Static Risk]
+    ENV --> LSTM[LSTM Temporal Risk]
+    ENV --> TRANS[Transformer Temporal Risk]
+    FIELD --> SLM[SLM Field Intelligence]
 
     %% Fusion Engine
-    XGB --> FUSION[Geo-Evidence Fusion]
+    XGB --> FUSION[Confidence-Aware Risk Fusion]
     LSTM --> FUSION
-    FIELD --> FUSION
+    TRANS --> FUSION
+    SLM --> FUSION
 
     %% Intelligence & Routing
-    FUSION --> INTEL[Risk and Impact Intelligence]
+    FUSION --> INTEL[Unified Risk Assessment]
     
     INTEL --> ROAD[Road Routing]
     INTEL --> TERR[Terrain-Aware Routing]
 
     %% Presentation Layer
-    ROAD --> DASH[Dashboard, Alerts, and Response Prioritization]
+    ROAD --> DASH[Dashboard & Response Prioritization]
     TERR --> DASH
     INTEL --> DASH
 ```
 
-## Module Boundaries
+## ML Components and Roles
 
-### Frontend
-Communicates exclusively with the Backend via REST APIs. Agnostic of ML and Geospatial implementation details.
+### 1. XGBoost Predictor
+- **Purpose**: Evaluates static terrain features (elevation, slope, soil moisture saturation proxy) to compute a base landslide susceptibility score.
+- **Explainability**: Uses SHAP values to determine top contributing features.
+- **Output**: Risk score (0.0 to 1.0).
 
-### Backend
-Acts as the orchestrator. Queries the ML and Geospatial services internally. Executes the Geo-Evidence Fusion Engine.
+### 2. LSTM & Transformer Predictors
+- **Purpose**: Evaluates time-series data (e.g., 72-hour rainfall sequences) to identify escalating temporal risk.
+- **Current State**: Uses synthetic/demo sequence processing in the prototype.
+- **Output**: Temporal risk score (0.0 to 1.0).
 
-### Machine Learning
-Receives raw or engineered features. Returns risk predictions and explanations via SHAP.
+### 3. SLM Field Intelligence
+- **Purpose**: Extracts structured information from unstructured citizen/field reports.
+- **Model**: Qwen2.5-0.5B-Instruct (local, on-device).
+- **Output**: Heuristic labels (hazard type, severity, urgency, observations).
+- **Note**: The SLM confidence represents extraction confidence, not disaster prediction probability.
 
-### Geospatial
-Generates base grids, slope analyses, and cost surfaces. Performs all vector math.
+### 4. Confidence-Aware Risk Fusion Engine
+- **Purpose**: Synthesizes the independent model scores and field evidence into a unified assessment.
+- **Weighting**: Uses prototype heuristics (`base_importance * reliability_factor * availability`). Source reliability factors are **not** statistically calibrated prediction confidence.
+- **Agreement**: Measures spread across numerical models. High spread triggers manual review.
+- **Field Evidence**: Mapped to a heuristic score representing the strength of concerning on-ground evidence, not the probability of a landslide. Acts as an escalation factor.
+
+## Microservices Flow
+
+1. **Frontend**: Next.js app sends data payloads to FastAPI backend.
+2. **FastAPI Routers**: Routes requests to specific endpoints (`/api/risk/predict`, `/api/risk/fuse`, etc.).
+3. **ML Inference**:
+   - `ml.inference.predict` handles XGBoost.
+   - `ml.models.*.predict` handles LSTM, Transformer, and SLM.
+4. **Fusion Engine**:
+   - Normalized in `ml.fusion.normalizer`.
+   - Agreement checked in `ml.fusion.agreement`.
+   - Weighted and fused in `ml.fusion.engine`.
+5. **Response**: Returns standardized JSON payloads to the frontend.
 
 ## Routing Systems Architecture
 
 GeoShield AI implements two strictly separated routing paradigms:
 
-1. Road Routing
-Road routing operates exclusively on mapped road networks. It uses standard graph algorithms to navigate established infrastructure, taking into account known road closures and high-risk intersections.
-
-2. Terrain-Aware Routing
-Terrain-aware routing is separate and uses a terrain cost surface. It is utilized when viable road routes are destroyed or unavailable. It computes an emergency off-road corridor based on slope difficulty, land cover penalties, landslide risk, and impassable barriers. 
-
-Important: Standard road routing systems such as OSRM cannot perform unrestricted off-road pathfinding. OSRM is strictly limited to the road network. Terrain routing relies on custom A* implementations traversing the cost surface grids.
+1. **Road Routing**: Operates exclusively on mapped road networks. Uses standard graph algorithms (OSRM/NetworkX) taking into account known road closures and high-risk intersections.
+2. **Terrain-Aware Routing**: Separate terrain cost surface routing utilized when viable roads are destroyed. Computes emergency off-road corridors based on slope difficulty, land cover penalties, landslide risk, and impassable barriers using custom A* implementations.

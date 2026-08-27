@@ -29,9 +29,8 @@ Combines distinct risk vectors:
 3. Field Evidence: Ground reality reports.
 
 Prototype formula:
-final_risk = 0.55 * static_risk + 0.30 * temporal_risk + 0.15 * field_evidence
-Note: Weights are prototype parameters and are configurable.
-
+> [!WARNING] 
+> This original static weighting formula was superseded in Phase 5. The implemented Confidence-Aware Risk Fusion Engine uses dynamic weights based on `base_importance * reliability_factor * availability`, incorporates model agreement detection, and uses field evidence as a heuristic escalation factor rather than a strict weighted sum. See `ml/fusion/README.md` for current implementation details.
 ## Machine Learning Models
 XGBoost calculates static and geospatial landslide susceptibility based on terrain, slope, and historical data.
 LSTM (Long Short-Term Memory) monitors temporal risk escalation based on sequential data like rainfall and soil moisture.

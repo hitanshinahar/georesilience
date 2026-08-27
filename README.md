@@ -27,71 +27,87 @@ Vision Processing: Processes visual field reports into structured evidence (plan
 Small Language Model Processing: Processes textual field reports into structured evidence (planned).
 Optional Transformer Experiment: Evaluates transformer architectures for time-series forecasting (experimental).
 
-## Architecture
+## System Architecture
 
-GeoShield AI employs a microservices architecture separating frontend UI, backend orchestration, machine learning inference, and geospatial processing. Data flows from environmental sources and field reports into ML and Geospatial engines. The Backend fuses these insights using the Geo-Evidence Fusion Engine and serves the aggregated risk intelligence to the Frontend via REST APIs.
+```text
+Environmental and terrain data
+        |
+        +--> XGBoost (Phase 1)
+        |
+        +--> LSTM (Phase 2)
+        |
+        +--> Transformer (Phase 3)
 
-## Repository Structure
-
-```
-geoshield-ai/
-├── frontend/
-├── backend/
-├── ml/
-│   ├── data/
-│   │   ├── raw/
-│   │   ├── processed/
-│   │   └── sample/
-│   ├── preprocessing/
-│   ├── models/
-│   │   ├── xgboost/
-│   │   ├── lstm/
-│   │   ├── transformer/
-│   │   └── vision/
-│   ├── training/
-│   ├── inference/
-│   └── evaluation/
-├── geospatial/
-│   ├── data/
-│   │   ├── dem/
-│   │   ├── landcover/
-│   │   ├── boundaries/
-│   │   └── roads/
-│   ├── processing/
-│   └── routing/
-├── shared/
-│   ├── contracts/
-│   ├── constants/
-│   └── types/
-├── docs/
-└── scripts/
+Citizen / Field Reports
+        |
+        +--> SLM Field Intelligence (Phase 4)
+                    |
+                    v
+             Risk Fusion Engine (Phase 5)
+                    |
+                    v
+          Unified Risk Assessment
 ```
 
-## Technology Stack
+## AI/ML Pipeline
 
-- Frontend: Next.js, React, Tailwind CSS, TypeScript
-- Backend: FastAPI, Python
-- Machine Learning: Scikit-learn, XGBoost, TensorFlow/PyTorch
-- Geospatial: NetworkX, OSRM (for road routing)
-- Database: PostgreSQL, PostGIS
+1. **XGBoost (Phase 1)**: Analyzes terrain, slope, and historical data to predict static landslide risk. Includes real SHAP explanations for interpretability.
+2. **LSTM (Phase 2)**: Analyzes 72-hour time-series rainfall and soil moisture to monitor temporal risk escalation. (Currently uses synthetic/demo data).
+3. **Transformer (Phase 3)**: Evaluates transformer architectures for alternative time-series forecasting. (Currently uses synthetic/demo data).
+4. **SLM Field Intelligence (Phase 4)**: Uses local Qwen2.5-0.5B-Instruct to convert unstructured textual field reports into structured heuristic evidence.
+5. **Confidence-Aware Risk Fusion Engine (Phase 5)**: Synthesizes the above predictions into a unified assessment. Uses prototype decision support heuristics for model agreement and field evidence weighting, rather than statistically calibrated probabilities.
 
-## Getting Started
+## Setup
 
-### Frontend UI Development
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/hitanshinahar/georesilience.git
+   cd georesilience
+   ```
+2. **Create Python environment:**
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   ```
+3. **Install backend dependencies:**
+   ```bash
+   cd backend
+   pip install -r requirements.txt
+   ```
+4. **Set up SLM:**
+   ```bash
+   python ml/models/slm/setup.py
+   ```
+   *(Downloads the Qwen model to `ml/artifacts/slm/model.safetensors`, which is ignored in Git)*
+5. **Verify ML artifacts:**
+   Ensure `ml/models/xgboost`, `lstm`, and `transformer` artifacts are present or generated.
+6. **Run the backend:**
+   ```bash
+   cd backend
+   uvicorn app.main:app --reload
+   ```
+7. **Run tests:**
+   ```bash
+   cd backend
+   python run_tests.py
+   python -m unittest tests/test_fusion_engine.py
+   ```
 
-The frontend currently utilizes a mock API, allowing UI development without a running backend.
+## API Overview
 
-```bash
-cd frontend
-npm install
-npm run dev
-```
+- `GET /health`: System health check
+- `POST /api/risk/predict`: Static XGBoost risk prediction
+- `POST /api/risk/timeseries`: Temporal LSTM risk prediction
+- `POST /api/risk/timeseries/transformer`: Temporal Transformer prediction
+- `POST /api/field-intelligence/analyze`: SLM structured field intelligence extraction
+- `POST /api/risk/fuse`: Confidence-Aware Risk Fusion Engine
 
 ## Documentation
 
 - [Product Requirements Document (PRD)](docs/PRD.md)
 - [Technical Requirements Document (TRD)](docs/TRD.md)
 - [Architecture](docs/ARCHITECTURE.md)
+- [SIH Technical Overview](docs/SIH_TECHNICAL_OVERVIEW.md)
 - [API Specifications](docs/API.md)
 - [Data Specifications](docs/DATA.md)
 - [Development Guidelines](docs/DEVELOPMENT.md)
