@@ -11,6 +11,7 @@ class HazardTypeEnum(str, Enum):
     road_blockage = "road_blockage"
     flooding = "flooding"
     erosion = "erosion"
+    seepage = "seepage"
     unknown = "unknown"
 
 class SeverityEnum(str, Enum):
@@ -50,6 +51,51 @@ def safe_extract_json(text: str) -> dict:
     """
     import re
     
+    def _normalize_dict(d: dict) -> dict:
+        if not isinstance(d, dict):
+            return d
+        if "hazard_type" in d and isinstance(d["hazard_type"], str):
+            ht = d["hazard_type"].lower().strip()
+            # Order matters: check more specific ones first if they overlap, 
+            # though here we just group them by hazard type.
+            if any(x in ht for x in ["crack", "fracture"]):
+                d["hazard_type"] = "slope_crack"
+            elif any(x in ht for x in ["rock", "boulder"]):
+                d["hazard_type"] = "rockfall"
+            elif any(x in ht for x in ["mudslide", "landslide", "slide", "sliding", "soil movement", "earth movement", "moving soil"]):
+                d["hazard_type"] = "landslide"
+            elif any(x in ht for x in ["road block", "blocked", "blockage"]):
+                d["hazard_type"] = "road_blockage"
+            elif any(x in ht for x in ["flood"]):
+                d["hazard_type"] = "flooding"
+            elif any(x in ht for x in ["seep", "wet ground", "leak"]):
+                d["hazard_type"] = "seepage"
+
+        if "severity" in d and isinstance(d["severity"], str):
+            sev = d["severity"].lower().strip()
+            if sev in ["moderate", "medium_risk"]:
+                d["severity"] = "medium"
+            elif sev in ["extreme", "severe", "catastrophic", "dangerous"]:
+                d["severity"] = "critical"
+            elif sev in ["elevated", "high_risk"]:
+                d["severity"] = "high"
+
+        if "urgency" in d and isinstance(d["urgency"], str):
+            urg = d["urgency"].lower().strip()
+            if urg in ["urgent", "critical", "high", "asap", "emergency"]:
+                d["urgency"] = "immediate"
+            elif urg in ["investigate", "check"]:
+                d["urgency"] = "inspect"
+
+        if "temporal_change" in d and isinstance(d["temporal_change"], str):
+            tc = d["temporal_change"].lower().strip()
+            if tc in ["worsening", "escalating", "deteriorating", "increasing"]:
+                d["temporal_change"] = "worsening"
+            elif tc in ["improving", "decreasing", "receding"]:
+                d["temporal_change"] = "improving"
+
+        return d
+
     text = text.strip()
     
     # 1. Strip markdown code fences
@@ -59,13 +105,13 @@ def safe_extract_json(text: str) -> dict:
     if match:
         extracted = match.group(1).strip()
         try:
-            return json.loads(extracted)
+            return _normalize_dict(json.loads(extracted))
         except json.JSONDecodeError:
             pass # Fallthrough
             
     # 2. Attempt json.loads directly
     try:
-        return json.loads(text)
+        return _normalize_dict(json.loads(text))
     except json.JSONDecodeError:
         pass # Fallthrough
         
@@ -97,7 +143,7 @@ def safe_extract_json(text: str) -> dict:
         if end_idx != -1:
             extracted = text[start_idx:end_idx+1]
             try:
-                return json.loads(extracted)
+                return _normalize_dict(json.loads(extracted))
             except json.JSONDecodeError:
                 pass
                 

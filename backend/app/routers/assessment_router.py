@@ -2,8 +2,12 @@ from fastapi import APIRouter, HTTPException
 from typing import Dict, Any
 from app.schemas.assessment import AssessmentRequest, AssessmentResponse
 from app.schemas.schemas import TimeseriesPredictionRequest, FieldIntelligenceRequest
+from app.services.assessment_workflow import post_assessment_hook
 import sys
 import os
+import logging
+
+logger = logging.getLogger(__name__)
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..")))
 
@@ -35,17 +39,16 @@ def run_orchestrated_assessment(request: AssessmentRequest):
     if request.static_features:
         try:
             xgboost_res = predict_risk(request.static_features)
-            # Handle Pydantic V2 dict() deprecation gracefully
-            model_outputs["xgboost"] = xgboost_res.model_dump() if hasattr(xgboost_res, "model_dump") else xgboost_res.dict()
+            model_outputs["xgboost"] = xgboost_res
             data_sources["xgboost_available"] = True
             fusion_req.xgboost = ModelSourceInput(
-                risk_score=xgboost_res.static_susceptibility_score,
+                risk_score=xgboost_res.get("static_susceptibility_score", 0.0),
                 confidence=0.85, # using default prototype reliability
                 available=True
             )
         except Exception as e:
-            model_outputs["xgboost"] = {"error": str(e)}
-            fusion_req.xgboost = ModelSourceInput(risk_score=0, available=False)
+            model_outputs["xgboost"] = {"error": str(e), "available": False}
+            fusion_req.xgboost = ModelSourceInput(risk_score=0.0, available=False)
     
     # 2. LSTM & Transformer
     if request.timeseries_sequence:
@@ -54,30 +57,30 @@ def run_orchestrated_assessment(request: AssessmentRequest):
         # LSTM
         try:
             lstm_res = predict_timeseries(ts_req)
-            model_outputs["lstm"] = lstm_res.model_dump() if hasattr(lstm_res, "model_dump") else lstm_res.dict()
-            data_sources["lstm_available"] = lstm_res.model_available
+            model_outputs["lstm"] = lstm_res
+            data_sources["lstm_available"] = lstm_res.get("model_available", False)
             fusion_req.lstm = ModelSourceInput(
-                risk_score=lstm_res.temporal_risk_lstm,
+                risk_score=lstm_res.get("temporal_risk_lstm", 0.0),
                 confidence=0.82,
-                available=lstm_res.model_available
+                available=lstm_res.get("model_available", False)
             )
         except Exception as e:
-            model_outputs["lstm"] = {"error": str(e)}
-            fusion_req.lstm = ModelSourceInput(risk_score=0, available=False)
+            model_outputs["lstm"] = {"error": str(e), "available": False}
+            fusion_req.lstm = ModelSourceInput(risk_score=0.0, available=False)
             
         # Transformer
         try:
             tf_res = predict_timeseries_transformer(ts_req)
-            model_outputs["transformer"] = tf_res.model_dump() if hasattr(tf_res, "model_dump") else tf_res.dict()
-            data_sources["transformer_available"] = tf_res.model_available
+            model_outputs["transformer"] = tf_res
+            data_sources["transformer_available"] = tf_res.get("model_available", False)
             fusion_req.transformer = ModelSourceInput(
-                risk_score=tf_res.temporal_risk_transformer,
+                risk_score=tf_res.get("temporal_risk_transformer", 0.0),
                 confidence=0.86,
-                available=tf_res.model_available
+                available=tf_res.get("model_available", False)
             )
         except Exception as e:
-            model_outputs["transformer"] = {"error": str(e)}
-            fusion_req.transformer = ModelSourceInput(risk_score=0, available=False)
+            model_outputs["transformer"] = {"error": str(e), "available": False}
+            fusion_req.transformer = ModelSourceInput(risk_score=0.0, available=False)
             
     # 3. SLM Field Intelligence
     if request.field_report:
@@ -101,7 +104,7 @@ def run_orchestrated_assessment(request: AssessmentRequest):
                 recommended_action=slm_res.get("recommended_action", "")
             )
         except Exception as e:
-            model_outputs["field_intelligence"] = {"error": str(e)}
+            model_outputs["field_intelligence"] = {"error": str(e), "available": False}
             
     # 4. Run Fusion
     try:
@@ -109,6 +112,17 @@ def run_orchestrated_assessment(request: AssessmentRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Fusion orchestrator error: {str(e)}")
     
+    # Phase 7: Post-assessment workflow hook (side effect only)
+    try:
+        fusion_dict = fusion_response.model_dump() if hasattr(fusion_response, "model_dump") else fusion_response.dict()
+        location_dict = None
+        if request.location:
+            location_dict = request.location.model_dump() if hasattr(request.location, "model_dump") else request.location.dict()
+        post_assessment_hook(fusion_dict, location_dict)
+    except Exception as e:
+        # Workflow hook failure should not break the assessment response
+        logger.warning(f"Post-assessment workflow hook error (non-fatal): {e}")
+
     return AssessmentResponse(
         location=request.location,
         assessment=fusion_response,

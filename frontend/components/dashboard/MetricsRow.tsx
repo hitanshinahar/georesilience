@@ -1,39 +1,41 @@
-import { AlertTriangle, AlertCircle, FileText, Users } from 'lucide-react';
+import { AlertTriangle, AlertCircle, Bell, Eye } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
-import { MOCK_ZONES, MOCK_REPORTS, MOCK_IMPACTS } from '@/lib/mock-data';
 
-export function MetricsRow() {
-  const criticalZones = MOCK_ZONES.filter(z => z.riskLevel === 'CRITICAL').length;
-  const highRiskZones = MOCK_ZONES.filter(z => z.riskLevel === 'HIGH').length;
-  const activeReports = MOCK_REPORTS.filter(r => r.status === 'PENDING').length;
-  const isolatedPopulation = MOCK_IMPACTS.reduce((acc, impact) => acc + impact.populationAffected, 0);
+export interface MetricsRowProps {
+  activeIncidents: number;
+  criticalIncidents: number;
+  activeAlerts: number;
+  pendingReviews: number;
+  loading?: boolean;
+}
 
+export function MetricsRow({ activeIncidents, criticalIncidents, activeAlerts, pendingReviews, loading }: MetricsRowProps) {
   const metrics = [
     {
-      title: 'Critical Zones',
-      value: criticalZones,
+      title: 'Active Incidents',
+      value: activeIncidents,
       icon: AlertTriangle,
-      color: 'text-red-500',
-      bgColor: 'bg-red-500/10',
-    },
-    {
-      title: 'High Risk Zones',
-      value: highRiskZones,
-      icon: AlertCircle,
       color: 'text-orange-500',
       bgColor: 'bg-orange-500/10',
     },
     {
-      title: 'Active Field Reports',
-      value: activeReports,
-      icon: FileText,
+      title: 'Critical/High Risk Incidents',
+      value: criticalIncidents,
+      icon: AlertCircle,
+      color: 'text-red-500',
+      bgColor: 'bg-red-500/10',
+    },
+    {
+      title: 'Active Alerts',
+      value: activeAlerts,
+      icon: Bell,
       color: 'text-blue-500',
       bgColor: 'bg-blue-500/10',
     },
     {
-      title: 'Isolated Population (Est.)',
-      value: isolatedPopulation.toLocaleString(),
-      icon: Users,
+      title: 'Pending Human Reviews',
+      value: pendingReviews,
+      icon: Eye,
       color: 'text-amber-500',
       bgColor: 'bg-amber-500/10',
     },
@@ -46,7 +48,11 @@ export function MetricsRow() {
           <CardContent className="p-4 flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-muted-foreground mb-1">{metric.title}</p>
-              <h3 className="text-2xl font-bold">{metric.value}</h3>
+              {loading ? (
+                <div className="h-8 w-16 bg-muted/50 rounded animate-pulse" />
+              ) : (
+                <h3 className="text-2xl font-bold">{metric.value}</h3>
+              )}
             </div>
             <div className={`p-3 rounded-full ${metric.bgColor}`}>
               <metric.icon className={`w-5 h-5 ${metric.color}`} />

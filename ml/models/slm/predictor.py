@@ -64,7 +64,7 @@ class SLMPredictor:
             extracted_dict = safe_extract_json(output_text)
             # Validate via Pydantic
             validated = HazardIntelligence(**extracted_dict)
-            return validated.dict()
+            return validated.model_dump() if hasattr(validated, "model_dump") else validated.dict()
         except Exception as e:
             # Return a controlled error instead of crashing
             logging.warning(f"Failed to extract/validate JSON. Raw output: {output_text}. Error: {e}")
@@ -78,4 +78,4 @@ class SLMPredictor:
                 recommended_action="manual_review",
                 model_available=True
             )
-            return fallback.dict()
+            return fallback.model_dump() if hasattr(fallback, "model_dump") else fallback.dict()

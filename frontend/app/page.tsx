@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import dynamic from 'next/dynamic';
-import { MOCK_ZONES, MOCK_INCIDENTS, MOCK_IMPACTS } from '@/lib/mock-data';
-import { RiskZone, PriorityIncident, InfrastructureImpact } from '@/types';
+import { api } from '@/lib/api';
+import { RiskZone, PriorityIncident, RiskLevel } from '@/types';
 import { MetricsRow } from '@/components/dashboard/MetricsRow';
 import { PriorityIncidents } from '@/components/dashboard/PriorityIncidents';
 import { ZoneIntelligencePanel } from '@/components/dashboard/ZoneIntelligencePanel';
@@ -30,12 +30,84 @@ const Map = dynamic(() => import('@/components/map/MapClient'), {
 });
 
 export default function CommandCenter() {
-  const [zones, setZones] = useState<RiskZone[]>(MOCK_ZONES);
-  const [incidents, setIncidents] = useState<PriorityIncident[]>(MOCK_INCIDENTS);
+  const [zones, setZones] = useState<RiskZone[]>([]);
+  const [incidents, setIncidents] = useState<PriorityIncident[]>([]);
+  const [impacts, setImpacts] = useState<any[]>([]);
   
   const [selectedZone, setSelectedZone] = useState<RiskZone | null>(null);
   const [isFieldReportOpen, setIsFieldReportOpen] = useState(false);
   const [isInfrastructureOpen, setIsInfrastructureOpen] = useState(false);
+  
+  // Real metrics state
+  const [metrics, setMetrics] = useState({
+    activeIncidents: 0,
+    criticalIncidents: 0,
+    activeAlerts: 0,
+    pendingReviews: 0,
+  });
+  const [metricsLoading, setMetricsLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchInitialData() {
+      try {
+        const [zonesRes, incidentsRes, impactsRes] = await Promise.all([
+          api.getInfrastructureImpacts().catch(() => []),
+          api.getIncidents().catch(() => []),
+          api.getInfrastructureImpacts().catch(() => [])
+        ]);
+        setZones(zonesRes);
+        setIncidents(incidentsRes);
+        setImpacts(impactsRes);
+      } catch (err) {
+        console.error('Failed to fetch initial data:', err);
+      }
+    }
+    fetchInitialData();
+  }, []);
+
+  useEffect(() => {
+    async function fetchMetrics() {
+      try {
+        const [incidentsRes, alertsRes] = await Promise.all([
+          fetch('/api/incidents').catch(() => null),
+          fetch('/api/alerts').catch(() => null)
+        ]);
+        
+        let activeIncs = 0;
+        let criticalIncs = 0;
+        let pendingRev = 0;
+        let activeAlts = 0;
+
+        if (incidentsRes && incidentsRes.ok) {
+          const incidents = await incidentsRes.json();
+          const active = incidents.filter((i: any) => i.status !== 'RESOLVED' && i.status !== 'DISMISSED');
+          activeIncs = active.length;
+          criticalIncs = incidents.filter((i: any) => i.risk_level === 'CRITICAL' || i.risk_level === 'HIGH').length;
+          pendingRev = incidents.filter((i: any) => i.status === 'UNDER_REVIEW').length;
+        }
+
+        if (alertsRes && alertsRes.ok) {
+          const alerts = await alertsRes.json();
+          activeAlts = alerts.filter((a: any) => a.status === 'ACTIVE').length;
+        }
+        
+        setMetrics({
+          activeIncidents: activeIncs,
+          criticalIncidents: criticalIncs,
+          activeAlerts: activeAlts,
+          pendingReviews: pendingRev
+        });
+      } catch (err) {
+        console.error('Failed to fetch metrics:', err);
+      } finally {
+        setMetricsLoading(false);
+      }
+    }
+    
+    fetchMetrics();
+    const interval = setInterval(fetchMetrics, 30000);
+    return () => clearInterval(interval);
+  }, []);
   
   // Field Report form state
   const [reportType, setReportType] = useState('Visible crack');
@@ -45,8 +117,8 @@ export default function CommandCenter() {
 
   const activeImpact = useMemo(() => {
     if (!selectedZone) return null;
-    return MOCK_IMPACTS.find(i => i.zoneId === selectedZone.id) || null;
-  }, [selectedZone]);
+    return impacts.find((i: any) => i.zoneId === selectedZone.id) || null;
+  }, [selectedZone, impacts]);
 
   const handleSelectZone = (zone: RiskZone) => {
     setSelectedZone(zone);
@@ -60,66 +132,146 @@ export default function CommandCenter() {
     if (zone) handleSelectZone(zone);
   };
 
-  const handleViewInfrastructure = (zoneId: string) => {
+  const handleViewInfrastructure = (_zoneId: string) => {
     setIsInfrastructureOpen(true);
   };
 
-  const handleRequestVerification = (zoneId: string) => {
+  const handleRequestVerification = (_zoneId: string) => {
     setIsFieldReportOpen(true);
     setShowAIAnalysis(false);
     setReportDesc('');
   };
 
-  const submitFieldReport = () => {
+  // SLM analysis result state
+  const [slmResult, setSlmResult] = useState<{
+    hazard_type: string;
+    hazard_confidence: number;
+    severity: string;
+    urgency: string;
+    observations: string[];
+    temporal_change: string;
+    recommended_action: string;
+  } | null>(null);
+
+  const submitFieldReport = async () => {
     setIsSubmitting(true);
-    // Simulate AI processing
-    setTimeout(() => {
-      setIsSubmitting(false);
-      setShowAIAnalysis(true);
-      
-      // Simulate risk escalation after analysis
-      setTimeout(() => {
-        if (selectedZone) {
-          setZones((prev: RiskZone[]) => prev.map(z => {
-            if (z.id === selectedZone.id) {
-              return {
-                ...z,
-                riskScore: Math.min(99, z.riskScore + 15),
-                riskLevel: 'CRITICAL',
-                confidence: Math.min(99, z.confidence + 25)
-              };
-            }
-            return z;
-          }));
-          
-          setIncidents(prev => {
-            const newIncidents = [...prev];
-            const idx = newIncidents.findIndex(i => i.zoneId === selectedZone.id);
-            if (idx >= 0) {
-              newIncidents[idx] = {
-                ...newIncidents[idx],
-                riskScore: Math.min(99, newIncidents[idx].riskScore + 15),
-                priorityScore: Math.min(99, newIncidents[idx].priorityScore + 20),
-                status: 'CRITICAL'
-              };
-              // re-sort
-              return newIncidents.sort((a, b) => b.priorityScore - a.priorityScore);
-            }
-            return newIncidents;
-          });
-          
-          setSelectedZone(prev => prev ? {
-            ...prev,
-            riskScore: Math.min(99, prev.riskScore + 15),
-            riskLevel: 'CRITICAL',
-            confidence: Math.min(99, prev.confidence + 25)
-          } : null);
+    setSlmResult(null);
+    try {
+      const fieldText = `${reportType}. ${reportDesc}`.trim();
+
+      // Build payload for backend Assessment Orchestrator
+      const static_features = {
+        elevation_m: 1200,
+        slope_deg: selectedZone?.environmentalFactors.slope ?? 30,
+        aspect_deg: 180,
+        tri_ruggedness: 4,
+        plan_curvature: 0.1,
+        rainfall_3h_accum_mm: selectedZone?.environmentalFactors.rainfall24h ? Math.round(selectedZone.environmentalFactors.rainfall24h / 8) : 20,
+        rainfall_72h_accum_mm: selectedZone?.environmentalFactors.rainfall7d ?? 150,
+        soil_moisture_saturation_pct: selectedZone?.environmentalFactors.soilMoisture ?? 60,
+        ground_deformation_proxy_mm_yr: 5,
+        anthropogenic_load_proxy_kpa: 30
+      };
+
+      // Generate 72h sequence for backend temporal models
+      const rain24 = selectedZone?.environmentalFactors.rainfall24h ?? 50;
+      const moisture = selectedZone?.environmentalFactors.soilMoisture ?? 60;
+      const timeseries_sequence = [];
+      let cumRain = 0;
+      for (let i = 0; i < 72; i++) {
+        const stepRain = Math.max(0, (rain24 / 24) * (0.8 + (i / 72) * 0.4));
+        cumRain += stepRain;
+        timeseries_sequence.push({
+          rainfall_mm: Math.round(stepRain * 100) / 100,
+          cumulative_rainfall_mm: Math.round(cumRain * 100) / 100,
+          soil_moisture: Math.round(moisture * 100) / 100
+        });
+      }
+
+      const payload = {
+        static_features,
+        timeseries_sequence,
+        field_report: fieldText,
+        location: {
+          latitude: selectedZone?.latitude ?? 27.3235,
+          longitude: selectedZone?.longitude ?? 88.5120,
+          name: selectedZone?.name ?? "NH-10 Sector 4"
         }
-      }, 1500);
-    }, 2000);
+      };
+
+      const res = await fetch('/api/assessment/analyze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) {
+        console.error('Assessment orchestrator request failed:', res.status);
+        return;
+      }
+
+      const data = await res.json();
+
+      // Store real backend SLM extraction
+      if (data.model_outputs?.field_intelligence) {
+        setSlmResult(data.model_outputs.field_intelligence);
+      }
+      setShowAIAnalysis(true);
+
+      // Apply backend-computed final risk score & level directly from Fusion Engine
+      const backendAssessment = data.assessment;
+      if (selectedZone && backendAssessment) {
+        const newRiskScore = Math.round(backendAssessment.final_risk_score * 100);
+        const newRiskLevel: RiskLevel = backendAssessment.risk_level as RiskLevel;
+        const newCoverage = Math.round(backendAssessment.evidence_coverage * 100);
+        const newAction = backendAssessment.recommended_action?.replace(/_/g, " ") || selectedZone.recommendedActions[0];
+
+        setZones((prev: RiskZone[]) => prev.map(z => {
+          if (z.id === selectedZone.id) {
+            return {
+              ...z,
+              riskScore: newRiskScore,
+              riskLevel: newRiskLevel,
+              evidenceCoverage: newCoverage,
+              recommendedActions: [newAction, ...z.recommendedActions.slice(0, 1)],
+              lastUpdated: new Date().toISOString()
+            };
+          }
+          return z;
+        }));
+
+        setIncidents(prev => {
+          const newIncidents = [...prev];
+          const idx = newIncidents.findIndex(i => i.zoneId === selectedZone.id);
+          if (idx >= 0) {
+            newIncidents[idx] = {
+              ...newIncidents[idx],
+              riskScore: newRiskScore,
+              priorityScore: Math.min(99, newRiskScore + 5),
+              status: newRiskLevel,
+            };
+            return newIncidents.sort((a, b) => b.priorityScore - a.priorityScore);
+          }
+          return newIncidents;
+        });
+
+        setSelectedZone(prev => prev ? {
+          ...prev,
+          riskScore: newRiskScore,
+          riskLevel: newRiskLevel,
+          evidenceCoverage: newCoverage,
+          recommendedActions: [newAction, ...prev.recommendedActions.slice(0, 1)],
+          lastUpdated: new Date().toISOString()
+        } : null);
+      }
+    } catch (err) {
+      console.error('Field report submission error:', err);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  const handleRunAssessment = async (payload: any) => {
+  const handleRunAssessment = async (payload: Record<string, unknown>) => {
     const res = await fetch('/api/assessment/analyze', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -129,15 +281,16 @@ export default function CommandCenter() {
     return res.json();
   };
 
-  const handleAssessmentComplete = (result: any) => {
+  const handleAssessmentComplete = (result: { location?: { name: string }; assessment: { final_risk_score: number; risk_level: string; evidence_coverage: number; recommended_action: string; model_agreement: string; requires_human_review: boolean; }; data_sources: { xgboost_available: boolean; lstm_available: boolean; transformer_available: boolean; field_intelligence_available: boolean; } }) => {
     // Update map zones with new assessment
     const targetName = result.location?.name;
+    if (!targetName) return;
     setZones(prev => prev.map(z => {
       if (z.name === targetName || (z.name.includes("NH-10") && targetName.includes("NH-10"))) {
         return {
           ...z,
           riskScore: Math.round(result.assessment.final_risk_score * 100),
-          riskLevel: result.assessment.risk_level,
+          riskLevel: result.assessment.risk_level as RiskLevel,
           evidenceCoverage: Math.round(result.assessment.evidence_coverage * 100),
           recommendedActions: [result.assessment.recommended_action.replace(/_/g, " "), ...z.recommendedActions.slice(0, 1)],
           lastUpdated: new Date().toISOString()
@@ -152,7 +305,7 @@ export default function CommandCenter() {
       setSelectedZone({
           ...updatedZone,
           riskScore: Math.round(result.assessment.final_risk_score * 100),
-          riskLevel: result.assessment.risk_level,
+          riskLevel: result.assessment.risk_level as RiskLevel,
           evidenceCoverage: Math.round(result.assessment.evidence_coverage * 100),
           recommendedActions: [result.assessment.recommended_action.replace(/_/g, " "), ...updatedZone.recommendedActions.slice(0, 1)],
           lastUpdated: new Date().toISOString()
@@ -162,7 +315,13 @@ export default function CommandCenter() {
 
   return (
     <div className="p-4 h-full flex flex-col">
-      <MetricsRow />
+      <MetricsRow 
+        activeIncidents={metrics.activeIncidents}
+        criticalIncidents={metrics.criticalIncidents}
+        activeAlerts={metrics.activeAlerts}
+        pendingReviews={metrics.pendingReviews}
+        loading={metricsLoading}
+      />
 
       <div className="flex-1 flex gap-4 min-h-0">
         {/* Main Map Area */}
@@ -254,8 +413,8 @@ export default function CommandCenter() {
             </div>
           ) : (
             <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4">
-              <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-5">
-                <div className="flex items-center gap-2 text-red-500 mb-3">
+              <div className={`${slmResult && (slmResult.severity === 'critical' || slmResult.severity === 'high') ? 'bg-red-500/10 border border-red-500/30' : 'bg-amber-500/10 border border-amber-500/30'} rounded-lg p-5`}>
+                <div className={`flex items-center gap-2 ${slmResult && (slmResult.severity === 'critical' || slmResult.severity === 'high') ? 'text-red-500' : 'text-amber-500'} mb-3`}>
                   <AlertTriangle className="w-5 h-5" />
                   <h3 className="font-semibold text-lg">AI Evidence Analysis</h3>
                 </div>
@@ -264,25 +423,39 @@ export default function CommandCenter() {
                   <div>
                     <div className="text-sm text-muted-foreground mb-1">Detected Indicators</div>
                     <div className="flex flex-wrap gap-2">
-                      <Badge variant="outline" className="border-red-500/30 text-red-400">Surface crack</Badge>
-                      <Badge variant="outline" className="border-red-500/30 text-red-400">Active soil movement</Badge>
+                      {slmResult?.observations?.length ? slmResult.observations.map((obs, i) => (
+                        <Badge key={i} variant="outline" className={`${slmResult.severity === 'critical' || slmResult.severity === 'high' ? 'border-red-500/30 text-red-400' : 'border-amber-500/30 text-amber-400'}`}>{obs}</Badge>
+                      )) : (
+                        <Badge variant="outline" className="border-muted-foreground/30 text-muted-foreground">No specific indicators</Badge>
+                      )}
                     </div>
                   </div>
                   
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <div className="text-sm text-muted-foreground">Severity</div>
-                      <div className="font-bold text-red-500">HIGH</div>
+                      <div className={`font-bold ${slmResult?.severity === 'critical' || slmResult?.severity === 'high' ? 'text-red-500' : slmResult?.severity === 'moderate' ? 'text-amber-500' : 'text-green-500'}`}>{slmResult?.severity?.toUpperCase() ?? 'N/A'}</div>
                     </div>
                     <div>
                       <div className="text-sm text-muted-foreground">Confidence</div>
-                      <div className="font-bold text-blue-400">84%</div>
+                      <div className="font-bold text-blue-400">{slmResult ? `${Math.round(slmResult.hazard_confidence * 100)}%` : 'N/A'}</div>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <div className="text-sm text-muted-foreground">Hazard Type</div>
+                      <div className="font-medium text-foreground">{slmResult?.hazard_type?.replace(/_/g, ' ') ?? 'N/A'}</div>
+                    </div>
+                    <div>
+                      <div className="text-sm text-muted-foreground">Urgency</div>
+                      <div className="font-medium text-foreground">{slmResult?.urgency ?? 'N/A'}</div>
                     </div>
                   </div>
                   
                   <div className="pt-3 border-t border-red-500/20">
-                    <div className="text-sm font-medium text-red-400">System Action</div>
-                    <div className="text-sm">Risk score automatically escalated to CRITICAL. Priority action queue updated.</div>
+                    <div className="text-sm font-medium text-primary">SLM Recommended Action</div>
+                    <div className="text-sm">{slmResult?.recommended_action || 'No specific action recommended.'}</div>
                   </div>
                 </div>
               </div>

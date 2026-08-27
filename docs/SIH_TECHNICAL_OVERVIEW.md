@@ -27,25 +27,35 @@ Uses a small, localized Large Language Model (Qwen2.5-0.5B-Instruct) to parse un
 ## 9. Risk Fusion Differentiator (Phase 5)
 Instead of a naive average, the Geo-Evidence Fusion Engine uses confidence-aware weighting. It normalizes inputs, detects agreement/disagreement among numerical models, and uses field evidence as a heuristic corroboration/escalation factor. It outputs decision-support metrics like `recommended_action`, `requires_human_review`, and `evidence_coverage` (not prediction probability).
 
-## 10. Explainability
+## 10. Phase 6 Assessment Orchestrator
+The `/api/assessment/analyze` endpoint orchestrates the full intelligence pipeline in a single POST call. It runs each model (XGBoost, LSTM, Transformer, SLM) in sequence, safely handles any unavailable model by excluding it from the fusion weighting rather than defaulting to zero risk, and triggers the Phase 7 operational workflow.
+
+## 11. Operational Workflow (Phase 7)
+Converts AI assessments into actionable operational reality. When an assessment exceeds risk thresholds, an Incident is automatically generated and geographically deduplicated. Critical incidents instantly generate push Alerts. Ambiguous situations (model disagreement) trigger a required Human Review workflow in the Operations Command Center before alerts are dispatched.
+
+## 12. Frontend–Backend Integration
+The Next.js frontend communicates with the FastAPI backend through Next.js rewrites that proxy all `/api/*` routes to the backend. This eliminates CORS issues during development. The field report sheet calls the real SLM endpoint (`/api/field-intelligence/analyze`) and renders live AI analysis results (hazard type, severity, confidence, observations) from the model. Demo scenarios in the Assessment panel generate full 72-step timeseries sequences for the LSTM and Transformer models.
+
+## 13. Explainability
 The system is designed for transparency:
 - XGBoost provides SHAP values for base terrain risk.
 - The Fusion Engine returns `contributing_factors` deterministically derived from the weighted input scores, showing exactly how each model influenced the final score.
 
-## 11. Handling Model Disagreement
+## 14. Handling Model Disagreement
 The engine measures the spread (max - min) of numerical model predictions. If the spread is large (low agreement), it explicitly flags `requires_human_review = true` rather than averaging them into a misleading "medium" risk. 
 
-## 12. Offline/Failure Considerations
+## 15. Offline/Failure Considerations
 - **Unavailable Sources:** Models that fail to report or are unavailable are dynamically excluded from the normalized weighting. They are not treated as zero-risk.
 - **Insufficient Data:** If fewer than two numerical models are available, the system flags `model_agreement = insufficient_data` and triggers human review.
 - **Local SLM:** The field intelligence model is small (0.5B parameters) and runs locally, preventing reliance on external APIs during connectivity outages.
 
-## 13. Prototype Limitations
-- The temporal models currently use synthetic/demo data for sequence generation.
+## 16. Prototype Limitations
 - Fusion weights and risk thresholds are prototype rules/heuristics designed for the hackathon, not statistically calibrated probabilities derived from historical landslide outcomes.
 - SLM extraction confidence is not a disaster prediction confidence.
+- Temporal models execute real PyTorch inference but are trained on synthetic prototype heuristic sequences.
+- 72-step sequences in demos use generated synthetic data; real-world deployment would require integration with live GIS raster datasets (e.g. SRTM) and IMD sensor feeds.
 
-## 14. Future Roadmap
+## 17. Future Roadmap
 - Integration of Computer Vision (segmentation/classification) for crack detection in images.
 - Calibration of source reliability factors against real historical landslide outcomes.
-- Dynamic GIS routing integration based on real-time risk assessments.
+- Dynamic GIS routing integration (OSRM road graph solvers and A* terrain-aware emergency corridors) based on real-time risk assessments.

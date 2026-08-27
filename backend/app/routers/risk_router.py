@@ -42,7 +42,8 @@ def predict_risk(features: StaticFeaturesInput):
         raise HTTPException(status_code=503, detail="ML model artifacts not found. Please train the model first.")
         
     try:
-        result = predictor.predict_susceptibility(features.dict())
+        feat_dict = features.model_dump() if hasattr(features, "model_dump") else features.dict()
+        result = predictor.predict_susceptibility(feat_dict)
         return result
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Prediction error: {str(e)}")
@@ -53,7 +54,7 @@ def predict_timeseries(request: TimeseriesPredictionRequest):
         raise HTTPException(status_code=503, detail="LSTM model artifacts not found. Please train the model first.")
         
     try:
-        seq_dicts = [step.dict() for step in request.sequence]
+        seq_dicts = [step.model_dump() if hasattr(step, "model_dump") else step.dict() for step in request.sequence]
         result = lstm_predictor.predict_timeseries(seq_dicts)
         return result
     except ValueError as ve:
@@ -67,7 +68,7 @@ def predict_timeseries_transformer(request: TimeseriesPredictionRequest):
         raise HTTPException(status_code=503, detail="Transformer model artifacts not found. Please train the model first.")
         
     try:
-        seq_dicts = [step.dict() for step in request.sequence]
+        seq_dicts = [step.model_dump() if hasattr(step, "model_dump") else step.dict() for step in request.sequence]
         result = transformer_predictor.predict_timeseries(seq_dicts)
         return result
     except ValueError as ve:

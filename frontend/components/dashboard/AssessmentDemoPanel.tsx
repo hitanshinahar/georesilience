@@ -1,21 +1,62 @@
 "use client";
 
 import { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
-import { Loader2, Activity, Zap, CheckCircle2, AlertTriangle, HelpCircle } from 'lucide-react';
+import { Loader2, Activity, AlertTriangle } from 'lucide-react';
+
+interface AssessmentResult {
+  location?: { name: string };
+  assessment: {
+    final_risk_score: number;
+    risk_level: string;
+    evidence_coverage: number;
+    recommended_action: string;
+    model_agreement: string;
+    requires_human_review: boolean;
+  };
+  data_sources: {
+    xgboost_available: boolean;
+    lstm_available: boolean;
+    transformer_available: boolean;
+    field_intelligence_available: boolean;
+  };
+}
 
 interface AssessmentDemoPanelProps {
-  onRunAssessment: (scenario: any) => Promise<any>;
-  onAssessmentComplete: (result: any) => void;
+  onRunAssessment: (scenario: Record<string, unknown>) => Promise<AssessmentResult>;
+  onAssessmentComplete: (result: AssessmentResult) => void;
 }
 
 export function AssessmentDemoPanel({ onRunAssessment, onAssessmentComplete }: AssessmentDemoPanelProps) {
   const [isRunning, setIsRunning] = useState(false);
   const [activeScenario, setActiveScenario] = useState<string | null>(null);
-  const [result, setResult] = useState<any>(null);
+  const [result, setResult] = useState<AssessmentResult | null>(null);
+
+  // Generate a 72-step timeseries sequence for demo scenarios
+  const generate72hSequence = (
+    baseRainfall: number,
+    peakRainfall: number,
+    baseMoisture: number,
+    peakMoisture: number,
+  ) => {
+    const steps = [];
+    let cumulative = 0;
+    for (let i = 0; i < 72; i++) {
+      // Ramp up rainfall and moisture toward the end of the 72h window
+      const progress = i / 71;
+      const rainfall = baseRainfall + (peakRainfall - baseRainfall) * progress + (Math.random() * 2 - 1);
+      cumulative += Math.max(0, rainfall);
+      const moisture = baseMoisture + (peakMoisture - baseMoisture) * progress;
+      steps.push({
+        rainfall_mm: Math.round(Math.max(0, rainfall) * 100) / 100,
+        cumulative_rainfall_mm: Math.round(cumulative * 100) / 100,
+        soil_moisture: Math.round(Math.min(100, Math.max(0, moisture)) * 100) / 100,
+      });
+    }
+    return steps;
+  };
 
   const scenarios = {
     LOW_RISK: {
@@ -27,10 +68,7 @@ export function AssessmentDemoPanel({ onRunAssessment, onAssessmentComplete }: A
             soil_moisture_saturation_pct: 30, ground_deformation_proxy_mm_yr: 2,
             anthropogenic_load_proxy_kpa: 10
         },
-        timeseries_sequence: [
-            {"rainfall_mm": 2, "cumulative_rainfall_mm": 5, "soil_moisture": 25},
-            {"rainfall_mm": 3, "cumulative_rainfall_mm": 10, "soil_moisture": 30}
-        ],
+        timeseries_sequence: generate72hSequence(0.5, 3, 20, 30),
         field_report: "Everything looks normal, no cracks visible.",
         location: { latitude: 27.3200, longitude: 88.6050, name: "Deorali" }
       }
@@ -44,10 +82,7 @@ export function AssessmentDemoPanel({ onRunAssessment, onAssessmentComplete }: A
             soil_moisture_saturation_pct: 65, ground_deformation_proxy_mm_yr: 5,
             anthropogenic_load_proxy_kpa: 30
         },
-        timeseries_sequence: [
-            {"rainfall_mm": 10, "cumulative_rainfall_mm": 50, "soil_moisture": 50},
-            {"rainfall_mm": 15, "cumulative_rainfall_mm": 80, "soil_moisture": 65}
-        ],
+        timeseries_sequence: generate72hSequence(5, 20, 40, 65),
         field_report: "Minor water pooling observed on the road edge.",
         location: { latitude: 27.3385, longitude: 88.6122, name: "Upper Sichey" }
       }
@@ -61,10 +96,7 @@ export function AssessmentDemoPanel({ onRunAssessment, onAssessmentComplete }: A
             soil_moisture_saturation_pct: 95, ground_deformation_proxy_mm_yr: 15,
             anthropogenic_load_proxy_kpa: 60
         },
-        timeseries_sequence: [
-            {"rainfall_mm": 40, "cumulative_rainfall_mm": 150, "soil_moisture": 80},
-            {"rainfall_mm": 50, "cumulative_rainfall_mm": 250, "soil_moisture": 95}
-        ],
+        timeseries_sequence: generate72hSequence(20, 60, 60, 95),
         field_report: "Large crack in the road surface and active soil sliding.",
         location: { latitude: 27.3235, longitude: 88.5120, name: "NH-10 Sector 4" }
       }
@@ -78,10 +110,7 @@ export function AssessmentDemoPanel({ onRunAssessment, onAssessmentComplete }: A
             soil_moisture_saturation_pct: 40, ground_deformation_proxy_mm_yr: 3,
             anthropogenic_load_proxy_kpa: 20
         },
-        timeseries_sequence: [
-            {"rainfall_mm": 50, "cumulative_rainfall_mm": 150, "soil_moisture": 80},
-            {"rainfall_mm": 60, "cumulative_rainfall_mm": 250, "soil_moisture": 95}
-        ],
+        timeseries_sequence: generate72hSequence(30, 70, 60, 95),
         field_report: "Stable condition, no cracks.",
         location: { latitude: 27.3501, longitude: 88.6210, name: "Burtuk Area" }
       }
@@ -93,7 +122,8 @@ export function AssessmentDemoPanel({ onRunAssessment, onAssessmentComplete }: A
     setIsRunning(true);
     setResult(null);
     try {
-      const res = await onRunAssessment((scenarios as any)[key].payload);
+      const scenarioData = scenarios[key as keyof typeof scenarios];
+      const res = await onRunAssessment(scenarioData.payload as Record<string, unknown>);
       setResult(res);
       onAssessmentComplete(res);
     } catch (e) {

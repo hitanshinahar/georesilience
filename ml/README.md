@@ -10,11 +10,11 @@ Its responsibility is strictly scoped to predicting spatial slope vulnerability 
 
 | Feature Name | Source Type | Underlying Dataset / Proxy |
 | :--- | :--- | :--- |
-| `elevation_m` | **Derived** | SRTM 30m Digital Elevation Model |
-| `slope_deg` | **Derived** | Topographic gradient derivative |
-| `aspect_deg` | **Derived** | Slope direction derivative |
-| `tri_ruggedness` | **Derived** | Terrain Ruggedness Index |
-| `plan_curvature` | **Derived** | Contour curvature profile |
+| `elevation_m` | **Simulated Proxy** | Future: SRTM 30m Digital Elevation Model |
+| `slope_deg` | **Simulated Proxy** | Future: Topographic gradient derivative |
+| `aspect_deg` | **Simulated Proxy** | Future: Slope direction derivative |
+| `tri_ruggedness` | **Simulated Proxy** | Future: Terrain Ruggedness Index |
+| `plan_curvature` | **Simulated Proxy** | Future: Contour curvature profile |
 | `rainfall_3h_accum_mm` | **Simulated Proxy** | Dynamic precipitation burst proxy |
 | `rainfall_72h_accum_mm` | **Simulated Proxy** | Antecedent Precipitation Index (API) |
 | `soil_moisture_saturation_pct`| **Simulated Proxy** | Root-zone soil saturation proxy |

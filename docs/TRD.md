@@ -16,7 +16,7 @@ scripts/: Shared setup and utilities.
 Frontend: Next.js, React, Tailwind CSS, Mapbox GL JS, TypeScript.
 Backend: FastAPI, Python, Pydantic, SQLAlchemy.
 Machine Learning: Scikit-learn, XGBoost, TensorFlow/PyTorch, SHAP.
-Geospatial: GDAL, Rasterio, Shapely, NetworkX, OSRM.
+Geospatial (Planned Phase 9): GDAL, Rasterio, Shapely, NetworkX, OSRM.
 Database: PostgreSQL with PostGIS.
 Deployment: Docker, Docker Compose, GitHub Actions.
 
@@ -40,12 +40,12 @@ SHAP computes feature importance for individual XGBoost predictions to inform us
 The geospatial pipeline processes static raster and vector data to generate features for ML and route optimization.
 
 ### Data Pipeline
-Raw DEMs, land cover, and boundary shapefiles are processed into localized risk grids (GeoTIFF) and vector outputs (GeoJSON).
+Raw DEMs, land cover, and boundary shapefiles are processed into localized risk grids (GeoTIFF) and vector outputs (GeoJSON). *Note: The current prototype utilizes statistical formulas as a proxy for SRTM processing.*
 
-### Road Routing
+### Road Routing (Planned Phase 9+)
 Uses NetworkX or OSRM on established road network graphs. Excludes edges intersecting with active high-risk landslide zones. Operates exclusively on mapped road networks.
 
-### Terrain Routing
+### Terrain Routing (Planned Phase 9+)
 Computes a cost surface from slope, land cover, and risk grids. Uses A* algorithm or Dijkstra to find viable off-road emergency corridors. Completely separate from road routing. OSRM is not used for arbitrary off-road pathfinding.
 
 ## Geo-Evidence Fusion Engine
@@ -73,4 +73,3 @@ Cross-boundary communication relies entirely on shared contracts.
 1. Static risk mapped across test zones.
 2. Field reports successfully ingested and integrated.
 3. Dashboard rendering dynamic risk.
-4. Working road-aware routing prototype.

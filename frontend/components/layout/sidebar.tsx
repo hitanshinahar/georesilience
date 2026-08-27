@@ -27,6 +27,10 @@ const navItems = [
 export function Sidebar() {
   const pathname = usePathname();
 
+  if (pathname.startsWith('/sentinel')) {
+    return null;
+  }
+
   return (
     <div className="w-64 border-r border-border/50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 flex flex-col h-full">
       <div className="h-14 flex items-center px-4 border-b border-border/50">
@@ -62,6 +66,10 @@ export function Sidebar() {
           <div className="w-2 h-2 rounded-full bg-green-500 mr-2" />
           System Online
         </div>
+        <Link href="/sentinel" className="flex items-center px-2 py-2 text-sm font-medium text-orange-400 bg-orange-500/10 border border-orange-500/30 rounded-md hover:bg-orange-500/20 transition-colors">
+          <ShieldAlert className="mr-3 h-4 w-4" />
+          Field Sentinel
+        </Link>
         <Link href="/settings" className="flex items-center px-2 py-2 text-sm font-medium text-muted-foreground rounded-md hover:bg-muted hover:text-foreground">
           <Settings className="mr-3 h-4 w-4" />
           Settings

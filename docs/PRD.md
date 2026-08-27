@@ -43,9 +43,9 @@ SHAP is used to provide feature importance for high-risk predictions, explaining
 ## Infrastructure and Connectivity Impact
 The platform assesses the exposure of infrastructure and settlements to landslide risk.
 
-## Routing Systems
-Road-aware emergency routing uses mapped road networks, closures, and risk segments to find safer routes.
-Terrain-aware emergency corridor generation is used when viable road routes are unavailable, employing cost surface algorithms to calculate off-road corridors.
+## Routing Systems (Planned Phase 9+)
+Road-aware emergency routing is planned to use mapped road networks, closures, and risk segments to find safer routes.
+Terrain-aware emergency corridor generation is planned for when viable road routes are unavailable, employing cost surface algorithms to calculate off-road corridors.
 
 ## Offline Field Reporting
 The architecture supports offline data collection for field officers, syncing when connectivity is restored.
@@ -56,7 +56,6 @@ Basic LSTM temporal analysis.
 Dashboard with GIS risk visualization.
 Manual and simulated field report ingestion.
 Basic Geo-Evidence Fusion.
-Road-aware routing prototype.
 
 ## Experimental Features
 Vision and SLM field evidence processing.

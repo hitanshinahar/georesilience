@@ -1,8 +1,51 @@
+"use client";
+
+import { useState, useEffect } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
 import { Bell, MapPin, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { api } from '@/lib/api';
+import { Alert } from '@/types';
+import { 
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+  DropdownMenuGroup 
+} from '@/components/ui/dropdown-menu';
+import { formatDistanceToNow } from 'date-fns';
 
 export function Header() {
+  const pathname = usePathname();
+  const router = useRouter();
+  const [alerts, setAlerts] = useState<Alert[]>([]);
+
+  useEffect(() => {
+    if (pathname.startsWith('/sentinel')) return;
+
+    const fetchAlerts = async () => {
+      try {
+        const data = await api.getAlerts({ status: 'ACTIVE' });
+        setAlerts(data);
+      } catch (e) {
+        console.error('Failed to fetch alerts in header:', e);
+      }
+    };
+
+    fetchAlerts();
+    const interval = setInterval(fetchAlerts, 15000);
+    return () => clearInterval(interval);
+  }, [pathname]);
+
+  if (pathname.startsWith('/sentinel')) {
+    return null;
+  }
+
+  const redAlerts = alerts.filter(a => a.severity === 'RED');
+
   return (
     <header className="h-14 border-b border-border/50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 flex items-center justify-between px-4 z-10 relative">
       <div className="flex items-center gap-4">
@@ -31,10 +74,52 @@ export function Header() {
         <div className="text-xs text-muted-foreground border-l border-border/50 pl-4">
           Last updated: Just now
         </div>
-        <Button variant="ghost" size="icon" className="relative text-muted-foreground">
-          <Bell className="h-5 w-5" />
-          <span className="absolute top-2 right-2 h-2 w-2 bg-red-500 rounded-full border-2 border-background" />
-        </Button>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger className="relative inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground h-9 w-9 text-muted-foreground outline-none">
+              <Bell className="h-5 w-5" />
+              {alerts.length > 0 && (
+                <span className={`absolute top-2 right-2 flex items-center justify-center h-4 w-4 text-[10px] text-white font-bold rounded-full border-2 border-background ${redAlerts.length > 0 ? 'bg-red-500' : 'bg-orange-500'}`}>
+                  {alerts.length}
+                </span>
+              )}
+            </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-80 max-h-96 overflow-auto">
+            <DropdownMenuGroup>
+              <DropdownMenuLabel className="flex justify-between items-center">
+                Active Alerts
+                <span className="text-xs font-normal text-muted-foreground bg-muted px-2 py-0.5 rounded-full">{alerts.length}</span>
+              </DropdownMenuLabel>
+            </DropdownMenuGroup>
+            <DropdownMenuSeparator />
+            {alerts.length === 0 ? (
+              <div className="p-4 text-center text-sm text-muted-foreground">No active alerts</div>
+            ) : (
+              alerts.map(alert => (
+                <DropdownMenuItem 
+                  key={alert.alert_id} 
+                  className="flex flex-col items-start p-3 gap-1 cursor-pointer focus:bg-muted"
+                  onClick={() => router.push('/command-center')}
+                >
+                  <div className="flex w-full justify-between items-start">
+                    <span className={`text-xs font-bold px-1.5 py-0.5 rounded ${
+                      alert.severity === 'RED' ? 'bg-red-500/10 text-red-500' : 
+                      alert.severity === 'ORANGE' ? 'bg-orange-500/10 text-orange-500' : 
+                      'bg-amber-500/10 text-amber-500'
+                    }`}>
+                      {alert.severity}
+                    </span>
+                    <span className="text-[10px] text-muted-foreground">
+                      {formatDistanceToNow(new Date(alert.created_at), { addSuffix: true })}
+                    </span>
+                  </div>
+                  <span className="text-sm font-medium line-clamp-1">{alert.title}</span>
+                  <span className="text-xs text-muted-foreground line-clamp-2">{alert.message}</span>
+                </DropdownMenuItem>
+              ))
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </header>
   );

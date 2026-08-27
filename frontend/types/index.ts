@@ -76,3 +76,90 @@ export interface PriorityIncident {
   priorityScore: number;
   status: RiskLevel;
 }
+
+// Phase 7: Incident Management Types
+
+export type IncidentStatusType =
+  | 'OPEN'
+  | 'UNDER_REVIEW'
+  | 'FIELD_VERIFIED'
+  | 'ESCALATED'
+  | 'RESOLVED'
+  | 'DISMISSED';
+
+export type ReviewActionType = 'VERIFY' | 'ESCALATE' | 'DISMISS' | 'RESOLVE';
+
+export type AlertStatusType = 'ACTIVE' | 'ACKNOWLEDGED' | 'RESOLVED';
+
+export type AlertSeverity = 'YELLOW' | 'ORANGE' | 'RED';
+
+export interface ReviewAction {
+  review_id: string;
+  incident_id: string;
+  action: string;
+  reviewer_id: string;
+  note?: string;
+  timestamp: string;
+}
+
+export interface Incident {
+  incident_id: string;
+  latitude: number;
+  longitude: number;
+  location_name?: string;
+  status: IncidentStatusType;
+  risk_level: string;
+  risk_score: number;
+  evidence_coverage: number;
+  model_agreement: string;
+  requires_human_review: boolean;
+  recommended_action?: string;
+  source: string;
+  assessment_data?: Record<string, unknown>;
+  linked_report_ids: string[];
+  review_history: ReviewAction[];
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Alert {
+  alert_id: string;
+  incident_id?: string;
+  severity: AlertSeverity;
+  title: string;
+  message: string;
+  target_area?: string;
+  status: AlertStatusType;
+  created_at: string;
+}
+
+export interface FieldReportSubmission {
+  report_text: string;
+  latitude: number;
+  longitude: number;
+  location_name?: string;
+  reporter_type: 'citizen' | 'field_officer';
+  timestamp?: string;
+  image_url?: string;
+}
+
+export interface FieldReportResponse {
+  report_id: string;
+  report_text: string;
+  latitude: number;
+  longitude: number;
+  location_name?: string;
+  reporter_type: string;
+  timestamp: string;
+  image_url?: string;
+  status: string;
+  slm_analysis?: Record<string, unknown>;
+  linked_incident_id?: string;
+  created_at: string;
+}
+
+export interface ReviewActionRequest {
+  action: ReviewActionType;
+  reviewer_id?: string;
+  note?: string;
+}

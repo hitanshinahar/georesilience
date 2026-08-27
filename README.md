@@ -15,9 +15,12 @@ The North Eastern Region (NER) of India faces the critical challenge of predicti
 - Risk explainability
 - Geo-Evidence Fusion
 - Infrastructure impact analysis
-- Road-aware routing
-- Terrain-aware emergency corridor analysis
 
+## Future Roadmap (Phase 9+)
+
+- **Road-aware routing**: Utilizing GIS graph networks (e.g. OSRM) for hazard-aware pathfinding.
+- **Terrain-aware emergency corridor analysis**: Utilizing A* routing across generated cost surfaces for off-road emergency paths.
+- **Real-time GIS integration**: Fetching live SRTM DEM rasters and IMD sensor feeds.
 ## Core ML and AI Components
 
 XGBoost: Analyzes terrain, slope, and historical data to predict static landslide risk.
@@ -47,15 +50,20 @@ Citizen / Field Reports
                     |
                     v
           Unified Risk Assessment
+                    |
+                    v
+    Operational Workflow (Phase 7)
+    (Incidents, Alerts, Human Review)
 ```
 
 ## AI/ML Pipeline
 
 1. **XGBoost (Phase 1)**: Analyzes terrain, slope, and historical data to predict static landslide risk. Includes real SHAP explanations for interpretability.
-2. **LSTM (Phase 2)**: Analyzes 72-hour time-series rainfall and soil moisture to monitor temporal risk escalation. (Currently uses synthetic/demo data).
-3. **Transformer (Phase 3)**: Evaluates transformer architectures for alternative time-series forecasting. (Currently uses synthetic/demo data).
-4. **SLM Field Intelligence (Phase 4)**: Uses local Qwen2.5-0.5B-Instruct to convert unstructured textual field reports into structured heuristic evidence.
+2. **LSTM (Phase 2)**: Analyzes 72-hour time-series rainfall and soil moisture to monitor temporal risk escalation. Demo scenarios generate full 72-step synthetic prototype sequences. Models execute real PyTorch inference but are trained on generated heuristic data.
+3. **Transformer (Phase 3)**: Evaluates transformer architectures for alternative time-series forecasting. Demo scenarios generate full 72-step synthetic prototype sequences. Models execute real PyTorch inference but are trained on generated heuristic data.
+4. **SLM Field Intelligence (Phase 4)**: Uses local Qwen2.5-0.5B-Instruct to convert unstructured textual field reports into structured heuristic evidence. The frontend field report sheet calls the backend SLM endpoint directly.
 5. **Confidence-Aware Risk Fusion Engine (Phase 5)**: Synthesizes the above predictions into a unified assessment. Uses prototype decision support heuristics for model agreement and field evidence weighting, rather than statistically calibrated probabilities. Evidence coverage represents data availability.
+6. **Assessment Orchestrator (Phase 6)**: Single `/api/assessment/analyze` endpoint orchestrates all models, safely handles unavailable models (marks them as unavailable rather than defaulting to zero risk), and triggers the Phase 7 operational workflow.
 
 ## Setup
 
@@ -80,18 +88,26 @@ Citizen / Field Reports
    ```
    *(Downloads the Qwen model to `ml/artifacts/slm/model.safetensors`, which is ignored in Git)*
 5. **Verify ML artifacts:**
-   Ensure `ml/models/xgboost`, `lstm`, and `transformer` artifacts are present or generated.
+    Ensure `ml/models/xgboost`, `lstm`, and `transformer` artifacts are present or generated.
 6. **Run the backend:**
-   ```bash
-   cd backend
-   uvicorn app.main:app --reload
-   ```
-7. **Run tests:**
-   ```bash
-   cd backend
-   python run_tests.py
-   python -m unittest tests/test_fusion_engine.py
-   ```
+    ```bash
+    cd backend
+    uvicorn app.main:app --reload
+    ```
+7. **Set up and run the frontend:**
+    ```bash
+    cd frontend
+    cp .env.example .env.local   # Configure API_BASE_URL if needed
+    npm install
+    npm run dev
+    ```
+    The Next.js dev server proxies `/api/*` requests to the backend via `next.config.ts` rewrites.
+8. **Run tests:**
+    ```bash
+    cd backend
+    python -m pytest tests/ -v
+    python run_tests.py
+    ```
 
 ## API Overview
 
@@ -101,6 +117,11 @@ Citizen / Field Reports
 - `POST /api/risk/timeseries/transformer`: Temporal Transformer prediction
 - `POST /api/field-intelligence/analyze`: SLM structured field intelligence extraction
 - `POST /api/risk/fuse`: Confidence-Aware Risk Fusion Engine
+- `POST /api/assessment/analyze`: Unified assessment orchestrator (Phase 6)
+- `POST /api/reports`: Submit field report (Phase 7)
+- `GET /api/incidents`: List incidents (Phase 7)
+- `POST /api/incidents/{id}/review`: Human review action (Phase 7)
+- `GET /api/alerts`: List alerts (Phase 7)
 
 ## Documentation
 

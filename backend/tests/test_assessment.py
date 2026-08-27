@@ -32,6 +32,10 @@ def test_analyze_xgboost_only():
     assert "evidence_coverage" in data["assessment"]
 
 def test_analyze_full():
+    seq_72 = [
+        {"rainfall_mm": 5 + i * 0.5, "cumulative_rainfall_mm": 5 + i * 5, "soil_moisture": 40 + i * 0.5}
+        for i in range(72)
+    ]
     response = client.post("/api/assessment/analyze", json={
         "static_features": {
             "elevation_m": 1200,
@@ -45,10 +49,7 @@ def test_analyze_full():
             "ground_deformation_proxy_mm_yr": 10,
             "anthropogenic_load_proxy_kpa": 50
         },
-        "timeseries_sequence": [
-            {"rainfall_mm": 10, "cumulative_rainfall_mm": 10, "soil_moisture": 50},
-            {"rainfall_mm": 20, "cumulative_rainfall_mm": 30, "soil_moisture": 60}
-        ],
+        "timeseries_sequence": seq_72,
         "field_report": "Heavy rain and active crack on the road.",
         "location": {
             "latitude": 27.0,

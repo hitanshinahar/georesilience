@@ -26,13 +26,21 @@ flowchart TD
     %% Intelligence & Routing
     FUSION --> INTEL[Unified Risk Assessment]
     
-    INTEL --> ROAD[Road Routing]
-    INTEL --> TERR[Terrain-Aware Routing]
+    INTEL --> ROAD[Road Routing - Planned]
+    INTEL --> TERR[Terrain-Aware Routing - Planned]
+
+    %% Phase 7 Operational Workflow
+    INTEL --> INC[Incident Management]
+    FIELD --> INC
+    INC --> ALR[Alert Engine]
+    INC --> REV[Human Review Workflow]
 
     %% Presentation Layer
     ROAD --> DASH[Dashboard & Response Prioritization]
     TERR --> DASH
     INTEL --> DASH
+    ALR --> DASH
+    REV --> DASH
 ```
 
 ## ML Components and Roles
@@ -43,8 +51,8 @@ flowchart TD
 - **Output**: Risk score (0.0 to 1.0).
 
 ### 2. LSTM & Transformer Predictors
-- **Purpose**: Evaluates time-series data (e.g., 72-hour rainfall sequences) to identify escalating temporal risk.
-- **Current State**: Uses synthetic/demo sequence processing in the prototype.
+- **Purpose**: Evaluates time-series data (72-hour rainfall sequences) to identify escalating temporal risk.
+- **Input**: 72-step sequences of `rainfall_mm`, `cumulative_rainfall_mm`, and `soil_moisture`. Demo scenarios generate full 72-step sequences programmatically.
 - **Output**: Temporal risk score (0.0 to 1.0).
 
 ### 3. SLM Field Intelligence
@@ -61,20 +69,40 @@ flowchart TD
 
 ## Microservices Flow
 
-1. **Frontend**: Next.js app sends data payloads to FastAPI backend.
-2. **FastAPI Routers**: Routes requests to specific endpoints (`/api/risk/predict`, `/api/risk/fuse`, etc.).
-3. **ML Inference**:
+1. **Frontend**: Next.js app proxies `/api/*` requests to the FastAPI backend via `next.config.ts` rewrites. The `NEXT_PUBLIC_API_URL` environment variable configures the backend target.
+2. **FastAPI Routers**: Routes requests to specific endpoints (`/api/risk/predict`, `/api/risk/fuse`, `/api/reports`, `/api/incidents`, `/api/alerts`).
+3. **Phase 6 Assessment Orchestrator** (`/api/assessment/analyze`):
+   - Single `POST` endpoint that orchestrates all model inference.
+   - Calls XGBoost, LSTM, Transformer, and SLM in sequence.
+   - Safely handles unavailable models (marks as unavailable, excluded from fusion weighting) rather than defaulting to zero risk.
+   - Passes results to the Fusion Engine and triggers the Phase 7 workflow.
+4. **ML Inference**:
    - `ml.inference.predict` handles XGBoost.
    - `ml.models.*.predict` handles LSTM, Transformer, and SLM.
-4. **Fusion Engine**:
+5. **Fusion Engine**:
    - Normalized in `ml.fusion.normalizer`.
    - Agreement checked in `ml.fusion.agreement`.
    - Weighted and fused in `ml.fusion.engine`.
-5. **Response**: Returns standardized JSON payloads to the frontend.
+6. **Operational Workflow (Phase 7)**:
+   - Evaluates unified assessment against `INCIDENT_CREATION_POLICY`.
+   - Generates alerts based on `ALERT_POLICY`.
+   - Deduplicates incidents using Haversine distance (`INCIDENT_MATCHING_RADIUS_METERS`).
+7. **Response**: Returns standardized JSON payloads to the frontend.
 
-## Routing Systems Architecture
+## Persistence Layer (Phase 7)
+- **SQLite Database**: `backend/data/georesilience.db` using `sqlite3` built-in module.
+- **Tables**: `reports`, `incidents`, `alerts`, `review_actions`.
 
-GeoShield AI implements two strictly separated routing paradigms:
+## Human Review Workflow (Phase 7)
+- **Trigger**: `requires_human_review` set by Fusion Engine (due to model disagreement or critical field evidence).
+- **Status Progression**: `OPEN` -> `UNDER_REVIEW` -> (`FIELD_VERIFIED` | `ESCALATED` | `DISMISSED` | `RESOLVED`).
+- **Audit**: All actions logged in `review_actions` table.
 
-1. **Road Routing**: Operates exclusively on mapped road networks. Uses standard graph algorithms (OSRM/NetworkX) taking into account known road closures and high-risk intersections.
-2. **Terrain-Aware Routing**: Separate terrain cost surface routing utilized when viable roads are destroyed. Computes emergency off-road corridors based on slope difficulty, land cover penalties, landslide risk, and impassable barriers using custom A* implementations.
+## Future Geospatial Architecture (Phase 9+)
+
+GeoShield AI is architecturally designed to support two strictly separated routing paradigms in a future phase:
+
+1. **Road Routing**: Planned to operate exclusively on mapped road networks. Intended to use standard graph algorithms (OSRM/NetworkX) taking into account known road closures and high-risk intersections.
+2. **Terrain-Aware Routing**: Planned separate terrain cost surface routing utilized when viable roads are destroyed. Intended to compute emergency off-road corridors based on slope difficulty, land cover penalties, landslide risk, and impassable barriers using custom A* implementations.
+
+*Note: The current `geospatial/` directory structure reflects this planned architecture but does not contain active routing implementations.*
