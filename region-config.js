@@ -45,6 +45,27 @@ window.GEO_REGIONS = [
   { id: "PY", name: "Puducherry", type: "UT", lat: 11.9416, lng: 79.8083, landTerm: "Patta / Revenue Record", hazard: "Storm Surge & Coastal Salinization", status: "Active Monitor", activeKhasras: 340 }
 ];
 
+// Add default bounding boxes (minLon, minLat, maxLon, maxLat) to regions if not defined
+window.GEO_REGIONS.forEach(r => {
+  if (!r.bbox) {
+    // Standard bounding box around center point for smooth map fitBounds
+    r.bbox = [r.lng - 0.4, r.lat - 0.4, r.lng + 0.4, r.lat + 0.4];
+  }
+});
+
+// Explicit demo bounding boxes for priority demonstration zones
+const sk = window.GEO_REGIONS.find(r => r.id === 'SK');
+if (sk) sk.bbox = [88.01, 27.08, 88.92, 28.13];
+
+const kl = window.GEO_REGIONS.find(r => r.id === 'KL');
+if (kl) kl.bbox = [74.85, 8.28, 77.41, 12.79];
+
+const hp = window.GEO_REGIONS.find(r => r.id === 'HP');
+if (hp) hp.bbox = [75.58, 30.38, 79.07, 33.26];
+
+const uk = window.GEO_REGIONS.find(r => r.id === 'UK');
+if (uk) uk.bbox = [77.57, 28.72, 81.04, 31.45];
+
 window.getRegionById = function(id) {
   return window.GEO_REGIONS.find(r => r.id === id) || window.GEO_REGIONS.find(r => r.id === 'SK');
 };
@@ -67,3 +88,33 @@ window.setSelectedRegion = function(regionId) {
   }
   return reg;
 };
+
+// Hierarchy Accessors (India -> State -> District -> Local Area -> Parcel)
+window.getDistrictsForRegion = function(regionId) {
+  const hierarchy = window.GEO_DEMO_DATA?.hierarchy?.regions || [];
+  const found = hierarchy.find(r => r.id === regionId);
+  if (found && found.districts && found.districts.length > 0) {
+    return found.districts;
+  }
+  // Default fallback district generator if specific district data isn't hardcoded
+  const reg = window.getRegionById(regionId);
+  return [
+    { id: `${regionId}-DIST-1`, name: `${reg ? reg.name : 'Central'} District 01`, center: [reg ? reg.lat : 27.5, reg ? reg.lng : 88.5], localAreas: [] },
+    { id: `${regionId}-DIST-2`, name: `${reg ? reg.name : 'North'} District 02`, center: [reg ? (reg.lat + 0.1) : 27.6, reg ? (reg.lng + 0.1) : 88.6], localAreas: [] }
+  ];
+};
+
+window.getLocalAreasForDistrict = function(districtId) {
+  const hierarchy = window.GEO_DEMO_DATA?.hierarchy?.regions || [];
+  for (const reg of hierarchy) {
+    const dist = reg.districts?.find(d => d.id === districtId);
+    if (dist && dist.localAreas && dist.localAreas.length > 0) {
+      return dist.localAreas;
+    }
+  }
+  return [
+    { id: `${districtId}-LA-1`, name: `Sub-Division Alpha Corridor`, center: [27.33, 88.61], parcels: [] },
+    { id: `${districtId}-LA-2`, name: `Valley Highway Sector`, center: [27.28, 88.59], parcels: [] }
+  ];
+};
+

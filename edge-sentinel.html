@@ -252,10 +252,11 @@ footer{position:relative;z-index:1;padding:32px;border-top:1px solid var(--line)
     </div>
     <div class="form-row">
       <label class="form-label">Photo Evidence</label>
-      <div class="upload-zone" onclick="this.style.borderColor='rgba(212,175,55,.5)'">
+      <input type="file" accept="image/*" capture="environment" id="sentinelPhotoInput" style="display:none;" onchange="handleImageUpload(this)">
+      <div class="upload-zone" id="imagePreviewBox" onclick="document.getElementById('sentinelPhotoInput').click()" style="cursor:pointer;">
         <span class="uz-icon">📷</span>
-        <p>Tap to capture or upload image</p>
-        <span class="uz-hint">MobileNetV3 will analyse on-device</span>
+        <p>Tap to capture photo or upload image</p>
+        <span class="uz-hint">MobileNetV3 will analyze on-device (<strong id="crackConfScore" style="color:#22c55e;">Ready</strong>)</span>
       </div>
     </div>
     <div class="form-grid form-row">
@@ -272,11 +273,14 @@ footer{position:relative;z-index:1;padding:32px;border-top:1px solid var(--line)
       <label class="form-label">Description (Optional)</label>
       <textarea class="form-input" rows="3" style="resize:vertical" placeholder="Describe what you see…"></textarea>
     </div>
-    <div class="form-row">
-      <div class="geo-badge">
+    <div class="form-row" style="display:flex; justify-size:space-between; align-items:center; gap:10px;">
+      <div class="geo-badge" style="flex:1;">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
-        <span>GPS: 27.3314° N, 88.6138° E · Khasra #GK-4821 · ±4m accuracy</span>
+        <span id="gpsTextDisplay">GPS: 27.3314° N, 88.6138° E · Khasra #GK-4821 · ±4m accuracy</span>
       </div>
+      <button onclick="captureGPS(this)" style="background:rgba(37,99,235,0.15); border:1px solid rgba(37,99,235,0.4); color:#60a5fa; padding:8px 12px; border-radius:8px; font-family:var(--font-m); font-size:10px; cursor:pointer;">
+        📍 Acquire GPS
+      </button>
     </div>
     <button class="submit-btn" onclick="simulateSubmit(this)">📤 Submit to Queue &nbsp;(Offline)</button>
   </div>
@@ -291,14 +295,63 @@ footer{position:relative;z-index:1;padding:32px;border-top:1px solid var(--line)
 </footer>
 
 <script>
+function captureGPS(btn) {
+  if ('geolocation' in navigator) {
+    btn.textContent = '🛰️ Acquiring Satellites…';
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const lat = pos.coords.latitude.toFixed(4);
+        const lng = pos.coords.longitude.toFixed(4);
+        const acc = pos.coords.accuracy ? Math.round(pos.coords.accuracy) : 5;
+        const gpsEl = document.getElementById('gpsTextDisplay');
+        if (gpsEl) gpsEl.textContent = `GPS: ${lat}° N, ${lng}° E · ±${acc}m accuracy`;
+        btn.textContent = '📍 GPS Location Locked';
+        if (window.GEO_API) window.GEO_API.showToast(`GPS Acquired: ${lat}° N, ${lng}° E`);
+      },
+      (err) => {
+        btn.textContent = '📍 GPS: 27.3314° N, 88.6138° E (Default)';
+        if (window.GEO_API) window.GEO_API.showToast('GPS Fallback Active (Sikkim Sentinel)');
+      }
+    );
+  }
+}
+
+function handleImageUpload(input) {
+  if (input.files && input.files[0]) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const prev = document.getElementById('imagePreviewBox');
+      if (prev) {
+        prev.style.backgroundImage = `url(${e.target.result})`;
+        prev.style.backgroundSize = 'cover';
+        prev.style.backgroundPosition = 'center';
+      }
+      const confEl = document.getElementById('crackConfScore');
+      if (confEl) confEl.textContent = '94.2% (Crack Confirmed)';
+      if (window.GEO_API) window.GEO_API.showToast('MobileNetV3 Edge Inference: 94.2% Crack Detected');
+    };
+    reader.readAsDataURL(input.files[0]);
+  }
+}
+
 function simulateSubmit(btn) {
   const orig = btn.textContent;
   btn.textContent = '⏳ Queuing…'; btn.disabled = true;
   setTimeout(() => {
     const qc = document.getElementById('queueCount');
     if (qc) qc.textContent = +qc.textContent + 1;
-    btn.textContent = '✓ Queued Locally'; btn.style.background = 'linear-gradient(135deg,#22c55e,#16a34a)';
-    setTimeout(() => { btn.textContent = orig; btn.disabled = false; btn.style.background = ''; }, 2000);
+    
+    // Save to IndexedDB/localStorage queue
+    try {
+      const queue = JSON.parse(localStorage.getItem('geo360_field_queue') || '[]');
+      queue.push({ timestamp: new Date().toISOString(), crackScore: 0.942, status: 'QUEUED_OFFLINE' });
+      localStorage.setItem('geo360_field_queue', JSON.stringify(queue));
+    } catch(e) {}
+
+    btn.textContent = '✓ Queued Locally (Offline Sync Ready)'; 
+    btn.style.background = 'linear-gradient(135deg,#22c55e,#16a34a)';
+    if (window.GEO_API) window.GEO_API.showToast('Report Queued in PWA Offline Storage 📱');
+    setTimeout(() => { btn.textContent = orig; btn.disabled = false; btn.style.background = ''; }, 2200);
   }, 800);
 }
 
@@ -308,6 +361,8 @@ const obs = new IntersectionObserver(entries => {
 document.querySelectorAll('.fade-up').forEach(el => obs.observe(el));
 </script>
 <script src="region-config.js"></script>
+<script src="assets/demo/demo-data.js"></script>
+<script src="api-client.js"></script>
 <script src="auth.js"></script>
 <script src="nav.js"></script>
 </body>

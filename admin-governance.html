@@ -142,7 +142,7 @@
 
   <div>
     <!-- Damage Reconciliation Pipeline -->
-    <div class="admin-card">
+    <div class="admin-card" style="margin-bottom:24px;">
       <h2>Damage Reconciliation Pipeline</h2>
       <div class="recon-flow">
         <div class="recon-step">
@@ -162,19 +162,92 @@
         </button>
       </div>
     </div>
+
+    <!-- Multilingual Emergency Alert System (Point 12) -->
+    <div class="admin-card">
+      <h2 style="color:var(--gold); font-size:16px;">🔊 Multilingual Bhashini Alert System</h2>
+      <p style="font-size:12px; color:var(--ink-1); margin-bottom:14px;">Generates local voice & SMS advisory text across regional languages:</p>
+
+      <div style="margin-bottom:12px;">
+        <label style="font-size:11px; color:var(--ink-1); font-family:var(--font-m); display:block; margin-bottom:4px;">Select Regional Target Language:</label>
+        <select id="bhashiniLangSelect" class="form-select" style="width:100%; background:#111827; border:1px solid rgba(255,255,255,0.1); color:#fff; padding:8px; border-radius:6px;" onchange="updateBhashiniText(this.value)">
+          <option value="en">English (Official National)</option>
+          <option value="hi">Hindi (हिन्दी)</option>
+          <option value="ne">Nepali (नेपाली - Sikkim/Darjeeling)</option>
+          <option value="ml">Malayalam (മലയാളം - Wayanad)</option>
+          <option value="bn">Bengali (বাংলা - West Bengal/Tripura)</option>
+        </select>
+      </div>
+
+      <div id="bhashiniBox" style="background:#05070f; border:1px solid #d4af37; border-radius:8px; padding:12px; font-size:12px; color:#cbd5e1; line-height:1.5; margin-bottom:14px;">
+        "EMERGENCY EVACUATION ADVISORY: High slope instability detected in Khasra 104/A. All 9 residents are ordered to evacuate immediately to Ranipool Govt Center."
+      </div>
+
+      <button onclick="playBhashiniSpeech()" style="width:100%; background:rgba(37,99,235,0.2); border:1px solid #3b82f6; border-radius:8px; padding:10px; color:#60a5fa; font-family:var(--font-m); font-size:11px; font-weight:700; cursor:pointer;">
+        🔊 PLAY SYNTHESIZED VOICE BROADCAST
+      </button>
+    </div>
   </div>
 </div>
 
 <script>
+const ALERT_TEXTS = {
+  en: "EMERGENCY EVACUATION ADVISORY: High slope instability detected in Khasra 104/A. All 9 residents are ordered to evacuate immediately to Ranipool Govt Center.",
+  hi: "आपातकालीन निकासी सलाह: खसरा 104/ए में ढलान अस्थिरता पाई गई है। सभी 9 निवासियों को तुरंत रानीपूल राहत केंद्र जाने का आदेश दिया जाता है।",
+  ne: "आपतकालीन निकासी सल्लाह: खसरा १०४/ए मा पहिरोको उच्च जोखिम छ। सबै ९ बासिन्दाहरूलाई तुरुन्तै रानीपुल राहत केन्द्रमा जान निर्देशन दिइन्छ।",
+  ml: "അടിയന്തര ഒഴിപ്പിക്കൽ നിർദ്ദേശം: ഖസ്ര 104/A യിൽ ഉരുൾപൊട്ടൽ ഭീഷണി കണ്ടെത്തി. 9 നിവാസികളും ഉടൻ മാറുക.",
+  bn: "জরুরি নির্দেশিকা: খাসরা ১০৪/এ এলাকায় ধসের আশঙ্কায় ৯ জন বাসিন্দাকে অবিলম্বে রানি পুল আশ্রয়কেন্দ্রে যাওয়ার নির্দেশ দেওয়া হচ্ছে।"
+};
+
+function updateBhashiniText(lang) {
+  const box = document.getElementById('bhashiniBox');
+  if (box) box.textContent = `"${ALERT_TEXTS[lang] || ALERT_TEXTS.en}"`;
+}
+
+function playBhashiniSpeech() {
+  const lang = document.getElementById('bhashiniLangSelect')?.value || 'en';
+  const text = ALERT_TEXTS[lang] || ALERT_TEXTS.en;
+  
+  if ('speechSynthesis' in window) {
+    window.speechSynthesis.cancel(); // cancel any ongoing speech
+    const synth = new SpeechSynthesisUtterance(text);
+    if (lang === 'hi') synth.lang = 'hi-IN';
+    else if (lang === 'ne') synth.lang = 'ne-NP';
+    else if (lang === 'ml') synth.lang = 'ml-IN';
+    else if (lang === 'bn') synth.lang = 'bn-IN';
+    else synth.lang = 'en-US';
+
+    window.speechSynthesis.speak(synth);
+    if (window.GEO_API) window.GEO_API.showToast(`Playing Bhashini Voice Alert (${lang.toUpperCase()}) 🔊`);
+  } else {
+    alert(`🔊 [Bhashini Voice Simulation]:\n\n"${text}"`);
+  }
+}
+
 function authorizeEmergencyEvacuation() {
+  if (window.GEO_AUTH && !window.GEO_AUTH.requireRole('admin', 'Authorize Emergency Evacuation')) {
+    return;
+  }
+
+  const confirmed = confirm("⚠️ OFFICIAL DISTRICT MAGISTRATE MANDATE:\n\nAre you sure you want to authorize mandatory evacuation for Khasra #104/A and #104/B?\n\nThis will trigger public sirens, Bhashini multilingual SMS/voice alerts, and dispatch NDRF teams.");
+  
+  if (!confirmed) return;
+
   const banner = document.getElementById('evacAlertBanner');
   if (banner) {
     banner.style.display = 'flex';
   }
-  alert('🚨 EMERGENCY EVACUATION AUTHORIZED:\n\n- Region: Sikkim\n- Parcels: Khasra 104/A & 104/B\n- Total Affected Residents: 9 Residents\n- Evacuation Center: Govt Higher Secondary School, Ranipool\n- Broadcast Sent to All Mobile Edge Sentinels & Response Teams.');
+  
+  playBhashiniSpeech();
+  
+  if (window.GEO_API) {
+    window.GEO_API.showToast('🚨 EVACUATION MANDATE AUTHORIZED BY DISTRICT MAGISTRATE');
+  }
 }
 </script>
 <script src="region-config.js"></script>
+<script src="assets/demo/demo-data.js"></script>
+<script src="api-client.js"></script>
 <script src="auth.js"></script>
 <script src="nav.js"></script>
 </body>

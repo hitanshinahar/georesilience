@@ -67,6 +67,46 @@ window.GEO_AUTH = {
     }
   },
 
+  hasRole: function(requiredRole) {
+    const session = this.getCurrentSession();
+    if (!session || !session.user) return false;
+    if (session.user.role === 'admin' || session.user.role === 'district_admin') return true; // Admins have elevated privileges
+    return session.user.role === requiredRole;
+  },
+
+  requireRole: function(requiredRole, actionLabel) {
+    if (this.hasRole(requiredRole)) return true;
+    
+    // Show RBAC permission warning modal
+    let modal = document.getElementById('geo360-rbac-modal');
+    if (!modal) {
+      modal = document.createElement('div');
+      modal.id = 'geo360-rbac-modal';
+      modal.className = 'geo360-modal-overlay active';
+      document.body.appendChild(modal);
+    }
+    
+    modal.innerHTML = `
+      <div class="geo360-modal-card" style="max-width:440px;">
+        <button class="geo360-modal-close" onclick="document.getElementById('geo360-rbac-modal').remove()">&times;</button>
+        <div class="geo360-modal-header" style="border-bottom:1px solid #ef4444;">
+          <div class="geo360-badge" style="background:rgba(239,68,68,0.15); color:#ef4444; border-color:rgba(239,68,68,0.4);">RESTRICTED AUTHORIZATION</div>
+          <h2>Access Granted Only To Authorized Officials</h2>
+          <p>Action: "${actionLabel || 'Administrative Command'}" requires District Magistrate / Admin Role</p>
+        </div>
+        <div style="padding:20px; font-size:13px; color:#a1a1aa; line-height:1.6;">
+          Under National Disaster Management Governance protocols, emergency evacuation orders and official alert broadcasts can only be authorized by an authenticated <strong>District Administrator / Magistrate</strong>.
+        </div>
+        <div style="padding:0 20px 20px; display:flex; gap:10px;">
+          <button onclick="window.GEO_AUTH.showLoginModal('admin'); document.getElementById('geo360-rbac-modal').remove();" class="geo360-submit-btn" style="background:linear-gradient(135deg,#d4af37,#b5891a); color:#000; font-weight:700;">
+            🔑 Fast-Track Login as District Admin
+          </button>
+        </div>
+      </div>
+    `;
+    return false;
+  },
+
   logout: function() {
     localStorage.removeItem('geo360_session');
     if (window.navigateTo) {

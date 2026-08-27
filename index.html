@@ -22,6 +22,8 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollToPlugin.min.js"></script>
 <script src="region-config.js"></script>
+<script src="assets/demo/demo-data.js"></script>
+<script src="api-client.js"></script>
 <script src="auth.js"></script>
 
 <style>
@@ -490,8 +492,43 @@
         <div class="val gold" id="regLandTerms">Khasra / Dag / RoR</div>
       </div>
       <div class="reg-card-item">
-        <label>Regional Languages</label>
-        <div class="val" id="regLangs">Nepali, Bhutia, Lepcha, Hindi</div>
+        <label>Geographic Bounding Box (BBOX)</label>
+        <div class="val" id="regBbox" style="font-family:var(--font-m); font-size:11px; color:#60a5fa;">[88.01, 27.08, 88.92, 28.13]</div>
+      </div>
+    </div>
+
+    <!-- Multi-Tier Geographic Hierarchy Drilldown (Point 1 & Point 2) -->
+    <div style="margin-top:20px; padding-top:16px; border-top:1px solid var(--line);">
+      <label style="font-family:var(--font-m); font-size:10px; color:var(--gold); letter-spacing:.15em; text-transform:uppercase; display:block; margin-bottom:8px;">
+        🌐 Multi-Tier Geographic Hierarchy: India → State/UT → District → Local Area → Parcel
+      </label>
+      
+      <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap:12px; margin-bottom:14px;">
+        <div>
+          <label style="font-size:11px; color:var(--ink-1); display:block; margin-bottom:4px;">District Selection:</label>
+          <select id="hierarchyDistrictSelect" class="region-select-dropdown" style="width:100%; font-size:11px; padding:6px 10px;" onchange="onDistrictSelected(this.value)">
+            <option value="">East Sikkim (Gangtok)</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:11px; color:var(--ink-1); display:block; margin-bottom:4px;">Local Area / Sub-Division:</label>
+          <select id="hierarchyLocalAreaSelect" class="region-select-dropdown" style="width:100%; font-size:11px; padding:6px 10px;" onchange="onLocalAreaSelected(this.value)">
+            <option value="">Gangtok Urban & Ridge Corridor</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:11px; color:var(--ink-1); display:block; margin-bottom:4px;">Cadastral Land Parcel / Khasra:</label>
+          <select id="hierarchyParcelSelect" class="region-select-dropdown" style="width:100%; font-size:11px; padding:6px 10px;">
+            <option value="104A">Khasra #104/A (Upper Ridge)</option>
+          </select>
+        </div>
+      </div>
+
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+        <span style="font-size:11px; color:var(--ink-1); font-family:var(--font-m);">Camera Transition: <strong style="color:var(--gold);">map.fitBounds(bbox, { padding: 40, duration: 1200 })</strong></span>
+        <button onclick="launchHierarchyCommandCenter()" class="cta-enter-btn" style="padding:8px 16px; font-size:11px;">
+          🧭 LAUNCH COMMAND CENTER FOR SELECTED PARCEL
+        </button>
       </div>
     </div>
   </div>
@@ -968,6 +1005,7 @@ function updateActiveRegionDisplay(regionId) {
   const coordsEl = document.getElementById('regCoords');
   const riskEl = document.getElementById('regRisk');
   const termsEl = document.getElementById('regLandTerms');
+  const bboxEl = document.getElementById('regBbox');
   const dropEl = document.getElementById('regionDropdown');
 
   if (pill) pill.textContent = reg.type.toUpperCase();
@@ -975,7 +1013,52 @@ function updateActiveRegionDisplay(regionId) {
   if (coordsEl) coordsEl.textContent = `${reg.lat}° N, ${reg.lng}° E`;
   if (riskEl) riskEl.textContent = reg.hazard;
   if (termsEl) termsEl.textContent = reg.landTerm;
+  if (bboxEl) bboxEl.textContent = reg.bbox ? `[${reg.bbox.join(', ')}]` : `[${(reg.lng-0.4).toFixed(2)}, ${(reg.lat-0.4).toFixed(2)}, ${(reg.lng+0.4).toFixed(2)}, ${(reg.lat+0.4).toFixed(2)}]`;
   if (dropEl) dropEl.value = reg.id;
+
+  // Populate Districts
+  const distSelect = document.getElementById('hierarchyDistrictSelect');
+  if (distSelect && window.getDistrictsForRegion) {
+    const districts = window.getDistrictsForRegion(reg.id);
+    distSelect.innerHTML = districts.map(d => `<option value="${d.id}">${d.name}</option>`).join('');
+    if (districts.length > 0) onDistrictSelected(districts[0].id);
+  }
+}
+
+function onDistrictSelected(districtId) {
+  const laSelect = document.getElementById('hierarchyLocalAreaSelect');
+  if (laSelect && window.getLocalAreasForDistrict) {
+    const localAreas = window.getLocalAreasForDistrict(districtId);
+    laSelect.innerHTML = localAreas.length > 0
+      ? localAreas.map(la => `<option value="${la.id}">${la.name}</option>`).join('')
+      : '<option value="LA-DEFAULT">Sub-Division Sector 01</option>';
+    if (localAreas.length > 0) onLocalAreaSelected(localAreas[0].id);
+  }
+}
+
+function onLocalAreaSelected(localAreaId) {
+  const parcelSelect = document.getElementById('hierarchyParcelSelect');
+  if (parcelSelect) {
+    parcelSelect.innerHTML = `
+      <option value="104A">Khasra #104/A (Upper Ridge Sector)</option>
+      <option value="104B">Khasra #104/B (Upper Ridge Slope)</option>
+      <option value="104C">Khasra #104/C (Valley Terrace)</option>
+    `;
+  }
+}
+
+function launchHierarchyCommandCenter() {
+  const dist = document.getElementById('hierarchyDistrictSelect')?.value;
+  const la = document.getElementById('hierarchyLocalAreaSelect')?.value;
+  const khasra = document.getElementById('hierarchyParcelSelect')?.value || '104A';
+  
+  if (window.GEO_API) {
+    window.GEO_API.showToast(`Navigating to Command Center: Parcel ${khasra}`);
+  }
+  setTimeout(() => {
+    if (window.navigateTo) window.navigateTo('command-center.html');
+    else window.location.href = 'command-center.html';
+  }, 300);
 }
 
 function selectRegionFromDropdown(regionId) {

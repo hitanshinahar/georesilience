@@ -78,6 +78,10 @@
 
     <!-- Right actions -->
     <div class="gnav-actions">
+      <button id="gnavDataModeBtn" style="background:rgba(212,175,55,0.1); border:1px solid rgba(212,175,55,0.3); color:#d4af37; cursor:pointer; padding:5px 10px; border-radius:6px; font-weight:600; font-family:var(--font-m, monospace); font-size:10px; display:flex; align-items:center; gap:5px;" onclick="window.GEO_API ? window.GEO_API.setMode(window.GEO_API.getMode() === 'LIVE' ? 'DEMO' : 'LIVE') : null" title="Toggle between LIVE backend API mode and DEMO offline cache mode">
+        <span id="gnavDataModeDot">🟡</span>
+        <span id="gnavDataModeText">MODE: DEMO</span>
+      </button>
       <button class="gnav-live" style="background:rgba(212,175,55,.1); border:1px solid rgba(212,175,55,.3); color:#d4af37; cursor:pointer; padding:6px 12px; border-radius:6px; font-weight:600; display:flex; align-items:center; gap:6px;" onclick="window.GEO_AUTH ? window.GEO_AUTH.showLoginModal() : null" id="gnavRegionBtn">
         <span>📍</span>
         <span id="gnavActiveRegionText">Sikkim</span>
@@ -567,8 +571,34 @@
         if (textEl) textEl.innerText = reg.name;
       }
     }
+
+    // Sync Data Mode Badge
+    function syncDataMode() {
+      if (window.GEO_API) {
+        const mode = window.GEO_API.getMode();
+        const dotEl = document.getElementById('gnavDataModeDot');
+        const textEl = document.getElementById('gnavDataModeText');
+        const btnEl = document.getElementById('gnavDataModeBtn');
+        if (dotEl) dotEl.innerText = mode === 'LIVE' ? '🟢' : '🟡';
+        if (textEl) textEl.innerText = `MODE: ${mode}`;
+        if (btnEl) {
+          if (mode === 'LIVE') {
+            btnEl.style.borderColor = 'rgba(34,197,94,0.4)';
+            btnEl.style.color = '#22c55e';
+            btnEl.style.background = 'rgba(34,197,94,0.1)';
+          } else {
+            btnEl.style.borderColor = 'rgba(212,175,55,0.3)';
+            btnEl.style.color = '#d4af37';
+            btnEl.style.background = 'rgba(212,175,55,0.1)';
+          }
+        }
+      }
+    }
+
     syncNavRegion();
+    syncDataMode();
     window.addEventListener('regionChanged', syncNavRegion);
+    window.addEventListener('dataModeChanged', syncDataMode);
   }
 
   if (document.readyState === 'loading') {
