@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Cascading Simulator — GeoResilience-360</title>
+<meta name="description" content="Simulate multi-hazard cascading chains: landslide → debris flow → flood, along Himalayan lifelines." />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="nav.css">
+<style>
+:root {
+  --bg-0: #000000;
+  --bg-1: #09090b;
+  --bg-2: #111113;
+  --gold: #d4af37;
+  --gold-soft: rgba(212,175,55,0.18);
+  --gold-glow: rgba(212,175,55,0.06);
+  --teal: #2563eb;
+  --orange: #f97316;
+  --red: #ef4444;
+  --ink-0: #ffffff;
+  --ink-1: #a1a1aa;
+  --ink-2: #52525b;
+  --line: #27272a;
+  --card: rgba(9,9,11,0.92);
+  --font-d: 'Space Grotesk', sans-serif;
+  --font-b: 'Inter', sans-serif;
+  --font-m: 'JetBrains Mono', monospace;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg-0);
+  color: var(--ink-0);
+  font-family: var(--font-b);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+::selection { background: var(--gold-soft); color: var(--bg-0); }
+
+/* ── Stars ── */
+.stars {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background-image:
+    radial-gradient(1px 1px at 8% 12%, #ffffff2a 0, transparent 70%),
+    radial-gradient(1px 1px at 78% 7%, #ffffff1a 0, transparent 70%),
+    radial-gradient(1.5px 1.5px at 55% 29%, #ffffff1a 0, transparent 70%),
+    radial-gradient(1px 1px at 22% 62%, #ffffff12 0, transparent 70%),
+    radial-gradient(1px 1px at 91% 68%, #ffffff20 0, transparent 70%),
+    radial-gradient(1.5px 1.5px at 40% 83%, #ffffff0e 0, transparent 70%),
+    radial-gradient(1px 1px at 66% 90%, #ffffff18 0, transparent 70%);
+}
+
+/* ── Nav ── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  height: 60px;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 32px;
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--line);
+}
+.nav-brand {
+  font-family: var(--font-m); font-size: 11px; letter-spacing: .2em;
+  text-transform: uppercase; color: var(--ink-1);
+}
+.nav-brand b { color: var(--gold); font-weight: 500; }
+.nav-back {
+  display: flex; align-items: center; gap: 8px;
+  font-family: var(--font-m); font-size: 11px; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--ink-1); text-decoration: none;
+  transition: color .2s;
+}
+.nav-back:hover { color: var(--gold); }
+.nav-back svg { width: 14px; height: 14px; }
+.nav-pill {
+  font-family: var(--font-m); font-size: 10px; letter-spacing: .12em;
+  text-transform: uppercase;
+  padding: 5px 12px;
+  border: 1px solid rgba(212,175,55,0.3);
+  border-radius: 100px;
+  color: var(--gold);
+  background: var(--gold-glow);
+}
+
+/* ── Hero ── */
+.hero {
+  position: relative; z-index: 1;
+  min-height: 100vh;
+  padding: 60px 0 0;
+  display: flex; flex-direction: column;
+}
+.hero-top {
+  flex: 1;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 60px 24px 40px;
+  text-align: center;
+}
+.module-tag {
+  font-family: var(--font-m); font-size: 10.5px; letter-spacing: .22em;
+  text-transform: uppercase; color: var(--gold);
+  margin-bottom: 18px;
+  display: flex; align-items: center; gap: 10px;
+}
+.module-tag::before, .module-tag::after {
+  content: ''; display: block; height: 1px; width: 36px;
+  background: linear-gradient(90deg, transparent, var(--gold));
+}
+.module-tag::after { background: linear-gradient(90deg, var(--gold), transparent); }
+.hero h1 {
+  font-family: var(--font-d); font-weight: 700;
+  font-size: clamp(32px, 5vw, 62px);
+  letter-spacing: -.03em; line-height: 1.1;
+  margin-bottom: 16px;
+}
+.hero h1 span { color: var(--gold); }
+.hero-sub {
+  max-width: 54ch; color: var(--ink-1); font-size: 15px; line-height: 1.65;
+  margin-bottom: 36px;
+}
+.hero-meta {
+  display: flex; gap: 32px; justify-content: center; flex-wrap: wrap;
+}
+.meta-item {
+  font-family: var(--font-m); font-size: 10px; letter-spacing: .14em;
+  text-transform: uppercase; color: var(--ink-2);
+  display: flex; align-items: center; gap: 8px;
+}
+.meta-item b { color: var(--ink-1); font-weight: 500; }
+.meta-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--gold); flex-shrink: 0; }
+
+/* ── Hazard Chain Flow ── */
+.chain-section {
+  position: relative; z-index: 1;
+  padding: 80px 24px;
+  max-width: 1100px; margin: 0 auto;
+}
+.section-label {
+  font-family: var(--font-m); font-size: 10px; letter-spacing: .22em;
+  text-transform: uppercase; color: var(--gold); margin-bottom: 10px;
+}
+.section-title {
+  font-family: var(--font-d); font-size: clamp(22px,3vw,32px);
+  font-weight: 600; margin-bottom: 48px; color: var(--ink-0);
+}
+
+.chain-flow {
+  display: flex; align-items: stretch; gap: 0;
+  position: relative;
+}
+.chain-node {
+  flex: 1;
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 28px 22px;
+  position: relative;
+  overflow: hidden;
+  transition: border-color .3s, box-shadow .3s;
+}
+.chain-node:hover {
+  border-color: var(--gold);
+  box-shadow: 0 0 32px -8px var(--gold-soft);
+}
+.chain-node::before {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(135deg, rgba(212,175,55,0.05) 0%, transparent 60%);
+  pointer-events: none;
+}
+.chain-connector {
+  display: flex; align-items: center; justify-content: center;
+  width: 48px; flex-shrink: 0; z-index: 2;
+}
+.chain-connector svg { width: 20px; height: 20px; color: var(--gold); opacity: .5; }
+.chain-icon {
+  font-size: 32px; margin-bottom: 14px; display: block;
+}
+.chain-index {
+  font-family: var(--font-m); font-size: 9.5px; letter-spacing: .18em;
+  text-transform: uppercase; color: var(--gold); margin-bottom: 8px; display: block;
+}
+.chain-node h3 {
+  font-family: var(--font-d); font-size: 17px; font-weight: 600;
+  margin-bottom: 10px;
+}
+.chain-node p {
+  font-size: 12.5px; line-height: 1.6; color: var(--ink-1); margin-bottom: 18px;
+}
+.chain-stats {
+  display: flex; flex-direction: column; gap: 8px;
+}
+.chain-stat {
+  display: flex; align-items: center; justify-content: space-between;
+  font-family: var(--font-m); font-size: 10.5px;
+}
+.chain-stat .label { color: var(--ink-2); }
+.chain-stat .value { color: var(--ink-0); }
+.chain-bar-wrap { height: 3px; flex: 1; margin: 0 10px; background: var(--line); border-radius: 2px; overflow: hidden; }
+.chain-bar { height: 100%; border-radius: 2px; animation: barFill 1.4s ease forwards; }
+@keyframes barFill { from { width: 0 } }
+
+/* Node color coding */
+.chain-node.node-land { --node-c: #f97316; }
+.chain-node.node-debris { --node-c: #eab308; }
+.chain-node.node-flood { --node-c: #3b82f6; }
+.chain-node .chain-bar { background: var(--node-c); }
+.chain-node .chain-index { color: var(--node-c); }
+.chain-node:hover { border-color: var(--node-c); box-shadow: 0 0 32px -8px color-mix(in srgb, var(--node-c) 40%, transparent); }
+
+/* ── Simulation Panel ── */
+.sim-section {
+  position: relative; z-index: 1;
+  padding: 0 24px 80px;
+  max-width: 1100px; margin: 0 auto;
+}
+.sim-grid {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 20px;
+  align-items: start;
+}
+@media (max-width: 860px) { .sim-grid { grid-template-columns: 1fr; } }
+
+.sim-controls {
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 24px;
+}
+.sim-controls h4 {
+  font-family: var(--font-d); font-size: 14px; font-weight: 600;
+  margin-bottom: 6px;
+}
+.sim-controls .hint {
+  font-family: var(--font-m); font-size: 10px; color: var(--ink-2);
+  letter-spacing: .1em; text-transform: uppercase;
+  margin-bottom: 24px; display: block;
+}
+
+.slider-group { margin-bottom: 20px; }
+.slider-label {
+  display: flex; justify-content: space-between;
+  font-family: var(--font-m); font-size: 10.5px; letter-spacing: .08em;
+  text-transform: uppercase; color: var(--ink-1); margin-bottom: 8px;
+}
+.slider-label .val { color: var(--gold); }
+input[type=range] {
+  -webkit-appearance: none;
+  width: 100%; height: 4px;
+  background: var(--line); border-radius: 4px; outline: none;
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 14px; height: 14px; border-radius: 50%;
+  background: var(--gold);
+  box-shadow: 0 0 8px rgba(212,175,55,0.6);
+  cursor: pointer;
+}
+input[type=range]::-webkit-slider-runnable-track { border-radius: 4px; }
+
+.run-btn {
+  width: 100%;
+  padding: 13px;
+  background: linear-gradient(135deg, #d4af37, #b8952e);
+  border: none; border-radius: 8px;
+  font-family: var(--font-m); font-size: 11px; letter-spacing: .15em;
+  text-transform: uppercase; color: #000;
+  font-weight: 700; cursor: pointer;
+  transition: opacity .2s, transform .1s;
+  margin-top: 4px;
+}
+.run-btn:hover { opacity: .9; transform: translateY(-1px); }
+.run-btn:active { transform: translateY(0); }
+.run-btn:disabled { opacity: .45; cursor: not-allowed; transform: none; }
+
+.sim-result {
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 24px;
+  min-height: 360px;
+  display: flex; flex-direction: column;
+}
+.sim-result h4 {
+  font-family: var(--font-d); font-size: 14px; font-weight: 600; margin-bottom: 20px;
+}
+
+/* Flow diagram canvas */
+#flowCanvas {
+  flex: 1;
+  border-radius: 8px;
+  background: var(--bg-1);
+  border: 1px solid var(--line);
+  min-height: 280px;
+  width: 100%;
+}
+
+/* ── Impact Summary ── */
+.impact-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px; margin-top: 20px;
+}
+.impact-card {
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 20px;
+  position: relative; overflow: hidden;
+}
+.impact-card::after {
+  content: ''; position: absolute;
+  top: 0; left: 0; right: 0; height: 2px;
+}
+.impact-card.ic-red::after { background: var(--red); }
+.impact-card.ic-orange::after { background: var(--orange); }
+.impact-card.ic-blue::after { background: var(--teal); }
+.impact-card.ic-gold::after { background: var(--gold); }
+.impact-card .ic-label {
+  font-family: var(--font-m); font-size: 9.5px; letter-spacing: .14em;
+  text-transform: uppercase; color: var(--ink-2); margin-bottom: 10px; display: block;
+}
+.impact-card .ic-value {
+  font-family: var(--font-d); font-size: 28px; font-weight: 700;
+  color: var(--ink-0); line-height: 1; margin-bottom: 4px; display: block;
+}
+.impact-card .ic-unit {
+  font-family: var(--font-m); font-size: 10px; color: var(--ink-1); display: block;
+}
+
+/* ── Footer ── */
+footer {
+  position: relative; z-index: 1;
+  padding: 32px;
+  border-top: 1px solid var(--line);
+  display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;
+}
+footer .f-left {
+  font-family: var(--font-m); font-size: 10px; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--ink-2);
+}
+footer .f-left b { color: var(--gold); font-weight: 500; }
+.next-module {
+  display: flex; align-items: center; gap: 8px;
+  font-family: var(--font-m); font-size: 11px; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--ink-1); text-decoration: none;
+  padding: 10px 18px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  transition: border-color .2s, color .2s;
+}
+.next-module:hover { border-color: var(--gold); color: var(--gold); }
+.next-module svg { width: 13px; height: 13px; }
+
+/* ── Animations ── */
+.fade-up { opacity: 0; transform: translateY(20px); transition: opacity .6s ease, transform .6s ease; }
+.fade-up.is-visible { opacity: 1; transform: translateY(0); }
+</style>
+</head>
+<body>
+<div class="stars"></div>
+<canvas id="particleCanvas"></canvas>
+<div id="gnavMount"></div>
+
+<!-- Hero -->
+<section class="hero">
+  <div class="hero-top">
+    <div class="module-tag">Cascading Hazard Module</div>
+    <h1>Cascading <span>Simulator</span></h1>
+    <p class="hero-sub">Models multi-hazard propagation chains — from initial slope failure to downstream flood inundation — along critical Himalayan lifelines in the North Eastern Region.</p>
+    <div class="hero-meta">
+      <span class="meta-item"><span class="meta-dot"></span> <b>Dehradun</b> / Himalayan Foothills</span>
+      <span class="meta-item"><span class="meta-dot"></span> Engine: <b>RichDEM + Hydro-Kinematic</b></span>
+      <span class="meta-item"><span class="meta-dot"></span> Data: <b>Open-Meteo + IMD Radar</b></span>
+    </div>
+  </div>
+</section>
+
+<!-- Hazard Chain Flow -->
+<div class="chain-section fade-up" id="chainSection">
+  <div class="section-label">Hazard Propagation Chain</div>
+  <div class="section-title">Three-Stage Cascade Model</div>
+
+  <div class="chain-flow stagger-parent" id="chainFlow">
+    <div class="chain-node node-land tilt-card">
+      <span class="chain-icon">⛰️</span>
+      <span class="chain-index">Stage 01 · Trigger</span>
+      <h3>Slope Failure</h3>
+      <p>Heavy antecedent rainfall saturates slope soil, reducing shear strength below critical limit-equilibrium threshold.</p>
+      <div class="chain-stats">
+        <div class="chain-stat">
+          <span class="label">Slope Angle</span>
+          <div class="chain-bar-wrap"><div class="chain-bar" style="width:72%; animation-delay:.1s"></div></div>
+          <span class="value">34°</span>
+        </div>
+        <div class="chain-stat">
+          <span class="label">Soil Saturation</span>
+          <div class="chain-bar-wrap"><div class="chain-bar" style="width:86%; animation-delay:.3s"></div></div>
+          <span class="value">86%</span>
+        </div>
+        <div class="chain-stat">
+          <span class="label">FS (Factor of Safety)</span>
+          <div class="chain-bar-wrap"><div class="chain-bar" style="width:40%; animation-delay:.5s"></div></div>
+          <span class="value">0.82</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="chain-connector">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+    </div>
+
+    <div class="chain-node node-debris tilt-card">
+      <span class="chain-icon">🪨</span>
+      <span class="chain-index">Stage 02 · Propagation</span>
+      <h3>Debris Flow</h3>
+      <p>Mobilised mass entrains additional sediment and water; rheological model tracks velocity and volume amplification along valley corridor.</p>
+      <div class="chain-stats">
+        <div class="chain-stat">
+          <span class="label">Volume (m³)</span>
+          <div class="chain-bar-wrap"><div class="chain-bar" style="width:65%; animation-delay:.2s"></div></div>
+          <span class="value">12,400</span>
+        </div>
+        <div class="chain-stat">
+          <span class="label">Peak Velocity</span>
+          <div class="chain-bar-wrap"><div class="chain-bar" style="width:55%; animation-delay:.4s"></div></div>
+          <span class="value">6.2 m/s</span>
+        </div>
+        <div class="chain-stat">
+          <span class="label">Road Reach Risk</span>
+          <div class="chain-bar-wrap"><div class="chain-bar" style="width:90%; animation-delay:.6s"></div></div>
+          <span class="value">HIGH</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="chain-connector">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+    </div>
+
+    <div class="chain-node node-flood tilt-card">
+      <span class="chain-icon">🌊</span>
+      <span class="chain-index">Stage 03 · Impact</span>
+      <h3>Flash Flood</h3>
+      <p>Debris dam outburst or channel blockage generates flash flood wave. Inundation extent mapped against Khasra cadastre for affected parcels.</p>
+      <div class="chain-stats">
+        <div class="chain-stat">
+          <span class="label">Flood Depth (m)</span>
+          <div class="chain-bar-wrap"><div class="chain-bar" style="width:48%; animation-delay:.1s"></div></div>
+          <span class="value">2.4 m</span>
+        </div>
+        <div class="chain-stat">
+          <span class="label">Khasras Affected</span>
+          <div class="chain-bar-wrap"><div class="chain-bar" style="width:60%; animation-delay:.3s"></div></div>
+          <span class="value">127</span>
+        </div>
+        <div class="chain-stat">
+          <span class="label">Persons at Risk</span>
+          <div class="chain-bar-wrap"><div class="chain-bar" style="width:75%; animation-delay:.5s"></div></div>
+          <span class="value">~890</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Simulation Panel -->
+<div class="sim-section fade-up" id="simSection">
+  <div class="section-label">Interactive Simulation</div>
+  <div class="section-title">Run a Cascade Scenario</div>
+  <div class="sim-grid">
+    <div class="sim-controls">
+      <h4>Scenario Parameters</h4>
+      <span class="hint">Adjust triggers · Re-run model</span>
+
+      <div class="slider-group">
+        <div class="slider-label">
+          <span>Rainfall Intensity</span>
+          <span class="val" id="rainVal">28 mm/hr</span>
+        </div>
+        <input type="range" id="rainSlider" min="5" max="80" value="28" />
+      </div>
+      <div class="slider-group">
+        <div class="slider-label">
+          <span>Antecedent Rainfall (72h)</span>
+          <span class="val" id="antVal">315 mm</span>
+        </div>
+        <input type="range" id="antSlider" min="50" max="600" value="315" />
+      </div>
+      <div class="slider-group">
+        <div class="slider-label">
+          <span>Slope Angle</span>
+          <span class="val" id="slopeVal">34°</span>
+        </div>
+        <input type="range" id="slopeSlider" min="10" max="65" value="34" />
+      </div>
+      <div class="slider-group">
+        <div class="slider-label">
+          <span>Soil Saturation</span>
+          <span class="val" id="satVal">86%</span>
+        </div>
+        <input type="range" id="satSlider" min="20" max="100" value="86" />
+      </div>
+      <button class="run-btn" id="runBtn" onclick="runSimulation()">▶ Run Simulation</button>
+    </div>
+
+    <div class="sim-result">
+      <h4>Propagation Diagram</h4>
+      <canvas id="flowCanvas"></canvas>
+    </div>
+  </div>
+
+  <!-- Impact summary cards -->
+  <div class="impact-grid" id="impactGrid" style="margin-top:32px;">
+    <div class="impact-card ic-red">
+      <span class="ic-label">Failure Probability</span>
+      <span class="ic-value" id="iv-fp">74</span>
+      <span class="ic-unit">% · HIGH RISK</span>
+    </div>
+    <div class="impact-card ic-orange">
+      <span class="ic-label">Debris Reach</span>
+      <span class="ic-value" id="iv-dr">2.1</span>
+      <span class="ic-unit">km downstream</span>
+    </div>
+    <div class="impact-card ic-blue">
+      <span class="ic-label">Flood Inundation</span>
+      <span class="ic-value" id="iv-fi">0.38</span>
+      <span class="ic-unit">km² affected area</span>
+    </div>
+    <div class="impact-card ic-gold">
+      <span class="ic-label">Khasras Impacted</span>
+      <span class="ic-value" id="iv-ki">127</span>
+      <span class="ic-unit">parcels · 890 persons</span>
+    </div>
+  </div>
+</div>
+
+<!-- Footer -->
+<footer>
+  <div class="f-left">GeoResilience-<b>360</b> · Module 01 of 05</div>
+  <a href="risk-engine.html" class="next-module">
+    Next: Dynamic Risk Engine
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+  </a>
+</footer>
+
+<script>
+/* ── Slider bindings ── */
+const sliders = [
+  { el: 'rainSlider',  disp: 'rainVal',  fmt: v => `${v} mm/hr` },
+  { el: 'antSlider',   disp: 'antVal',   fmt: v => `${v} mm` },
+  { el: 'slopeSlider', disp: 'slopeVal', fmt: v => `${v}°` },
+  { el: 'satSlider',   disp: 'satVal',   fmt: v => `${v}%` },
+];
+sliders.forEach(({ el, disp, fmt }) => {
+  const s = document.getElementById(el);
+  const d = document.getElementById(disp);
+  s.addEventListener('input', () => { d.textContent = fmt(s.value); });
+});
+
+/* ── Simulation logic ── */
+function runSimulation() {
+  const btn = document.getElementById('runBtn');
+  btn.disabled = true; btn.textContent = '⏳ Computing…';
+
+  const rain = +document.getElementById('rainSlider').value;
+  const ant  = +document.getElementById('antSlider').value;
+  const slope = +document.getElementById('slopeSlider').value;
+  const sat  = +document.getElementById('satSlider').value;
+
+  setTimeout(() => {
+    const fp = Math.min(99, Math.round((rain/80 * 30) + (ant/600 * 25) + (slope/65 * 25) + (sat/100 * 20)));
+    const dr = +(0.5 + (fp / 99) * 3.8).toFixed(1);
+    const fi = +((fp / 99) * 0.72).toFixed(2);
+    const ki = Math.round(fp * 2.1);
+
+    document.getElementById('iv-fp').textContent = fp;
+    document.getElementById('iv-dr').textContent = dr;
+    document.getElementById('iv-fi').textContent = fi;
+    document.getElementById('iv-ki').textContent = ki;
+
+    drawFlowDiagram(fp, dr, fi);
+
+    btn.disabled = false; btn.textContent = '▶ Run Simulation';
+  }, 900);
+}
+
+/* ── Canvas diagram ── */
+function drawFlowDiagram(fp, dr, fi) {
+  const canvas = document.getElementById('flowCanvas');
+  const W = canvas.offsetWidth, H = canvas.offsetHeight;
+  canvas.width = W; canvas.height = H;
+  const ctx = canvas.getContext('2d');
+
+  ctx.clearRect(0, 0, W, H);
+
+  const nodes = [
+    { label: 'Slope Failure', color: '#f97316', x: W * 0.14 },
+    { label: 'Debris Flow',   color: '#eab308', x: W * 0.5 },
+    { label: 'Flash Flood',   color: '#3b82f6', x: W * 0.86 },
+  ];
+  const cy = H * 0.5, r = Math.min(W * 0.08, 42);
+
+  // Draw connecting lines
+  for (let i = 0; i < nodes.length - 1; i++) {
+    const prog = fp / 99;
+    const grd = ctx.createLinearGradient(nodes[i].x, cy, nodes[i+1].x, cy);
+    grd.addColorStop(0, nodes[i].color + 'cc');
+    grd.addColorStop(1, nodes[i+1].color + 'cc');
+    ctx.beginPath();
+    ctx.moveTo(nodes[i].x + r, cy);
+    ctx.lineTo(nodes[i+1].x - r, cy);
+    ctx.strokeStyle = grd;
+    ctx.lineWidth = 2 + prog * 4;
+    ctx.setLineDash([6, 3]);
+    ctx.stroke();
+    ctx.setLineDash([]);
+  }
+
+  // Draw nodes
+  nodes.forEach(({ label, color, x }) => {
+    // Glow
+    const grd = ctx.createRadialGradient(x, cy, 0, x, cy, r * 2);
+    grd.addColorStop(0, color + '40');
+    grd.addColorStop(1, 'transparent');
+    ctx.beginPath(); ctx.arc(x, cy, r * 2, 0, Math.PI * 2);
+    ctx.fillStyle = grd; ctx.fill();
+
+    // Circle
+    ctx.beginPath(); ctx.arc(x, cy, r, 0, Math.PI * 2);
+    ctx.fillStyle = '#111113'; ctx.fill();
+    ctx.strokeStyle = color; ctx.lineWidth = 2; ctx.stroke();
+
+    // Label
+    ctx.fillStyle = '#fff';
+    ctx.font = `600 ${Math.max(11, W * 0.014)}px 'Space Grotesk', sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    const short = label.split(' ')[0];
+    ctx.fillText(short, x, cy);
+
+    ctx.fillStyle = '#71717a';
+    ctx.font = `${Math.max(10, W * 0.012)}px 'JetBrains Mono', monospace`;
+    ctx.fillText(label, x, cy + r + 18);
+  });
+
+  // FP badge
+  ctx.fillStyle = '#fff';
+  ctx.font = `700 ${Math.max(14, W * 0.02)}px 'Space Grotesk', sans-serif`;
+  ctx.textAlign = 'center';
+  ctx.fillText(`Failure Prob: ${fp}%`, W * 0.5, H * 0.12);
+  ctx.fillStyle = '#71717a';
+  ctx.font = `${Math.max(10, W * 0.012)}px 'JetBrains Mono', monospace`;
+  ctx.fillText(`Reach: ${dr} km · Inundation: ${fi} km²`, W * 0.5, H * 0.88);
+}
+
+/* ── Intersection Observer for fade-up ── */
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('is-visible'); } });
+}, { threshold: 0.1 });
+document.querySelectorAll('.fade-up').forEach(el => obs.observe(el));
+
+/* ── Initial draw ── */
+window.addEventListener('load', () => {
+  setTimeout(() => drawFlowDiagram(74, 2.1, 0.38), 300);
+});
+window.addEventListener('resize', () => drawFlowDiagram(
+  +document.getElementById('iv-fp').textContent,
+  +document.getElementById('iv-dr').textContent,
+  +document.getElementById('iv-fi').textContent
+));
+</script>
+<script src="region-config.js"></script>
+<script src="auth.js"></script>
+<script src="nav.js"></script>
+</body>
+</html>

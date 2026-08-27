@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Resettlement Allocator — GeoResilience-360</title>
+<meta name="description" content="AI-powered safe land scoring engine to identify and rank government revenue parcels for long-term disaster rehabilitation." />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="nav.css">
+<style>
+:root{--bg-0:#000;--bg-1:#09090b;--bg-2:#111113;--gold:#d4af37;--gold-soft:rgba(212,175,55,.18);--gold-glow:rgba(212,175,55,.06);--teal:#2563eb;--green:#22c55e;--orange:#f97316;--red:#ef4444;--ink-0:#fff;--ink-1:#a1a1aa;--ink-2:#52525b;--line:#27272a;--font-d:'Space Grotesk',sans-serif;--font-b:'Inter',sans-serif;--font-m:'JetBrains Mono',monospace}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg-0);color:var(--ink-0);font-family:var(--font-b);overflow-x:hidden;-webkit-font-smoothing:antialiased}
+::selection{background:var(--gold-soft);color:var(--bg-0)}
+.stars{position:fixed;inset:0;z-index:0;pointer-events:none;background-image:radial-gradient(1px 1px at 7% 11%,#fff2 0,transparent 70%),radial-gradient(1px 1px at 81% 7%,#fff1 0,transparent 70%),radial-gradient(1.5px 1.5px at 54% 28%,#fff1 0,transparent 70%),radial-gradient(1px 1px at 21% 61%,#fff1 0,transparent 70%),radial-gradient(1px 1px at 92% 69%,#fff2 0,transparent 70%),radial-gradient(1px 1px at 68% 88%,#fff1 0,transparent 70%)}
+
+nav{position:fixed;top:0;left:0;right:0;z-index:100;height:60px;display:flex;align-items:center;justify-content:space-between;padding:0 32px;background:rgba(0,0,0,.8);backdrop-filter:blur(16px);border-bottom:1px solid var(--line)}
+.nav-brand{font-family:var(--font-m);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-1)}
+.nav-brand b{color:var(--gold);font-weight:500}
+.nav-pill{font-family:var(--font-m);font-size:10px;letter-spacing:.12em;text-transform:uppercase;padding:5px 12px;border:1px solid rgba(212,175,55,.3);border-radius:100px;color:var(--gold);background:var(--gold-glow)}
+.nav-back{display:flex;align-items:center;gap:8px;font-family:var(--font-m);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-1);text-decoration:none;transition:color .2s}
+.nav-back:hover{color:var(--gold)}
+.nav-back svg{width:14px;height:14px}
+
+/* Hero */
+.hero{position:relative;z-index:1;padding:100px 24px 60px;text-align:center}
+.module-tag{font-family:var(--font-m);font-size:10.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);margin-bottom:18px;display:flex;align-items:center;justify-content:center;gap:10px}
+.module-tag::before,.module-tag::after{content:'';display:block;height:1px;width:36px}
+.module-tag::before{background:linear-gradient(90deg,transparent,var(--gold))}
+.module-tag::after{background:linear-gradient(90deg,var(--gold),transparent)}
+.hero h1{font-family:var(--font-d);font-weight:700;font-size:clamp(30px,5vw,60px);letter-spacing:-.03em;line-height:1.1;margin-bottom:16px}
+.hero h1 span{color:var(--gold)}
+.hero-sub{max-width:52ch;color:var(--ink-1);font-size:15px;line-height:1.65;margin:0 auto 40px}
+
+/* Section */
+.content{position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:0 24px 80px}
+.section-label{font-family:var(--font-m);font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);margin-bottom:8px}
+.section-title{font-family:var(--font-d);font-size:clamp(20px,2.8vw,30px);font-weight:600;margin-bottom:36px}
+.section-sep{height:1px;background:var(--line);margin:64px 0}
+
+/* Land Parcel Grid */
+.parcel-map-wrap{background:var(--bg-2);border:1px solid var(--line);border-radius:12px;padding:0;overflow:hidden;margin-bottom:20px}
+.pm-header{padding:16px 20px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between}
+.pm-header h4{font-family:var(--font-d);font-size:13px;font-weight:600}
+.pm-legend{display:flex;gap:16px}
+.pm-legend-item{display:flex;align-items:center;gap:6px;font-family:var(--font-m);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-2)}
+.pm-legend-dot{width:8px;height:8px;border-radius:2px;flex-shrink:0}
+#parcelCanvas{width:100%;display:block}
+
+/* Scoring Criteria */
+.criteria-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px}
+.crit-card{background:var(--bg-2);border:1px solid var(--line);border-radius:10px;padding:20px;position:relative;overflow:hidden}
+.crit-card::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--crit-c)}
+.crit-icon{font-size:22px;margin-bottom:12px;display:block}
+.crit-name{font-family:var(--font-m);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-2);margin-bottom:6px;display:block}
+.crit-title{font-family:var(--font-d);font-size:14px;font-weight:600;margin-bottom:8px}
+.crit-desc{font-size:11.5px;color:var(--ink-1);line-height:1.5;margin-bottom:12px}
+.crit-weight{font-family:var(--font-m);font-size:10px;color:var(--crit-c);display:flex;align-items:center;gap:6px}
+.crit-bar{height:3px;flex:1;background:var(--line);border-radius:2px;overflow:hidden}
+.crit-bar-fill{height:100%;border-radius:2px;background:var(--crit-c);animation:bFill 1.2s ease forwards}
+@keyframes bFill{from{width:0}}
+
+/* Candidate comparison table */
+.compare-table{width:100%;border-collapse:collapse;font-size:12.5px}
+.compare-table th{font-family:var(--font-m);font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-2);text-align:left;padding:0 12px 12px 0;border-bottom:1px solid var(--line)}
+.compare-table th:last-child{text-align:center}
+.compare-table td{padding:14px 12px 14px 0;border-bottom:1px solid var(--line);vertical-align:middle;color:var(--ink-1)}
+.compare-table tr:last-child td{border-bottom:none}
+.compare-table td:first-child{font-family:var(--font-m);font-size:11px;color:var(--ink-0)}
+.score-badge{display:inline-flex;align-items:center;justify-content:center;width:42px;height:28px;border-radius:6px;font-family:var(--font-m);font-size:11px;font-weight:700}
+.s-high{background:rgba(34,197,94,.15);color:var(--green);border:1px solid rgba(34,197,94,.3)}
+.s-mid{background:rgba(212,175,55,.12);color:var(--gold);border:1px solid rgba(212,175,55,.3)}
+.s-low{background:rgba(249,115,22,.12);color:var(--orange);border:1px solid rgba(249,115,22,.3)}
+.recommend-badge{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.25);border-radius:6px;font-family:var(--font-m);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--green)}
+
+/* Assignment flow */
+.flow-grid{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:20px}
+@media(max-width:600px){.flow-grid{grid-template-columns:1fr}}
+.flow-panel{background:var(--bg-2);border:1px solid var(--line);border-radius:12px;padding:20px}
+.fp-label{font-family:var(--font-m);font-size:9px;letter-spacing:.18em;text-transform:uppercase;margin-bottom:14px;display:block}
+.fp-label.danger{color:var(--red)} .fp-label.safe{color:var(--green)}
+.fp-item{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}
+.fp-item:last-child{border-bottom:none}
+.fp-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.fp-name{font-size:12px;flex:1}
+.fp-khasra{font-family:var(--font-m);font-size:9.5px;color:var(--ink-2)}
+.flow-arrow{display:flex;flex-direction:column;align-items:center;gap:8px;color:var(--gold);font-family:var(--font-m);font-size:9px;letter-spacing:.1em;text-transform:uppercase}
+.flow-arrow svg{width:24px;height:24px}
+
+footer{position:relative;z-index:1;padding:32px;border-top:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+.f-left{font-family:var(--font-m);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-2)}
+.f-left b{color:var(--gold);font-weight:500}
+.back-home{display:flex;align-items:center;gap:8px;font-family:var(--font-m);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);text-decoration:none;padding:10px 18px;border:1px solid rgba(212,175,55,.3);border-radius:8px;background:var(--gold-glow);transition:opacity .2s}
+.back-home:hover{opacity:.8}
+.fade-up{opacity:0;transform:translateY(20px);transition:opacity .6s ease,transform .6s ease}
+.fade-up.is-visible{opacity:1;transform:translateY(0)}
+</style>
+</head>
+<body>
+<div class="stars"></div>
+<canvas id="particleCanvas"></canvas>
+<div id="gnavMount"></div>
+
+<section class="hero">
+  <div class="module-tag">Resettlement Intelligence</div>
+  <h1>Resettlement <span>Allocator</span></h1>
+  <p class="hero-sub">Locates, scores, and ranks available government revenue land parcels as candidate resettlement sites, then assigns displaced Khasra households to optimal safe zones.</p>
+</section>
+
+<div class="content">
+
+  <!-- Parcel Map -->
+  <div class="fade-up">
+    <div class="section-label">Cadastre Overlay</div>
+    <div class="section-title">Land Parcel Safety Map</div>
+    <div class="parcel-map-wrap">
+      <div class="pm-header">
+        <h4>Revenue Land Suitability — Pilot Area</h4>
+        <div class="pm-legend">
+          <div class="pm-legend-item"><div class="pm-legend-dot" style="background:#22c55e"></div>Safe (Score ≥75)</div>
+          <div class="pm-legend-item"><div class="pm-legend-dot" style="background:#d4af37"></div>Marginal (50–74)</div>
+          <div class="pm-legend-item"><div class="pm-legend-dot" style="background:#ef4444"></div>Unsafe (&lt;50)</div>
+          <div class="pm-legend-item"><div class="pm-legend-dot" style="background:#a855f7"></div>Affected Khasra</div>
+        </div>
+      </div>
+      <canvas id="parcelCanvas" height="340"></canvas>
+    </div>
+  </div>
+
+  <!-- Scoring Criteria -->
+  <div class="fade-up">
+    <div class="section-label">Scoring Model</div>
+    <div class="section-title">Multi-Criteria Safety Scoring</div>
+    <div class="criteria-grid stagger-parent">
+      <div class="crit-card tilt-card" style="--crit-c:#22c55e">
+        <span class="crit-icon">⛰️</span>
+        <span class="crit-name">Criterion 01 · Weight 30%</span>
+        <div class="crit-title">Slope Safety</div>
+        <div class="crit-desc">Slope angle &lt;15° from DEM, no existing landslide inventory intersect, curvature within stable range.</div>
+        <div class="crit-weight">30% <div class="crit-bar"><div class="crit-bar-fill" style="width:30%"></div></div></div>
+      </div>
+      <div class="crit-card tilt-card" style="--crit-c:#3b82f6">
+        <span class="crit-icon">🌊</span>
+        <span class="crit-name">Criterion 02 · Weight 25%</span>
+        <div class="crit-title">Flood Buffer Distance</div>
+        <div class="crit-desc">Minimum 150m from river channels and 50m above 100-year flood extent computed from DEM flow accumulation.</div>
+        <div class="crit-weight">25% <div class="crit-bar"><div class="crit-bar-fill" style="width:25%;animation-delay:.1s"></div></div></div>
+      </div>
+      <div class="crit-card tilt-card" style="--crit-c:#d4af37">
+        <span class="crit-icon">🛣️</span>
+        <span class="crit-name">Criterion 03 · Weight 20%</span>
+        <div class="crit-title">Road Connectivity</div>
+        <div class="crit-desc">OSRM travel time to nearest district hospital ≤45 min; site within 500m of all-weather motorable road.</div>
+        <div class="crit-weight">20% <div class="crit-bar"><div class="crit-bar-fill" style="width:20%;animation-delay:.2s"></div></div></div>
+      </div>
+      <div class="crit-card tilt-card" style="--crit-c:#f97316">
+        <span class="crit-icon">⚡</span>
+        <span class="crit-name">Criterion 04 · Weight 15%</span>
+        <div class="crit-title">Utility Access</div>
+        <div class="crit-desc">Proximity to existing power line (≤200m), piped water supply infrastructure, and telecom coverage polygon.</div>
+        <div class="crit-weight">15% <div class="crit-bar"><div class="crit-bar-fill" style="width:15%;animation-delay:.3s"></div></div></div>
+      </div>
+      <div class="crit-card tilt-card" style="--crit-c:#a855f7">
+        <span class="crit-icon">📋</span>
+        <span class="crit-name">Criterion 05 · Weight 10%</span>
+        <div class="crit-title">Land Revenue Status</div>
+        <div class="crit-desc">Government gazetted land with no encumbrance record, clear title in state revenue register, available for allocation without acquisition.</div>
+        <div class="crit-weight">10% <div class="crit-bar"><div class="crit-bar-fill" style="width:10%;animation-delay:.4s"></div></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-sep"></div>
+
+  <!-- Candidate Sites Comparison Table -->
+  <div class="fade-up">
+    <div class="section-label">Candidate Sites</div>
+    <div class="section-title">Ranked Resettlement Parcels</div>
+    <table class="compare-table">
+      <thead>
+        <tr>
+          <th>Parcel ID</th>
+          <th>Area (ha)</th>
+          <th>Slope Score</th>
+          <th>Flood Score</th>
+          <th>Road Score</th>
+          <th>Total</th>
+          <th style="text-align:center">Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>MN-GOV-0142</td>
+          <td>4.8</td>
+          <td style="color:var(--green)">28/30</td>
+          <td style="color:var(--green)">23/25</td>
+          <td style="color:var(--green)">18/20</td>
+          <td><span class="score-badge s-high">89</span></td>
+          <td style="text-align:center"><span class="recommend-badge">✓ Recommended</span></td>
+        </tr>
+        <tr>
+          <td>MN-GOV-0087</td>
+          <td>3.2</td>
+          <td style="color:var(--green)">25/30</td>
+          <td style="color:var(--gold)">18/25</td>
+          <td style="color:var(--green)">17/20</td>
+          <td><span class="score-badge s-high">76</span></td>
+          <td style="text-align:center"><span style="font-family:var(--font-m);font-size:9px;color:var(--gold)">Suitable</span></td>
+        </tr>
+        <tr>
+          <td>MN-GOV-0215</td>
+          <td>6.1</td>
+          <td style="color:var(--gold)">19/30</td>
+          <td style="color:var(--green)">22/25</td>
+          <td style="color:var(--gold)">12/20</td>
+          <td><span class="score-badge s-mid">65</span></td>
+          <td style="text-align:center"><span style="font-family:var(--font-m);font-size:9px;color:var(--gold)">Marginal</span></td>
+        </tr>
+        <tr>
+          <td>MN-GOV-0033</td>
+          <td>2.6</td>
+          <td style="color:var(--gold)">16/30</td>
+          <td style="color:var(--orange)">12/25</td>
+          <td style="color:var(--gold)">14/20</td>
+          <td><span class="score-badge s-low">52</span></td>
+          <td style="text-align:center"><span style="font-family:var(--font-m);font-size:9px;color:var(--ink-2)">Review Needed</span></td>
+        </tr>
+        <tr>
+          <td>MN-GOV-0198</td>
+          <td>1.9</td>
+          <td style="color:var(--red)">10/30</td>
+          <td style="color:var(--red)">8/25</td>
+          <td style="color:var(--gold)">13/20</td>
+          <td><span class="score-badge s-low">39</span></td>
+          <td style="text-align:center"><span style="font-family:var(--font-m);font-size:9px;color:var(--red)">Rejected</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section-sep"></div>
+
+  <!-- Assignment Flow -->
+  <div class="fade-up">
+    <div class="section-label">Relocation Assignment</div>
+    <div class="section-title">Affected Khasra → Safe Site Mapping</div>
+    <div class="flow-grid">
+      <div class="flow-panel">
+        <span class="fp-label danger">⚠ Affected Khasras</span>
+        <div class="fp-item"><div class="fp-dot" style="background:#ef4444"></div><div class="fp-name">Khasra GK-4821</div><span class="fp-khasra">3 households · 12 persons</span></div>
+        <div class="fp-item"><div class="fp-dot" style="background:#ef4444"></div><div class="fp-name">Khasra GK-4822</div><span class="fp-khasra">2 households · 8 persons</span></div>
+        <div class="fp-item"><div class="fp-dot" style="background:#f97316"></div><div class="fp-name">Khasra GK-4834</div><span class="fp-khasra">4 households · 17 persons</span></div>
+        <div class="fp-item"><div class="fp-dot" style="background:#f97316"></div><div class="fp-name">Khasra GK-4836</div><span class="fp-khasra">2 households · 9 persons</span></div>
+        <div class="fp-item"><div class="fp-dot" style="background:#eab308"></div><div class="fp-name">Khasra GK-4850</div><span class="fp-khasra">1 household · 5 persons</span></div>
+      </div>
+
+      <div class="flow-arrow">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        <span>Allocator</span>
+      </div>
+
+      <div class="flow-panel">
+        <span class="fp-label safe">✓ Assigned Safe Sites</span>
+        <div class="fp-item"><div class="fp-dot" style="background:#22c55e"></div><div class="fp-name">MN-GOV-0142 (Primary)</div><span class="fp-khasra">GK-4821 + GK-4822 → Plot A</span></div>
+        <div class="fp-item"><div class="fp-dot" style="background:#22c55e"></div><div class="fp-name">MN-GOV-0142 (Primary)</div><span class="fp-khasra">GK-4834 → Plot B</span></div>
+        <div class="fp-item"><div class="fp-dot" style="background:#22c55e"></div><div class="fp-name">MN-GOV-0087 (Secondary)</div><span class="fp-khasra">GK-4836 → Plot A</span></div>
+        <div class="fp-item"><div class="fp-dot" style="background:#22c55e"></div><div class="fp-name">MN-GOV-0087 (Secondary)</div><span class="fp-khasra">GK-4850 → Plot B</span></div>
+        <div class="fp-item"><div class="fp-dot" style="background:#3b82f6"></div><div class="fp-name">Unallocated capacity</div><span class="fp-khasra">MN-GOV-0142: 2.1 ha remaining</span></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  <div class="f-left">GeoResilience-<b>360</b> · Module 05 of 05</div>
+  <a href="index.html" class="back-home">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px"><polyline points="19 12 5 12"/><polyline points="12 5 5 12 12 19"/></svg>
+    Return to Command Center
+  </a>
+</footer>
+
+<script>
+/* Parcel grid canvas */
+function drawParcels() {
+  const c = document.getElementById('parcelCanvas');
+  const W = c.offsetWidth; c.width = W;
+  const ctx = c.getContext('2d');
+  const H = c.height;
+
+  ctx.fillStyle = '#0a0a0c'; ctx.fillRect(0,0,W,H);
+
+  // Grid lines (cadastre)
+  ctx.strokeStyle = 'rgba(255,255,255,0.04)'; ctx.lineWidth = 0.5;
+  const gs = 28;
+  for(let x=0;x<W;x+=gs){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke()}
+  for(let y=0;y<H;y+=gs){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke()}
+
+  // Parcel data [x%, y%, w%, h%, score, label]
+  const parcels = [
+    [0.06,0.08,0.14,0.18,89,'MN-GOV-0142'],
+    [0.25,0.06,0.10,0.14,76,'MN-GOV-0087'],
+    [0.42,0.10,0.16,0.20,65,'MN-GOV-0215'],
+    [0.64,0.05,0.08,0.12,52,'MN-GOV-0033'],
+    [0.78,0.09,0.07,0.10,39,'MN-GOV-0198'],
+    // Affected khasras in purple
+    [0.10,0.55,0.08,0.12,-1,'GK-4821'],
+    [0.20,0.52,0.06,0.10,-1,'GK-4822'],
+    [0.30,0.58,0.09,0.13,-1,'GK-4834'],
+    [0.44,0.55,0.07,0.10,-1,'GK-4836'],
+    [0.56,0.50,0.06,0.09,-1,'GK-4850'],
+    // Random neutral parcels
+    [0.06,0.32,0.08,0.12,0,''],[0.17,0.30,0.12,0.15,0,''],[0.34,0.28,0.09,0.18,0,''],
+    [0.48,0.28,0.11,0.14,0,''],[0.64,0.28,0.08,0.16,0,''],[0.76,0.22,0.10,0.14,0,''],
+    [0.06,0.70,0.12,0.15,0,''],[0.22,0.72,0.08,0.12,0,''],[0.36,0.68,0.10,0.16,0,''],
+    [0.50,0.65,0.12,0.14,0,''],[0.66,0.62,0.08,0.16,0,''],[0.78,0.58,0.12,0.18,0,''],
+  ];
+
+  parcels.forEach(([px,py,pw,ph,score,label]) => {
+    const x=px*W, y=py*H, w=pw*W, h=ph*H;
+    let fill, stroke;
+    if(score === -1){fill='rgba(168,85,247,0.18)';stroke='rgba(168,85,247,0.5)'}
+    else if(score===0){fill='rgba(255,255,255,0.03)';stroke='rgba(255,255,255,0.07)'}
+    else if(score>=75){fill='rgba(34,197,94,0.14)';stroke='rgba(34,197,94,0.45)'}
+    else if(score>=50){fill='rgba(212,175,55,0.12)';stroke='rgba(212,175,55,0.4)'}
+    else{fill='rgba(239,68,68,0.12)';stroke='rgba(239,68,68,0.4)'}
+
+    ctx.fillStyle=fill; ctx.fillRect(x,y,w,h);
+    ctx.strokeStyle=stroke; ctx.lineWidth=score===0?0.5:1.2; ctx.strokeRect(x,y,w,h);
+
+    if(label && score!==0){
+      ctx.fillStyle = score===-1 ? 'rgba(168,85,247,0.9)' : score>=75 ? 'rgba(34,197,94,0.9)' : score>=50 ? 'rgba(212,175,55,0.85)' : 'rgba(239,68,68,0.85)';
+      ctx.font=`500 ${Math.max(8,W*0.009)}px 'JetBrains Mono',monospace`;
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText(label,x+w/2,y+h/2);
+    }
+    if(score>0){
+      ctx.fillStyle='rgba(255,255,255,0.5)';
+      ctx.font=`600 ${Math.max(9,W*0.01)}px 'Space Grotesk',sans-serif`;
+      ctx.fillText(score,x+w/2,y+h/2+14);
+    }
+  });
+
+  // Compass rose
+  ctx.save(); ctx.translate(W-30,H-30);
+  ctx.fillStyle='rgba(212,175,55,0.4)';
+  ctx.font=`9px 'JetBrains Mono',monospace`; ctx.textAlign='center';
+  ctx.fillText('N',0,-14); ctx.fillText('S',0,18); ctx.fillText('W',-14,4); ctx.fillText('E',14,4);
+  ctx.beginPath(); ctx.moveTo(0,-10); ctx.lineTo(3,0); ctx.lineTo(-3,0); ctx.closePath();
+  ctx.fillStyle='rgba(212,175,55,0.6)'; ctx.fill();
+  ctx.restore();
+}
+
+const obs = new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('is-visible')});},{threshold:0.1});
+document.querySelectorAll('.fade-up').forEach(el=>obs.observe(el));
+window.addEventListener('load',()=>{drawParcels()});
+window.addEventListener('resize',()=>{drawParcels()});
+</script>
+<script src="region-config.js"></script>
+<script src="auth.js"></script>
+<script src="nav.js"></script>
+</body>
+</html>

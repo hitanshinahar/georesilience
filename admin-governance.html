@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin & Governance — GeoResilience-360</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="nav.css">
+<style>
+  :root {
+    --bg-0: #05070f; --bg-1: #0a0f1d; --bg-2: #111827;
+    --gold: #d4af37; --gold-glow: rgba(212,175,55,0.25);
+    --ink-0: #f8fafc; --ink-1: #94a3b8; --line: rgba(255,255,255,0.08);
+    --font-d: 'Space Grotesk', sans-serif; --font-b: 'Inter', sans-serif; --font-m: 'JetBrains Mono', monospace;
+  }
+  body { margin: 0; background: var(--bg-0); color: var(--ink-0); font-family: var(--font-b); overflow-x: hidden; }
+
+  .admin-header {
+    padding: 100px 32px 32px; max-width: 1200px; margin: 0 auto;
+    border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 20px;
+  }
+  .admin-title .eyebrow { font-family: var(--font-m); font-size: 11px; color: var(--gold); letter-spacing: 2px; text-transform: uppercase; font-weight: 700; }
+  .admin-title h1 { font-family: var(--font-d); font-size: 32px; margin: 6px 0 4px; color: #fff; }
+  .admin-title p { color: var(--ink-1); margin: 0; font-size: 14px; }
+
+  .evac-btn-hero {
+    background: linear-gradient(135deg, #ef4444, #b91c1c); border: 1px solid #f87171;
+    box-shadow: 0 0 25px rgba(239, 68, 68, 0.4); color: #fff; padding: 14px 28px;
+    border-radius: 10px; font-family: var(--font-d); font-size: 14px; font-weight: 700;
+    cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 10px;
+  }
+  .evac-btn-hero:hover { filter: brightness(1.2); transform: scale(1.02); }
+
+  .admin-grid { max-width: 1200px; margin: 32px auto; padding: 0 32px; display: grid; grid-template-columns: 2fr 1fr; gap: 24px; }
+
+  .admin-card {
+    background: var(--bg-1); border: 1px solid var(--line); border-radius: 14px; padding: 24px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  }
+  .admin-card h2 { font-family: var(--font-d); font-size: 18px; margin: 0 0 16px; color: #fff; display: flex; align-items: center; justify-content: space-between; }
+  
+  .parcels-table { width: 100%; border-collapse: collapse; font-size: 13px; text-align: left; }
+  .parcels-table th { padding: 10px 12px; background: #161e31; color: var(--gold); font-family: var(--font-m); font-size: 11px; text-transform: uppercase; border-bottom: 1px solid var(--line); }
+  .parcels-table td { padding: 12px; border-bottom: 1px solid var(--line); color: #cbd5e1; }
+  .parcels-table tr.critical { background: rgba(239, 68, 68, 0.1); }
+  .parcels-table tr.critical td { color: #fca5a5; }
+
+  .badge-red { background: rgba(239,68,68,0.2); border: 1px solid #ef4444; color: #f87171; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; }
+  .badge-green { background: rgba(16,185,129,0.2); border: 1px solid #10b981; color: #34d399; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; }
+
+  .recon-flow { display: flex; flex-direction: column; gap: 14px; }
+  .recon-step { background: #161e31; border: 1px solid #2a3652; border-radius: 8px; padding: 14px; }
+  .recon-step label { font-size: 10px; color: var(--gold); font-family: var(--font-m); text-transform: uppercase; letter-spacing: 1px; font-weight: 700; display: block; margin-bottom: 4px; }
+  .recon-step .val { font-size: 13px; color: #f1f5f9; font-weight: 600; }
+
+  .alert-banner-broadcast {
+    background: linear-gradient(90deg, #ef4444, #7f1d1d); border: 1px solid #f87171;
+    color: #fff; padding: 14px 20px; border-radius: 10px; margin-bottom: 24px;
+    display: none; align-items: center; gap: 12px; font-family: var(--font-d); font-weight: 700;
+  }
+</style>
+</head>
+<body>
+<div class="stars"></div>
+<canvas id="particleCanvas"></canvas>
+<div id="gnavMount"></div>
+
+<header class="admin-header">
+  <div class="admin-title">
+    <div class="eyebrow">🏛️ DISASTER GOVERNANCE WORKSPACE</div>
+    <h1>Emergency Evacuation & Damage Reconciliation</h1>
+    <p>Real-time citizen safety authorization, cadastral damage logging, and candidate resettlement allocation.</p>
+  </div>
+  <button class="evac-btn-hero" onclick="authorizeEmergencyEvacuation()">
+    🚨 AUTHORIZE EMERGENCY EVACUATION
+  </button>
+</header>
+
+<div class="admin-grid">
+  <div>
+    <!-- Broadcast alert indicator -->
+    <div id="evacAlertBanner" class="alert-banner-broadcast">
+      <span>🚨 EMERGENCY BROADCAST ACTIVE: Evacuation Authorized for Khasra 104/A & 104/B. NDRF Teams & Mobile Sentinels Alerted.</span>
+    </div>
+
+    <!-- Critical Parcels & Residents Registry -->
+    <div class="admin-card">
+      <h2>
+        <span>Critical Parcels & Resident Hazard Registry</span>
+        <span class="badge-red">2 CRITICAL PARCELS</span>
+      </h2>
+      <table class="parcels-table">
+        <thead>
+          <tr>
+            <th>Khasra #</th>
+            <th>Location</th>
+            <th>FoS Risk</th>
+            <th>Residents</th>
+            <th>Structures</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="critical">
+            <td><strong>104/A</strong></td>
+            <td>Gangtok Slopes (Upper)</td>
+            <td><strong>0.84 (RED)</strong></td>
+            <td><strong>5 Residents</strong></td>
+            <td>2 Houses</td>
+            <td><span class="badge-red">Evacuation Pending</span></td>
+          </tr>
+          <tr class="critical">
+            <td><strong>104/B</strong></td>
+            <td>Gangtok Slopes (Lower)</td>
+            <td><strong>0.89 (RED)</strong></td>
+            <td><strong>4 Residents</strong></td>
+            <td>1 House</td>
+            <td><span class="badge-red">Evacuation Pending</span></td>
+          </tr>
+          <tr>
+            <td>104/C</td>
+            <td>Gangtok Ridge</td>
+            <td>1.38 (Green)</td>
+            <td>8 Residents</td>
+            <td>3 Houses</td>
+            <td><span class="badge-green">Safe</span></td>
+          </tr>
+          <tr>
+            <td>105/1</td>
+            <td>Ranipool Valley</td>
+            <td>1.62 (Green)</td>
+            <td>12 Residents</td>
+            <td>4 Houses</td>
+            <td><span class="badge-green">Safe</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div>
+    <!-- Damage Reconciliation Pipeline -->
+    <div class="admin-card">
+      <h2>Damage Reconciliation Pipeline</h2>
+      <div class="recon-flow">
+        <div class="recon-step">
+          <label>Step 1: Damaged Parcel Record</label>
+          <div class="val">Khasra #104/A (High Slope Failure)</div>
+        </div>
+        <div class="recon-step">
+          <label>Step 2: Damage Assessment</label>
+          <div class="val">Structure Loss: 100% · Land Unstable</div>
+        </div>
+        <div class="recon-step">
+          <label>Step 3: Candidate Relocation Land</label>
+          <div class="val" style="color:var(--gold);">Govt Parcel #REV-772 (Score: 94.2)</div>
+        </div>
+        <button onclick="if(window.navigateTo) window.navigateTo('resettlement-allocator.html'); else window.location.href='resettlement-allocator.html';" style="width:100%; background:linear-gradient(135deg,var(--gold),#b8860b); border:none; border-radius:8px; padding:12px; color:#05070f; font-family:var(--font-d); font-weight:700; cursor:pointer; margin-top:8px;">
+          🏠 OPEN RESETTLEMENT ALLOCATOR
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function authorizeEmergencyEvacuation() {
+  const banner = document.getElementById('evacAlertBanner');
+  if (banner) {
+    banner.style.display = 'flex';
+  }
+  alert('🚨 EMERGENCY EVACUATION AUTHORIZED:\n\n- Region: Sikkim\n- Parcels: Khasra 104/A & 104/B\n- Total Affected Residents: 9 Residents\n- Evacuation Center: Govt Higher Secondary School, Ranipool\n- Broadcast Sent to All Mobile Edge Sentinels & Response Teams.');
+}
+</script>
+<script src="region-config.js"></script>
+<script src="auth.js"></script>
+<script src="nav.js"></script>
+</body>
+</html>
