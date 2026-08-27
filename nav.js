@@ -1,42 +1,33 @@
 /* =============================================================
-   GeoResilience-360 — Shared Navigation JS
-   - Reka-UI nav: viewport dropdown + indicator + directional animation
-   - Particle canvas
-   - Page transitions
-   - Animated counters
-   - Card tilt
-   - Stagger observer
+   GeoShield 🇮🇳 — Shared Navigation & Header System
+   GOVT OF INDIA • MDoNER × MoRD | GeoShield
    ============================================================= */
 (function () {
   'use strict';
 
-  /* ============================================================
-     NAV DATA
-     ============================================================ */
-  const MODULES = [
-    { icon: '🧭', location: 'Guwahati',  name: 'Command Center Map',   desc: '3D digital twin & incident feed',     href: 'command-center.html' },
-    { icon: '🏛️', location: 'National',  name: 'Admin & Governance',   desc: 'Evacuation auth & damage records',    href: 'admin-governance.html' },
-    { icon: '🌊', location: 'Dehradun',  name: 'Cascading Simulator',  desc: 'Multi-hazard chain modelling',        href: 'cascading-simulator.html' },
-    { icon: '🏔️', location: 'Gangtok',   name: 'Dynamic Risk Engine',  desc: 'Khasra-level AI risk scoring',        href: 'risk-engine.html' },
-    { icon: '⚡', location: 'Mumbai',    name: 'Edge AI Sentinel',     desc: 'On-device MobileNetV3 triage',        href: 'edge-sentinel.html' },
-    { icon: '🏠', location: 'Munnar',    name: 'Resettlement Allocator', desc: 'Safe land scoring & allocation',    href: 'resettlement-allocator.html' },
+  const NAV_TABS = [
+    { id: 'index', name: '1. National Landing', href: 'index.html', icon: '🛰️' },
+    { id: 'command-center', name: '2. 3D Command Center', href: 'command-center.html', icon: '🎛️' },
+    { id: 'cascading-simulator', name: '3. Cascade Simulator', href: 'cascading-simulator.html', icon: '🌊' },
+    { id: 'edge-sentinel', name: '4. Field Sentinel', href: 'edge-sentinel.html', icon: '📱' },
+    { id: 'admin-governance', name: '5. Admin Governance', href: 'admin-governance.html', icon: '🏛️' },
+    { id: 'resettlement-allocator', name: '6. Resettlement', href: 'resettlement-allocator.html', icon: '🏘️' }
   ];
 
-  const PLATFORM_LINKS = [
-    { icon: '📋', name: 'Problem Statement', desc: 'SIH26001 · MDoNER', href: '#' },
-    { icon: '⚙️', name: 'Tech Stack',        desc: '15-layer architecture', href: '#' },
-    { icon: '🛡️', name: 'GeoShield AI',      desc: 'Evidence-fusion engine', href: '#' },
-    { icon: '📡', name: 'Data Sources',       desc: 'IMD, Sentinel-1, Open-Meteo', href: '#' },
-    { icon: '🔐', name: 'Security & RBAC',    desc: 'PyJWT + RS256 + roles', href: '#' },
-    { icon: '📖', name: 'Documentation',      desc: 'API reference & guides', href: '#' },
-  ];
+  function getActiveRegion() {
+    if (window.getDefaultRegion) {
+      return window.getDefaultRegion();
+    }
+    const saved = localStorage.getItem('geo360_selected_region') || localStorage.getItem('active_region');
+    if (window.getRegionById && saved) {
+      return window.getRegionById(saved);
+    }
+    return { id: 'sikkim', name: 'Sikkim', capital: 'Gangtok' };
+  }
 
-  /* ============================================================
-     BUILD NAV HTML
-     ============================================================ */
   function buildNav(currentPage) {
-    const currentHref = (currentPage || '').replace('.html', '');
-    const isIndex = !currentPage || currentPage === 'index.html';
+    const activeReg = getActiveRegion();
+    const currentFile = (window.location.pathname.split('/').pop() || 'index.html').toLowerCase();
 
     return `
 <header class="gnav-root" role="banner">
@@ -44,566 +35,169 @@
 
     <!-- Brand -->
     <a href="index.html" class="gnav-brand">
-      GeoResilience-<b>360</b>
-      <span class="gnav-brand-badge" id="gnavBrandBadge">LIVE · Sikkim Sentinel</span>
+      <span class="gnav-flag">🇮🇳</span>
+      <div class="gnav-brand-text">
+        <span class="gnav-title">GeoShield</span>
+        <span class="gnav-subtext">GOVT OF INDIA • MDoNER × MoRD</span>
+      </div>
+      <span class="gnav-brand-badge">36 STATES/UTs</span>
     </a>
 
-    <!-- Desktop nav menu -->
-    <nav class="gnav-menu" aria-label="Main navigation">
-      <ul class="gnav-list" role="menubar">
-
-        <li class="gnav-item" data-gnav-id="platform" role="none">
-          <button class="gnav-trigger" role="menuitem" aria-haspopup="true" aria-expanded="false">
-            Platform
-            <svg class="gnav-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
-          </button>
-        </li>
-
-        <li class="gnav-item" data-gnav-id="modules" role="none">
-          <button class="gnav-trigger" role="menuitem" aria-haspopup="true" aria-expanded="false">
-            Modules
-            <svg class="gnav-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
-          </button>
-        </li>
-
-        <li class="gnav-item" role="none">
-          <a href="index.html" class="gnav-link ${isIndex ? 'is-active' : ''}" role="menuitem">Overview</a>
-        </li>
-
+    <!-- Center Navigation Tabs -->
+    <nav class="gnav-tabs-container" aria-label="Main navigation">
+      <ul class="gnav-tabs-list" role="menubar">
+        ${NAV_TABS.map(tab => {
+          const isActive = currentFile.includes(tab.href) || (currentFile === '' && tab.href === 'index.html');
+          return `
+            <li class="gnav-tab-item" role="none">
+              <a href="${tab.href}" class="gnav-tab-link ${isActive ? 'is-active' : ''}" role="menuitem">
+                <span class="gnav-tab-icon">${tab.icon}</span>
+                <span class="gnav-tab-label">${tab.name}</span>
+              </a>
+            </li>
+          `;
+        }).join('')}
       </ul>
-
-      <!-- Sliding indicator -->
-      <div class="gnav-indicator" aria-hidden="true"></div>
     </nav>
 
-    <!-- Right actions -->
+    <!-- Right Actions & Telemetry -->
     <div class="gnav-actions">
-      <button id="gnavDataModeBtn" style="background:rgba(212,175,55,0.1); border:1px solid rgba(212,175,55,0.3); color:#d4af37; cursor:pointer; padding:5px 10px; border-radius:6px; font-weight:600; font-family:var(--font-m, monospace); font-size:10px; display:flex; align-items:center; gap:5px;" onclick="window.GEO_API ? window.GEO_API.setMode(window.GEO_API.getMode() === 'LIVE' ? 'DEMO' : 'LIVE') : null" title="Toggle between LIVE backend API mode and DEMO offline cache mode">
-        <span id="gnavDataModeDot">🟡</span>
-        <span id="gnavDataModeText">MODE: DEMO</span>
+      <!-- 15-Layer Architecture Trigger -->
+      <button class="gnav-btn-arch" onclick="window.GEO_NAV.showArchModal()" title="View 15-Layer Official Architecture Specification">
+        <span>⚙️ 15-Layer Spec</span>
       </button>
-      <button class="gnav-live" style="background:rgba(212,175,55,.1); border:1px solid rgba(212,175,55,.3); color:#d4af37; cursor:pointer; padding:6px 12px; border-radius:6px; font-weight:600; display:flex; align-items:center; gap:6px;" onclick="window.GEO_AUTH ? window.GEO_AUTH.showLoginModal() : null" id="gnavRegionBtn">
-        <span>📍</span>
-        <span id="gnavActiveRegionText">Sikkim</span>
-      </button>
-      <a href="javascript:void(0)" onclick="window.GEO_AUTH ? window.GEO_AUTH.showLoginModal() : null" class="gnav-cta" aria-label="Open Workspace Login">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10"/></svg>
-        Access Gateway
-      </a>
 
-      <!-- Hamburger -->
-      <button class="gnav-hamburger" id="gnavHamburger" aria-label="Open menu" aria-expanded="false">
-        <span></span><span></span><span></span>
+      <!-- Active Sector Indicator -->
+      <button class="gnav-sector-pill" onclick="window.GEO_AUTH ? window.GEO_AUTH.showLoginModal() : null" id="gnavSectorBtn" title="Current Active State/Territory">
+        <span class="gnav-pulse-dot"></span>
+        <span id="gnavActiveSectorText">📍 ${activeReg.name}</span>
+      </button>
+
+      <!-- Live / Demo Mode Toggle -->
+      <button id="gnavDataModeBtn" class="gnav-mode-pill" onclick="window.GEO_API ? window.GEO_API.setMode(window.GEO_API.getMode() === 'LIVE' ? 'DEMO' : 'LIVE') : null" title="Toggle Live FastAPI vs Offline Demo Mode">
+        <span id="gnavDataModeDot">🟢</span>
+        <span id="gnavDataModeText">MODE: LIVE</span>
+      </button>
+
+      <!-- SAR Radar Badge -->
+      <div class="gnav-sar-badge" title="Sentinel-1 C-Band Synthetic Aperture Radar Active">
+        <span class="sar-icon">🛰️</span>
+        <span>SAR: ACTIVE</span>
+      </div>
+
+      <!-- JWT Access Gateway CTA -->
+      <button onclick="window.GEO_AUTH ? window.GEO_AUTH.showLoginModal() : null" class="gnav-cta-btn" aria-label="Open Role Access Gateway">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        <span>ACCESS GATEWAY</span>
       </button>
     </div>
-  </div>
 
-  <!-- Viewport (desktop dropdown) -->
-  <div class="gnav-viewport-wrap" aria-live="polite">
-    <div class="gnav-viewport" id="gnavViewport" role="region" aria-label="Navigation panel"></div>
   </div>
 </header>
 
-<!-- Mobile drawer -->
-<div class="gnav-drawer" id="gnavDrawer" aria-hidden="true">
-  <div class="gnd-section">
-    <span class="gnd-label">Modules</span>
-    ${MODULES.map(m => `
-    <a href="${m.href}" class="gnd-link">
-      <span class="gnd-link-icon">${m.icon}</span>
-      <span>
-        <span class="gnd-link-name">${m.name}</span>
-        <span class="gnd-link-sub">${m.location} · ${m.desc}</span>
-      </span>
-    </a>`).join('')}
-  </div>
-  <div class="gnd-section">
-    <span class="gnd-label">Platform</span>
-    ${PLATFORM_LINKS.map(p => `
-    <a href="${p.href}" class="gnd-link">
-      <span class="gnd-link-icon">${p.icon}</span>
-      <span>
-        <span class="gnd-link-name">${p.name}</span>
-        <span class="gnd-link-sub">${p.desc}</span>
-      </span>
-    </a>`).join('')}
+<!-- 15-Layer Official Architecture Modal Mount -->
+<div id="geoArchModal" class="geo-arch-modal-overlay">
+  <div class="geo-arch-modal-card">
+    <div class="geo-arch-modal-header">
+      <div>
+        <div class="geo360-badge" style="background:rgba(245,158,11,0.15); color:#f59e0b; border:1px solid rgba(245,158,11,0.4);">
+          GOVT OF INDIA • MDoNER × MoRD
+        </div>
+        <h2>GeoShield 15-Layer Official Architecture</h2>
+        <p>End-to-End Mission Architecture from Spaceborne InSAR to Cadastral Resettlement</p>
+      </div>
+      <button class="geo360-modal-close" onclick="window.GEO_NAV.closeArchModal()">&times;</button>
+    </div>
+    <div class="geo-arch-modal-body">
+      <div class="arch-layer-grid">
+        <div class="arch-layer-box"><span class="layer-num">01</span><h4>Spaceborne InSAR (Sentinel-1 SAR)</h4><p>Interferometric phase delta detection for sub-cm hill creep.</p></div>
+        <div class="arch-layer-box"><span class="layer-num">02</span><h4>IMD Doppler Radar Nowcasting</h4><p>High-resolution precipitation scanning (1 km² mesh grid).</p></div>
+        <div class="arch-layer-box"><span class="layer-num">03</span><h4>30m ALOS PALSAR / CartoDEM</h4><p>Digital elevation gradient, aspect, and flow accumulation.</p></div>
+        <div class="arch-layer-box"><span class="layer-num">04</span><h4>PostGIS 3.4 Cadastral Index</h4><p>Spatial polygon join for 74,320+ Khasra/Dag land parcels.</p></div>
+        <div class="arch-layer-box"><span class="layer-num">05</span><h4>FastAPI Async REST & WS Core</h4><p>Sub-50ms inference bridge and session token orchestrator.</p></div>
+        <div class="arch-layer-box"><span class="layer-num">06</span><h4>Trained XGBoost Susceptibility</h4><p>Geotechnical slope factor of safety (Fs) evaluation.</p></div>
+        <div class="arch-layer-box"><span class="layer-num">07</span><h4>LSTM Temporal Rainfall Decay</h4><p>72h antecedent rainfall accumulation and pore pressure.</p></div>
+        <div class="arch-layer-box"><span class="layer-num">08</span><h4>Bayesian Geo-Evidence Fusion</h4><p>Multimodal confidence scoring (96.4% empirical accuracy).</p></div>
+        <div class="arch-layer-box"><span class="layer-num">09</span><h4>Dynamic Runout Physics Engine</h4><p>Debris reach, highway severance, and lake inundation pool.</p></div>
+        <div class="arch-layer-box"><span class="layer-num">10</span><h4>MobileNetV3 WASM Field Edge AI</h4><p>On-device offline tension crack vs spam pothole triage.</p></div>
+        <div class="arch-layer-box"><span class="layer-num">11</span><h4>Tactical Evacuation Compass</h4><p>Real-time bearing & descent calculation to safe shelters.</p></div>
+        <div class="arch-layer-box"><span class="layer-num">12</span><h4>Bhashini Voice Dispatch Engine</h4><p>Multi-lingual automated IVR warning calls (12 languages).</p></div>
+        <div class="arch-layer-box"><span class="layer-num">13</span><h4>District Magistrate Gov Console</h4><p>Level-3 Red Alert declaration & statutory violation notices.</p></div>
+        <div class="arch-layer-box"><span class="layer-num">14</span><h4>PFMS Direct Benefit Transfer (DBT)</h4><p>Automated relief ledger generation with cryptographic audit.</p></div>
+        <div class="arch-layer-box"><span class="layer-num">15</span><h4>5-Criteria MCDA Resettlement Engine</h4><p>Multi-criteria safe government parcel allocation & tenure transfer.</p></div>
+      </div>
+    </div>
   </div>
 </div>
-
-<!-- Page transition overlay -->
-<div class="page-transition-overlay" id="pageTransition" aria-hidden="true"></div>
     `;
   }
 
-  /* ============================================================
-     PANEL CONTENT
-     ============================================================ */
-  function buildModulesPanel(currentPage) {
-    return `
-      <div class="gc-header">All Modules <span style="margin-left:auto;font-size:9px;letter-spacing:.12em;color:#52525b">05 ACTIVE</span></div>
-      <div class="gc-modules">
-        ${MODULES.map((m, i) => {
-          const isCurrent = currentPage && currentPage.includes(m.href.replace('.html',''));
-          return `
-          <a href="${m.href}" class="gc-module-link ${isCurrent ? 'is-current' : ''}" data-nav-link>
-            <div class="gcm-icon">${m.icon}</div>
-            <div class="gcm-body">
-              <span class="gcm-location">0${i+1} · ${m.location}</span>
-              <span class="gcm-name">${m.name}</span>
-              <span class="gcm-desc">${m.desc}</span>
-            </div>
-          </a>`;
-        }).join('')}
-      </div>
-    `;
-  }
-
-  function buildPlatformPanel() {
-    const half = Math.ceil(PLATFORM_LINKS.length / 2);
-    const left = PLATFORM_LINKS.slice(0, half);
-    const right = PLATFORM_LINKS.slice(half);
-    return `
-      <div class="gc-header">Platform Overview</div>
-      <div class="gc-platform">
-        <div class="gc-plat-group">
-          ${left.map(p => `
-          <a href="${p.href}" class="gc-plat-link" data-nav-link>
-            <div class="gc-plat-link-icon">${p.icon}</div>
-            <div>
-              <span class="gc-plat-link-name">${p.name}</span>
-              <span class="gc-plat-link-desc">${p.desc}</span>
-            </div>
-          </a>`).join('')}
-        </div>
-        <div class="gc-plat-group">
-          <span class="gc-plat-label">Resources</span>
-          ${right.map(p => `
-          <a href="${p.href}" class="gc-plat-link" data-nav-link>
-            <div class="gc-plat-link-icon">${p.icon}</div>
-            <div>
-              <span class="gc-plat-link-name">${p.name}</span>
-              <span class="gc-plat-link-desc">${p.desc}</span>
-            </div>
-          </a>`).join('')}
-        </div>
-      </div>
-    `;
-  }
-
-  /* ============================================================
-     NAV LOGIC — Viewport + Indicator + Directional Animation
-     ============================================================ */
-  function initNav(currentPage) {
-    const viewport  = document.getElementById('gnavViewport');
-    const indicator = document.querySelector('.gnav-indicator');
-    const items     = document.querySelectorAll('.gnav-item[data-gnav-id]');
-
-    if (!viewport || !indicator) return;
-
-    const PANELS = {
-      platform: buildPlatformPanel(),
-      modules:  buildModulesPanel(currentPage),
-    };
-    const HEIGHTS = { platform: 200, modules: 210 };
-
-    let activeId  = null;
-    let prevIndex = -1;
-
-    // --- Indicator positioning ---
-    function moveIndicator(trigger) {
-      if (!trigger) { indicator.classList.remove('is-visible'); return; }
-      const navRect   = trigger.closest('.gnav-menu').getBoundingClientRect();
-      const trigRect  = trigger.getBoundingClientRect();
-      indicator.style.left  = (trigRect.left - navRect.left) + 'px';
-      indicator.style.width = trigRect.width + 'px';
-      indicator.classList.add('is-visible');
-    }
-
-    // --- Open panel ---
-    function openPanel(id, fromIndex, toIndex) {
-      const content  = document.createElement('div');
-      content.className = 'gnav-content';
-      content.innerHTML = PANELS[id];
-
-      const dir = fromIndex < toIndex ? 'from-end' : 'from-start';
-      content.setAttribute('data-motion', dir);
-      content.setAttribute('data-gnav-panel', id);
-
-      // Exit old panel
-      const old = viewport.querySelector('.gnav-content:not([data-motion^="to"])');
-      if (old && old.getAttribute('data-gnav-panel') !== id) {
-        const exitDir = fromIndex < toIndex ? 'to-start' : 'to-end';
-        old.setAttribute('data-motion', exitDir);
-        old.addEventListener('animationend', () => old.remove(), { once: true });
-      } else if (old) {
-        old.remove();
+  window.GEO_NAV = {
+    init: function () {
+      let mount = document.getElementById('gnavMount');
+      if (!mount) {
+        mount = document.createElement('div');
+        mount.id = 'gnavMount';
+        document.body.prepend(mount);
       }
+      mount.innerHTML = buildNav();
 
-      viewport.appendChild(content);
-      viewport.style.height = HEIGHTS[id] + 'px';
-      viewport.classList.add('is-open');
+      this.syncModeUI();
+      this.syncRegionUI();
 
-      // Add page-transition on any nav link click
-      content.querySelectorAll('[data-nav-link]').forEach(el => {
-        el.addEventListener('click', handleNavLinkClick);
-      });
-    }
-
-    function closePanel() {
-      viewport.style.height = '0';
-      viewport.classList.remove('is-open');
-      setTimeout(() => { viewport.innerHTML = ''; }, 320);
-      indicator.classList.remove('is-visible');
-      activeId = null;
-      prevIndex = -1;
-      items.forEach(i => {
-        i.classList.remove('is-open');
-        const btn = i.querySelector('.gnav-trigger');
-        if (btn) btn.setAttribute('aria-expanded', 'false');
-      });
-    }
-
-    // --- Item interaction ---
-    items.forEach((item, toIndex) => {
-      const id  = item.getAttribute('data-gnav-id');
-      const btn = item.querySelector('.gnav-trigger');
-
-      const activate = () => {
-        if (activeId === id) { closePanel(); return; }
-        const fromIndex = prevIndex === -1 ? toIndex : prevIndex;
-        items.forEach((i, ii) => {
-          i.classList.toggle('is-open', ii === toIndex);
-          const b = i.querySelector('.gnav-trigger');
-          if (b) b.setAttribute('aria-expanded', ii === toIndex ? 'true' : 'false');
-        });
-        openPanel(id, fromIndex, toIndex);
-        moveIndicator(btn);
-        activeId  = id;
-        prevIndex = toIndex;
-      };
-
-      btn.addEventListener('click', (e) => { e.stopPropagation(); activate(); });
-      btn.addEventListener('mouseenter', activate);
-    });
-
-    // Close on outside click
-    document.addEventListener('click', (e) => {
-      if (!e.target.closest('.gnav-root')) closePanel();
-    });
-
-    // Close on Escape
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') closePanel();
-    });
-
-    // Keep open while hovering viewport
-    viewport.parentElement.addEventListener('mouseleave', closePanel);
-    document.querySelector('.gnav-menu').addEventListener('mouseleave', (e) => {
-      if (!e.relatedTarget?.closest('.gnav-viewport-wrap')) closePanel();
-    });
-  }
-
-  /* ============================================================
-     MOBILE HAMBURGER
-     ============================================================ */
-  function initMobile() {
-    const btn    = document.getElementById('gnavHamburger');
-    const drawer = document.getElementById('gnavDrawer');
-    if (!btn || !drawer) return;
-
-    btn.addEventListener('click', () => {
-      const open = btn.classList.toggle('is-open');
-      drawer.classList.toggle('is-open', open);
-      drawer.setAttribute('aria-hidden', !open);
-      btn.setAttribute('aria-expanded', open);
-      document.body.style.overflow = open ? 'hidden' : '';
-    });
-
-    drawer.querySelectorAll('.gnd-link').forEach(link => {
-      link.addEventListener('click', handleNavLinkClick);
-    });
-  }
-
-  /* ============================================================
-     PAGE TRANSITIONS
-     ============================================================ */
-  function handleNavLinkClick(e) {
-    const href = e.currentTarget.href;
-    if (!href || href === window.location.href || href.includes('#')) return;
-    e.preventDefault();
-    const overlay = document.getElementById('pageTransition');
-    if (overlay) {
-      overlay.classList.add('fade-out');
-      setTimeout(() => { window.location.href = href; }, 340);
-    } else {
-      window.location.href = href;
-    }
-  }
-
-  function initPageTransition() {
-    // Fade in on load
-    const overlay = document.getElementById('pageTransition');
-    if (!overlay) return;
-    overlay.style.opacity = '1';
-    overlay.style.transition = 'none';
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        overlay.style.transition = 'opacity .36s ease';
-        overlay.style.opacity = '0';
-      });
-    });
-
-    // Wire all internal links
-    document.querySelectorAll('a[href]').forEach(el => {
-      const href = el.getAttribute('href');
-      if (href && !href.startsWith('#') && !href.startsWith('http') && !el.hasAttribute('data-no-transition')) {
-        el.addEventListener('click', handleNavLinkClick);
-      }
-    });
-  }
-
-  /* ============================================================
-     PARTICLE CANVAS
-     ============================================================ */
-  function initParticles() {
-    const canvas = document.getElementById('particleCanvas');
-    if (!canvas) return;
-
-    const ctx = canvas.getContext('2d');
-    let W, H, particles = [], animId;
-
-    const COLORS = ['rgba(212,175,55,', 'rgba(37,99,235,', 'rgba(255,255,255,'];
-
-    function resize() {
-      W = canvas.width  = window.innerWidth;
-      H = canvas.height = window.innerHeight;
-    }
-
-    function createParticle() {
-      const c = COLORS[Math.floor(Math.random() * COLORS.length)];
-      return {
-        x: Math.random() * W,
-        y: Math.random() * H,
-        vx: (Math.random() - .5) * 0.3,
-        vy: (Math.random() - .5) * 0.3,
-        r: .8 + Math.random() * 1.2,
-        alpha: .05 + Math.random() * .18,
-        color: c,
-        // label: random coordinate-like string shown rarely
-        label: Math.random() < .08 ? `${(Math.random()*90+10).toFixed(2)}°${Math.random()<.5?'N':'E'}` : null,
-        labelAlpha: 0,
-        labelFade: Math.random() * .004 + .001,
-        labelDir: 1,
-        labelTimer: Math.random() * 200,
-      };
-    }
-
-    function init() {
-      resize();
-      const count = Math.floor((W * H) / 18000);
-      particles = Array.from({ length: count }, createParticle);
-    }
-
-    const MAX_DIST = 120;
-
-    function draw() {
-      ctx.clearRect(0, 0, W, H);
-
-      // Update & draw particles
-      particles.forEach(p => {
-        p.x += p.vx; p.y += p.vy;
-        if (p.x < 0) p.x = W; if (p.x > W) p.x = 0;
-        if (p.y < 0) p.y = H; if (p.y > H) p.y = 0;
-
-        // Draw dot
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-        ctx.fillStyle = p.color + p.alpha + ')';
-        ctx.fill();
-
-        // Floating label
-        if (p.label) {
-          p.labelTimer--;
-          if (p.labelTimer <= 0) {
-            p.labelAlpha += p.labelFade * p.labelDir;
-            if (p.labelAlpha >= .4) { p.labelDir = -1; }
-            if (p.labelAlpha <= 0)  { p.labelDir = 1; p.labelTimer = 120 + Math.random() * 200; p.labelAlpha = 0; }
-            ctx.fillStyle = p.color + Math.max(0, p.labelAlpha) + ')';
-            ctx.font = '9px JetBrains Mono, monospace';
-            ctx.textBaseline = 'middle';
-            ctx.fillText(p.label, p.x + 6, p.y);
-          }
-        }
+      window.addEventListener('dataModeChanged', (e) => {
+        this.syncModeUI(e.detail.mode);
       });
 
-      // Draw connections
-      for (let i = 0; i < particles.length; i++) {
-        for (let j = i + 1; j < particles.length; j++) {
-          const dx = particles[i].x - particles[j].x;
-          const dy = particles[i].y - particles[j].y;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist < MAX_DIST) {
-            const alpha = (1 - dist / MAX_DIST) * 0.055;
-            ctx.beginPath();
-            ctx.moveTo(particles[i].x, particles[i].y);
-            ctx.lineTo(particles[j].x, particles[j].y);
-            ctx.strokeStyle = `rgba(212,175,55,${alpha})`;
-            ctx.lineWidth = 0.5;
-            ctx.stroke();
-          }
+      window.addEventListener('regionChanged', (e) => {
+        this.syncRegionUI(e.detail);
+      });
+    },
+
+    syncModeUI: function(mode) {
+      mode = mode || (window.GEO_API ? window.GEO_API.getMode() : 'LIVE');
+      const dot = document.getElementById('gnavDataModeDot');
+      const text = document.getElementById('gnavDataModeText');
+      const btn = document.getElementById('gnavDataModeBtn');
+      if (dot && text && btn) {
+        if (mode === 'LIVE') {
+          dot.textContent = '🟢';
+          text.textContent = 'MODE: LIVE';
+          btn.style.borderColor = 'rgba(34, 197, 94, 0.4)';
+          btn.style.color = '#22c55e';
+          btn.style.background = 'rgba(34, 197, 94, 0.1)';
+        } else {
+          dot.textContent = '🟡';
+          text.textContent = 'MODE: DEMO';
+          btn.style.borderColor = 'rgba(245, 158, 11, 0.4)';
+          btn.style.color = '#f59e0b';
+          btn.style.background = 'rgba(245, 158, 11, 0.1)';
         }
       }
+    },
 
-      animId = requestAnimationFrame(draw);
-    }
-
-    window.addEventListener('resize', () => { resize(); });
-    init();
-    draw();
-
-    // Pause when not visible
-    document.addEventListener('visibilitychange', () => {
-      if (document.hidden) cancelAnimationFrame(animId);
-      else draw();
-    });
-  }
-
-  /* ============================================================
-     ANIMATED COUNTERS
-     ============================================================ */
-  function initCounters() {
-    document.querySelectorAll('.anim-counter').forEach(el => {
-      const target = parseFloat(el.getAttribute('data-target') || el.textContent);
-      const decimals = el.getAttribute('data-decimals') || 0;
-      const duration = parseInt(el.getAttribute('data-duration') || 1400);
-      let started = false;
-
-      const obs = new IntersectionObserver(entries => {
-        if (entries[0].isIntersecting && !started) {
-          started = true;
-          const start = performance.now();
-          const step = (now) => {
-            const t = Math.min(1, (now - start) / duration);
-            const ease = 1 - Math.pow(1 - t, 3);
-            const val = (ease * target).toFixed(decimals);
-            el.textContent = val;
-            if (t < 1) requestAnimationFrame(step);
-          };
-          requestAnimationFrame(step);
-        }
-      }, { threshold: .3 });
-      obs.observe(el);
-    });
-  }
-
-  /* ============================================================
-     CARD TILT
-     ============================================================ */
-  function initTilt() {
-    document.querySelectorAll('.tilt-card').forEach(card => {
-      card.addEventListener('mousemove', (e) => {
-        const rect = card.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-        const cx = rect.width  / 2;
-        const cy = rect.height / 2;
-        const rx = ((y - cy) / cy) * -4;
-        const ry = ((x - cx) / cx) *  4;
-        card.style.transform = `perspective(800px) rotateX(${rx}deg) rotateY(${ry}deg) scale(1.01)`;
-      });
-      card.addEventListener('mouseleave', () => {
-        card.style.transform = 'perspective(800px) rotateX(0) rotateY(0) scale(1)';
-      });
-    });
-  }
-
-  /* ============================================================
-     STAGGER OBSERVER
-     ============================================================ */
-  function initStagger() {
-    const obs = new IntersectionObserver(entries => {
-      entries.forEach(e => {
-        if (e.isIntersecting) {
-          e.target.classList.add('is-visible');
-          obs.unobserve(e.target);
-        }
-      });
-    }, { threshold: 0.1 });
-
-    document.querySelectorAll('.fade-up, .stagger-parent').forEach(el => obs.observe(el));
-  }
-
-  /* ============================================================
-     BOOT — detect current page & inject
-     ============================================================ */
-  function boot() {
-    const currentPage = window.location.pathname.split('/').pop() || 'index.html';
-
-    // Inject nav into #gnavMount if present, else prepend to body
-    const mount = document.getElementById('gnavMount') || document.body;
-    if (document.getElementById('gnavMount')) {
-      mount.innerHTML = buildNav(currentPage);
-    } else {
-      const wrapper = document.createElement('div');
-      wrapper.innerHTML = buildNav(currentPage);
-      document.body.insertBefore(wrapper.firstElementChild, document.body.firstChild);
-      // drawer
-      document.body.insertBefore(wrapper.firstElementChild, document.body.children[1]);
-      // overlay
-      document.body.appendChild(wrapper.firstElementChild);
-    }
-
-    initNav(currentPage);
-    initMobile();
-    initPageTransition();
-    initParticles();
-    initCounters();
-    initTilt();
-    initStagger();
-
-    // Sync Active Region Badge
-    function syncNavRegion() {
-      if (window.getDefaultRegion) {
-        const reg = window.getDefaultRegion();
-        const badgeEl = document.getElementById('gnavBrandBadge');
-        const textEl = document.getElementById('gnavActiveRegionText');
-        if (badgeEl) badgeEl.innerText = `LIVE · ${reg.name} Sentinel`;
-        if (textEl) textEl.innerText = reg.name;
+    syncRegionUI: function(reg) {
+      reg = reg || getActiveRegion();
+      const el = document.getElementById('gnavActiveSectorText');
+      if (el && reg) {
+        el.textContent = `📍 ${reg.name}`;
       }
-    }
+    },
 
-    // Sync Data Mode Badge
-    function syncDataMode() {
-      if (window.GEO_API) {
-        const mode = window.GEO_API.getMode();
-        const dotEl = document.getElementById('gnavDataModeDot');
-        const textEl = document.getElementById('gnavDataModeText');
-        const btnEl = document.getElementById('gnavDataModeBtn');
-        if (dotEl) dotEl.innerText = mode === 'LIVE' ? '🟢' : '🟡';
-        if (textEl) textEl.innerText = `MODE: ${mode}`;
-        if (btnEl) {
-          if (mode === 'LIVE') {
-            btnEl.style.borderColor = 'rgba(34,197,94,0.4)';
-            btnEl.style.color = '#22c55e';
-            btnEl.style.background = 'rgba(34,197,94,0.1)';
-          } else {
-            btnEl.style.borderColor = 'rgba(212,175,55,0.3)';
-            btnEl.style.color = '#d4af37';
-            btnEl.style.background = 'rgba(212,175,55,0.1)';
-          }
-        }
-      }
-    }
+    showArchModal: function() {
+      const m = document.getElementById('geoArchModal');
+      if (m) m.classList.add('active');
+    },
 
-    syncNavRegion();
-    syncDataMode();
-    window.addEventListener('regionChanged', syncNavRegion);
-    window.addEventListener('dataModeChanged', syncDataMode);
-  }
+    closeArchModal: function() {
+      const m = document.getElementById('geoArchModal');
+      if (m) m.classList.remove('active');
+    }
+  };
 
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', boot);
+    document.addEventListener('DOMContentLoaded', () => window.GEO_NAV.init());
   } else {
-    boot();
+    window.GEO_NAV.init();
   }
 })();

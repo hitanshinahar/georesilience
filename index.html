@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>GeoResilience-360 — Command Center</title>
+<title>GeoShield 🇮🇳 — National Disaster Resilience Platform</title>
 
 <!-- ============================================================
      FONTS
@@ -28,18 +28,18 @@
 
 <style>
   /* ==========================================================
-     DESIGN TOKENS — Professional Pitch Black & Gold Theme
+     DESIGN TOKENS — Professional Dark Space & Amber Gold Theme
   ========================================================== */
   :root {
-    --bg-0: #000000;            /* Pitch Black */
-    --bg-1: #09090b;            /* Charcoal Zinc */
-    --gold: #d4af37;            /* Amber Gold */
-    --gold-soft: rgba(212, 175, 55, 0.4);
-    --teal: #2563eb;            /* Royal Blue primary accent */
+    --bg-0: #060b13;            /* Dark Space Navy */
+    --bg-1: #0d1524;            /* Dark Slate Card */
+    --gold: #f59e0b;            /* Amber Gold */
+    --gold-soft: rgba(245, 158, 11, 0.35);
+    --teal: #38bdf8;            /* Cyan Sky Accent */
     --ink-0: #ffffff;           /* White text */
-    --ink-1: #a1a1aa;           /* Muted Zinc text */
-    --line: #27272a;            /* Zinc Border */
-    --card-bg: rgba(9, 9, 11, 0.9);
+    --ink-1: #94a3b8;           /* Muted Slate text */
+    --line: #1e293b;            /* Slate Border */
+    --card-bg: rgba(13, 21, 36, 0.92);
 
     --font-display: 'Space Grotesk', sans-serif;
     --font-body: 'Inter', sans-serif;
@@ -71,7 +71,7 @@
       radial-gradient(1px 1px at 90% 70%, #ffffff25 0, transparent 60%),
       radial-gradient(1.5px 1.5px at 45% 85%, #ffffff11 0, transparent 60%),
       radial-gradient(1px 1px at 70% 92%, #ffffff20 0, transparent 60%),
-      radial-gradient(1200px 800px at 50% 20%, #09090b99 0%, transparent 60%);
+      radial-gradient(1200px 800px at 50% 20%, #0d152499 0%, transparent 60%);
     background-repeat: no-repeat;
     background-size: 100% 100%;
   }
@@ -111,6 +111,29 @@
     to { opacity: 1; transform: translateY(0); }
   }
 
+  /* ── Metrics Ribbon ── */
+  .metrics-ribbon {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 14px; max-width: 1080px; margin: 0 auto 36px; padding: 0 16px;
+  }
+  .metric-card {
+    background: rgba(13, 21, 36, 0.85); border: 1px solid rgba(245, 158, 11, 0.25);
+    border-radius: 8px; padding: 14px 18px; text-align: left;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    display: flex; align-items: center; gap: 14px;
+    transition: transform 0.2s, border-color 0.2s;
+  }
+  .metric-card:hover {
+    transform: translateY(-2px); border-color: var(--gold);
+  }
+  .metric-icon { font-size: 24px; }
+  .metric-val {
+    font-family: var(--font-display); font-size: 16px; font-weight: 700; color: #fff;
+  }
+  .metric-lbl {
+    font-family: var(--font-mono); font-size: 10px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px;
+  }
+
   /* ── Closing section entrance ── */
   .closing { opacity: 0; transform: translateY(30px); transition: opacity .8s ease, transform .8s ease; }
   .closing.is-visible { opacity: 1; transform: translateY(0); }
@@ -147,7 +170,8 @@
     font-size: 11px;
     letter-spacing: .25em;
     text-transform: uppercase;
-    color: var(--ink-1);
+    color: var(--gold);
+    font-weight: 700;
   }
   .intro-copy h1 {
     font-family: var(--font-display);
@@ -203,7 +227,7 @@
     stroke: var(--gold);
     stroke-width: 1.2;
     stroke-linejoin: round;
-    filter: drop-shadow(0 0 16px rgba(212, 175, 55, 0.15));
+    filter: drop-shadow(0 0 16px rgba(245, 158, 11, 0.2));
   }
   .india-dot { fill: var(--gold); }
 
@@ -238,7 +262,7 @@
     position: absolute; left: 50%; top: 50%; translate: -50% -50%;
     width: 6px; height: 6px; border-radius: 50%;
     background: var(--teal);
-    box-shadow: 0 0 10px 2px rgba(37, 99, 235, 0.6);
+    box-shadow: 0 0 10px 2px rgba(56, 189, 248, 0.6);
     transition: transform .25s ease, background .25s ease;
   }
   .marker.is-active .core, .marker:hover .core {
@@ -302,9 +326,9 @@
   /* ---------- closing section ---------- */
   .closing {
     position: relative; z-index: 1;
-    min-height: 60vh;
+    min-height: 50vh;
     display: flex; flex-direction: column; align-items: center; justify-content: center;
-    text-align: center; padding: 80px 24px;
+    text-align: center; padding: 60px 24px;
     border-top: 1px solid var(--line);
     background: var(--bg-1);
   }
@@ -322,11 +346,10 @@
     font-size: 14px;
   }
 
-  /* ---------- responsive ---------- */
   /* ---------- National Region Selector Section ---------- */
   .national-region-section {
     position: relative; z-index: 2;
-    padding: 60px 24px; background: #080c16; border-top: 1px solid rgba(212, 175, 55, 0.2);
+    padding: 60px 24px; background: #060b13; border-top: 1px solid rgba(245, 158, 11, 0.3);
     border-bottom: 1px solid rgba(255, 255, 255, 0.08); text-align: center;
   }
   .national-header .eyebrow {
@@ -336,64 +359,54 @@
     font-family: var(--font-display); font-size: clamp(24px, 3.5vw, 36px); color: #ffffff; margin: 0 0 10px;
   }
   .national-header p {
-    color: #94a3b8; max-width: 60ch; margin: 0 auto 28px; font-size: 14px; line-height: 1.5;
+    color: #94a3b8; max-width: 68ch; margin: 0 auto 28px; font-size: 14px; line-height: 1.5;
   }
   .region-select-controls {
-    display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; align-items: center; max-width: 860px; margin: 0 auto 28px;
+    display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; align-items: center; max-width: 900px; margin: 0 auto 28px;
   }
   .search-box { position: relative; flex: 1 1 300px; }
   .search-box svg { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #64748b; }
   .search-box input {
-    width: 100%; background: #111827; border: 1px solid #2d3748; border-radius: 8px;
+    width: 100%; background: #0d1524; border: 1px solid #334155; border-radius: 8px;
     padding: 12px 14px 12px 42px; color: #ffffff; font-size: 13.5px; outline: none; box-sizing: border-box; transition: border-color 0.2s;
   }
   .search-box input:focus { border-color: var(--gold); }
   .search-results-dropdown {
-    position: absolute; top: 100%; left: 0; right: 0; background: #0f172a; border: 1px solid #334155;
+    position: absolute; top: 100%; left: 0; right: 0; background: #0d1524; border: 1px solid #334155;
     border-radius: 8px; max-height: 220px; overflow-y: auto; z-index: 100; display: none; text-align: left;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.6); margin-top: 4px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.8); margin-top: 4px;
   }
-  .search-result-item {
+  .autocomplete-item {
     padding: 10px 14px; border-bottom: 1px solid #1e293b; color: #e2e8f0; cursor: pointer; font-size: 13px;
     display: flex; justify-content: space-between; align-items: center;
   }
-  .search-result-item:hover { background: rgba(212, 175, 55, 0.15); color: var(--gold); }
+  .autocomplete-item:hover { background: rgba(245, 158, 11, 0.15); color: var(--gold); }
   .region-select-dropdown {
-    background: #111827; border: 1px solid #2d3748; border-radius: 8px; padding: 12px 16px;
-    color: #f8fafc; font-size: 13.5px; outline: none; cursor: pointer; transition: border-color 0.2s; min-width: 220px;
+    background: #0d1524; border: 1px solid #334155; border-radius: 8px; padding: 12px 16px;
+    color: #f8fafc; font-size: 13.5px; outline: none; cursor: pointer; transition: border-color 0.2s; min-width: 240px;
   }
   .region-select-dropdown:focus { border-color: var(--gold); }
   .cta-enter-btn {
-    background: linear-gradient(135deg, var(--gold), #b8860b); border: none; border-radius: 8px;
-    padding: 12px 22px; color: #05070f; font-family: var(--font-display); font-weight: 700; font-size: 13.5px;
+    background: linear-gradient(135deg, var(--gold), #d97706); border: none; border-radius: 8px;
+    padding: 12px 22px; color: #060b13; font-family: var(--font-display); font-weight: 700; font-size: 13.5px;
     letter-spacing: 0.5px; cursor: pointer; transition: transform 0.15s, filter 0.2s;
+    box-shadow: 0 4px 16px rgba(245, 158, 11, 0.3);
   }
   .cta-enter-btn:hover { filter: brightness(1.15); transform: translateY(-1px); }
 
   .active-region-card {
-    background: #0d1322; border: 1px solid rgba(212, 175, 55, 0.3); border-radius: 12px;
-    padding: 22px 28px; max-width: 780px; margin: 0 auto 36px; text-align: left;
-    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5), 0 0 20px rgba(212, 175, 55, 0.1);
+    background: #0d1524; border: 1px solid rgba(245, 158, 11, 0.4); border-radius: 12px;
+    padding: 24px 28px; max-width: 860px; margin: 0 auto 36px; text-align: left;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.7), 0 0 20px rgba(245, 158, 11, 0.12);
   }
   .reg-card-header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; border-bottom: 1px solid #1e293b; padding-bottom: 12px; }
-  .reg-type-pill { background: rgba(212, 175, 55, 0.15); border: 1px solid var(--gold); color: var(--gold); font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 4px; letter-spacing: 1px; }
+  .reg-type-pill { background: rgba(245, 158, 11, 0.15); border: 1px solid var(--gold); color: var(--gold); font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 4px; letter-spacing: 1px; }
   .reg-card-header h3 { margin: 0; font-family: var(--font-display); font-size: 22px; color: #ffffff; }
   .reg-coords { margin-left: auto; font-family: var(--font-mono); font-size: 11px; color: #64748b; }
   .reg-card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; }
   .reg-card-item label { display: block; font-size: 10px; text-transform: uppercase; color: #64748b; font-weight: 700; letter-spacing: 1px; margin-bottom: 4px; }
   .reg-card-item .val { font-size: 13px; color: #cbd5e1; font-weight: 500; }
   .reg-card-item .val.gold { color: var(--gold); font-weight: 700; font-family: var(--font-mono); }
-
-  .national-stats-bar {
-    display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 18px;
-    padding-top: 24px; border-top: 1px solid rgba(255, 255, 255, 0.06); max-width: 900px; margin: 0 auto;
-  }
-  .stat-group { display: flex; align-items: baseline; gap: 6px; }
-  .stat-num { font-family: var(--font-display); font-size: 20px; font-weight: 700; color: var(--gold); }
-  .stat-lbl { font-size: 11px; color: #94a3b8; font-weight: 600; letter-spacing: 0.5px; }
-  .stat-divider { color: #334155; }
-  .stat-badges { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 10px; width: 100%; }
-  .stat-badges .badge { background: #111827; border: 1px solid #1e293b; color: #94a3b8; font-size: 11px; padding: 4px 10px; border-radius: 20px; }
 
   @media (max-width: 767px) {
     .india-stage { width: min(92vw, 420px); }
@@ -423,12 +436,12 @@
 
     <div class="india-layer" id="indiaLayer">
       <div class="india-stage">
-        <span class="map-caption">GeoShield-Cadastre · National Deployment (36 Regions)</span>
+        <span class="map-caption">GeoShield · National Coverage (36 States & UTs)</span>
         <svg viewBox="0 0 400 450" xmlns="http://www.w3.org/2000/svg">
           <defs>
             <radialGradient id="indiaFill" cx="45%" cy="35%" r="75%">
-              <stop offset="0%" stop-color="rgba(212, 175, 55, 0.15)"/>
-              <stop offset="100%" stop-color="rgba(212, 175, 55, 0.0)"/>
+              <stop offset="0%" stop-color="rgba(245, 158, 11, 0.2)"/>
+              <stop offset="100%" stop-color="rgba(245, 158, 11, 0.0)"/>
             </radialGradient>
           </defs>
           <polygon class="india-outline" id="indiaOutline" points=""></polygon>
@@ -439,11 +452,47 @@
     </div>
 
     <div class="intro-copy" id="introCopy">
-      <div class="eyebrow">GeoResilience-360</div>
+      <div class="eyebrow">GOVT OF INDIA • MDoNER × MoRD | GeoShield 🇮🇳</div>
       <h1 id="heroTitle">Resilience in Every Khasra</h1>
-      <div class="cue"><span>Scroll to zoom to India</span><span class="stick"></span></div>
+      <div class="cue"><span>From National Hazard Intelligence to Parcel-Level Protection • Scroll to zoom</span><span class="stick"></span></div>
     </div>
 
+  </div>
+</section>
+
+<!-- ============================================================
+     METRICS RIBBON (Task 2 Requirement)
+============================================================ -->
+<section style="position:relative; z-index:2; background:#060b13; padding-top:20px;">
+  <div class="metrics-ribbon">
+    <div class="metric-card">
+      <span class="metric-icon">🇮🇳</span>
+      <div>
+        <div class="metric-val">36 REGIONS</div>
+        <div class="metric-lbl">28 States + 8 Union Territories</div>
+      </div>
+    </div>
+    <div class="metric-card">
+      <span class="metric-icon">📐</span>
+      <div>
+        <div class="metric-val">74,320 PLOTS</div>
+        <div class="metric-lbl">PostGIS 3.4 Spatial Cadastre</div>
+      </div>
+    </div>
+    <div class="metric-card">
+      <span class="metric-icon">🚨</span>
+      <div>
+        <div class="metric-val" style="color:#ef4444;">5 ZONES</div>
+        <div class="metric-lbl">Critical Red Sectors (Fs &lt; 1.0)</div>
+      </div>
+    </div>
+    <div class="metric-card">
+      <span class="metric-icon">🛰️</span>
+      <div>
+        <div class="metric-val" style="color:#22c55e;">100% LIVE</div>
+        <div class="metric-lbl">Sentinel-1 SAR C-Band Radar</div>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -452,15 +501,15 @@
 ============================================================ -->
 <section class="national-region-section" id="nationalRegions">
   <div class="national-header">
-    <div class="eyebrow">🇮🇳 INDIA — NATIONAL GEORESILIENCE MAP</div>
+    <div class="eyebrow">🇮🇳 INDIA — NATIONAL DISASTER RESILIENCE PLATFORM</div>
     <h2>Select Any State or Union Territory</h2>
-    <p>GeoResilience-360 dynamically configures hazard intelligence, local cadastral terminology (Khasra, Khatauni, Thandaper, Dag, RoR), and language vectors across all 36 Indian regions.</p>
+    <p>GeoShield dynamically configures real-time hazard triggers, local land cadastre standards (Khasra, Khatauni, Thandaper, Dag, 7/12 RoR), and Bhashini language dispatch for all 36 Indian territories.</p>
 
     <div class="region-select-controls">
       <!-- Search Input with Autocomplete -->
       <div class="search-box">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        <input type="text" id="regionSearchInput" placeholder="Search State / UT (e.g. Sikkim, Kerala, Himachal Pradesh)..." onkeyup="filterRegionSearch(this.value)" onfocus="filterRegionSearch(this.value)" />
+        <input type="text" id="regionSearchInput" placeholder="Search state, district, or hazard (e.g. Sikkim, Shimla, Wayanad)..." onkeyup="filterRegionSearch(this.value)" onfocus="filterRegionSearch(this.value)" />
         <div id="searchResultsList" class="search-results-dropdown"></div>
       </div>
 
@@ -470,7 +519,7 @@
       </select>
 
       <button class="cta-enter-btn" onclick="openWorkspaceLogin()">
-        ⚡ ENTER GEORESILIENCE CENTER
+        🚀 ENTER GEOSHIELD COMMAND CENTER
       </button>
     </div>
   </div>
@@ -485,21 +534,29 @@
     <div class="reg-card-grid">
       <div class="reg-card-item">
         <label>Primary Geohazard Risk</label>
-        <div class="val" id="regRisk">Landslide / Debris Flow / Jhora Breach</div>
+        <div class="val" id="regRisk">Tectonic Schist Slip &amp; NH-10 Washout</div>
       </div>
       <div class="reg-card-item">
         <label>Cadastre Terminology</label>
-        <div class="val gold" id="regLandTerms">Khasra / Dag / RoR</div>
+        <div class="val gold" id="regLandTerms">Dag / Khasra / Jamabandi RoR</div>
       </div>
       <div class="reg-card-item">
+        <label>Bhashini Regional Languages</label>
+        <div class="val" id="regLanguages" style="color:#38bdf8; font-weight:600;">Nepali, Bhutia, Lepcha</div>
+      </div>
+      <div class="reg-card-item">
+        <label>Rain Trigger Threshold</label>
+        <div class="val" id="regRainLimit" style="color:#ef4444; font-weight:700; font-family:var(--font-mono);">&gt; 55.0 mm/hr (Warning)</div>
+      </div>
+      <div class="reg-card-item" style="grid-column: 1 / -1;">
         <label>Geographic Bounding Box (BBOX)</label>
-        <div class="val" id="regBbox" style="font-family:var(--font-m); font-size:11px; color:#60a5fa;">[88.01, 27.08, 88.92, 28.13]</div>
+        <div class="val" id="regBbox" style="font-family:var(--font-mono); font-size:11.5px; color:#60a5fa;">[88.01, 27.08, 88.92, 28.13]</div>
       </div>
     </div>
 
-    <!-- Multi-Tier Geographic Hierarchy Drilldown (Point 1 & Point 2) -->
+    <!-- Multi-Tier Geographic Hierarchy Drilldown -->
     <div style="margin-top:20px; padding-top:16px; border-top:1px solid var(--line);">
-      <label style="font-family:var(--font-m); font-size:10px; color:var(--gold); letter-spacing:.15em; text-transform:uppercase; display:block; margin-bottom:8px;">
+      <label style="font-family:var(--font-mono); font-size:10px; color:var(--gold); letter-spacing:.15em; text-transform:uppercase; display:block; margin-bottom:8px;">
         🌐 Multi-Tier Geographic Hierarchy: India → State/UT → District → Local Area → Parcel
       </label>
       
@@ -513,7 +570,7 @@
         <div>
           <label style="font-size:11px; color:var(--ink-1); display:block; margin-bottom:4px;">Local Area / Sub-Division:</label>
           <select id="hierarchyLocalAreaSelect" class="region-select-dropdown" style="width:100%; font-size:11px; padding:6px 10px;" onchange="onLocalAreaSelected(this.value)">
-            <option value="">Gangtok Urban & Ridge Corridor</option>
+            <option value="">Gangtok Urban &amp; Ridge Corridor</option>
           </select>
         </div>
         <div>
@@ -525,44 +582,19 @@
       </div>
 
       <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
-        <span style="font-size:11px; color:var(--ink-1); font-family:var(--font-m);">Camera Transition: <strong style="color:var(--gold);">map.fitBounds(bbox, { padding: 40, duration: 1200 })</strong></span>
+        <span style="font-size:11px; color:var(--ink-1); font-family:var(--font-mono);">Camera Transition: <strong style="color:var(--gold);">map.fitBounds(bbox, { padding: 40, duration: 1200 })</strong></span>
         <button onclick="launchHierarchyCommandCenter()" class="cta-enter-btn" style="padding:8px 16px; font-size:11px;">
           🧭 LAUNCH COMMAND CENTER FOR SELECTED PARCEL
         </button>
       </div>
     </div>
   </div>
-
-  <!-- National Stats Footer Bar -->
-  <div class="national-stats-bar">
-    <div class="stat-group">
-      <span class="stat-num">28</span>
-      <span class="stat-lbl">STATES</span>
-    </div>
-    <div class="stat-divider">|</div>
-    <div class="stat-group">
-      <span class="stat-num">8</span>
-      <span class="stat-lbl">UNION TERRITORIES</span>
-    </div>
-    <div class="stat-divider">|</div>
-    <div class="stat-group">
-      <span class="stat-num">36</span>
-      <span class="stat-lbl">ACTIVE REGIONS</span>
-    </div>
-    <div class="stat-badges">
-      <span class="badge">🌧️ Rainfall Nowcasting</span>
-      <span class="badge">🛰️ SAR InSAR</span>
-      <span class="badge">🏔️ Terrain Physics</span>
-      <span class="badge">🏠 Cadastre Harmonization</span>
-      <span class="badge">🚨 Early Warning</span>
-    </div>
-  </div>
 </section>
 
 <section class="closing">
-  <div class="eyebrow">Disaster Decision-Support</div>
-  <h2>Built for what happens next in India.</h2>
-  <p>Connecting scientific hazard intelligence with legal land cadastre records to drive immediate response, safe resettlement, and transparent damage reconciliation across vulnerable regions.</p>
+  <div class="eyebrow">GOVT OF INDIA • DISASTER RESILIENCE</div>
+  <h2>Resilience In Every Khasra.</h2>
+  <p>Connecting scientific hazard intelligence with legal land cadastre records to drive immediate response, safe resettlement, and transparent damage reconciliation across all 36 Indian regions.</p>
 </section>
 
 <script>
@@ -1005,14 +1037,18 @@ function updateActiveRegionDisplay(regionId) {
   const coordsEl = document.getElementById('regCoords');
   const riskEl = document.getElementById('regRisk');
   const termsEl = document.getElementById('regLandTerms');
+  const langEl = document.getElementById('regLanguages');
+  const rainEl = document.getElementById('regRainLimit');
   const bboxEl = document.getElementById('regBbox');
   const dropEl = document.getElementById('regionDropdown');
 
-  if (pill) pill.textContent = reg.type.toUpperCase();
+  if (pill) pill.textContent = reg.type ? reg.type.toUpperCase() : 'STATE';
   if (nameEl) nameEl.textContent = reg.name;
   if (coordsEl) coordsEl.textContent = `${reg.lat}° N, ${reg.lng}° E`;
-  if (riskEl) riskEl.textContent = reg.hazard;
-  if (termsEl) termsEl.textContent = reg.landTerm;
+  if (riskEl) riskEl.textContent = reg.primaryRisk || reg.hazard;
+  if (termsEl) termsEl.textContent = reg.cadastreTerm || reg.landTerm;
+  if (langEl) langEl.textContent = reg.languages ? reg.languages.join(', ') : 'Hindi, Regional Dialect';
+  if (rainEl) rainEl.textContent = `> ${reg.rainTriggerLimit || 60}.0 mm/hr (Warning Level)`;
   if (bboxEl) bboxEl.textContent = reg.bbox ? `[${reg.bbox.join(', ')}]` : `[${(reg.lng-0.4).toFixed(2)}, ${(reg.lat-0.4).toFixed(2)}, ${(reg.lng+0.4).toFixed(2)}, ${(reg.lat+0.4).toFixed(2)}]`;
   if (dropEl) dropEl.value = reg.id;
 

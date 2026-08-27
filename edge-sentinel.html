@@ -3,133 +3,69 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Edge AI Crack Sentinel — GeoResilience-360</title>
-<meta name="description" content="On-device Edge AI PWA using quantized MobileNetV3 for offline crack triage and geo-tagged field reporting." />
+<title>GeoShield 🇮🇳 — Offline Field Sentinel &amp; Tactical Compass</title>
+<meta name="description" content="On-device Edge AI Mobile PWA using MobileNetV3 WASM for offline crack triage and tactical evacuation compass." />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="nav.css">
 <style>
-:root{--bg-0:#000;--bg-1:#09090b;--bg-2:#111113;--gold:#d4af37;--gold-soft:rgba(212,175,55,.18);--gold-glow:rgba(212,175,55,.06);--teal:#2563eb;--green:#22c55e;--orange:#f97316;--red:#ef4444;--ink-0:#fff;--ink-1:#a1a1aa;--ink-2:#52525b;--line:#27272a;--font-d:'Space Grotesk',sans-serif;--font-b:'Inter',sans-serif;--font-m:'JetBrains Mono',monospace}
+:root{
+  --bg-0:#060b13;--bg-1:#0d1524;--bg-2:#111b30;
+  --gold:#f59e0b;--gold-soft:rgba(245,158,11,.18);
+  --teal:#38bdf8;--green:#22c55e;--orange:#f97316;--red:#ef4444;
+  --ink-0:#fff;--ink-1:#94a3b8;--ink-2:#64748b;--line:#1e293b;
+  --font-d:'Space Grotesk',sans-serif;--font-b:'Inter',sans-serif;--font-m:'JetBrains Mono',monospace;
+}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html{scroll-behavior:smooth}
 body{background:var(--bg-0);color:var(--ink-0);font-family:var(--font-b);overflow-x:hidden;-webkit-font-smoothing:antialiased}
 ::selection{background:var(--gold-soft);color:var(--bg-0)}
-.stars{position:fixed;inset:0;z-index:0;pointer-events:none;background-image:radial-gradient(1px 1px at 9% 13%,#fff2 0,transparent 70%),radial-gradient(1px 1px at 79% 8%,#fff1 0,transparent 70%),radial-gradient(1.5px 1.5px at 56% 32%,#fff1 0,transparent 70%),radial-gradient(1px 1px at 23% 63%,#fff1 0,transparent 70%),radial-gradient(1px 1px at 90% 71%,#fff2 0,transparent 70%),radial-gradient(1px 1px at 67% 89%,#fff1 0,transparent 70%)}
 
-nav{position:fixed;top:0;left:0;right:0;z-index:100;height:60px;display:flex;align-items:center;justify-content:space-between;padding:0 32px;background:rgba(0,0,0,.8);backdrop-filter:blur(16px);border-bottom:1px solid var(--line)}
-.nav-brand{font-family:var(--font-m);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-1)}
-.nav-brand b{color:var(--gold);font-weight:500}
-.nav-pill{font-family:var(--font-m);font-size:10px;letter-spacing:.12em;text-transform:uppercase;padding:5px 12px;border:1px solid rgba(212,175,55,.3);border-radius:100px;color:var(--gold);background:var(--gold-glow)}
-.nav-back{display:flex;align-items:center;gap:8px;font-family:var(--font-m);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-1);text-decoration:none;transition:color .2s}
-.nav-back:hover{color:var(--gold)}
-.nav-back svg{width:14px;height:14px}
+.stars{position:fixed;inset:0;z-index:0;pointer-events:none;background-image:radial-gradient(1px 1px at 9% 13%,#fff2 0,transparent 70%),radial-gradient(1px 1px at 79% 8%,#fff1 0,transparent 70%),radial-gradient(1.5px 1.5px at 56% 32%,#fff1 0,transparent 70%),radial-gradient(1px 1px at 23% 63%,#fff1 0,transparent 70%),radial-gradient(1px 1px at 90% 71%,#fff2 0,transparent 70%)}
 
-/* Hero */
-.hero{position:relative;z-index:1;padding:100px 24px 60px;text-align:center}
-.module-tag{font-family:var(--font-m);font-size:10.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);margin-bottom:18px;display:flex;align-items:center;justify-content:center;gap:10px}
-.module-tag::before,.module-tag::after{content:'';display:block;height:1px;width:36px}
-.module-tag::before{background:linear-gradient(90deg,transparent,var(--gold))}
-.module-tag::after{background:linear-gradient(90deg,var(--gold),transparent)}
-.hero h1{font-family:var(--font-d);font-weight:700;font-size:clamp(30px,5vw,60px);letter-spacing:-.03em;line-height:1.1;margin-bottom:16px}
-.hero h1 span{color:var(--gold)}
-.hero-sub{max-width:52ch;color:var(--ink-1);font-size:15px;line-height:1.65;margin:0 auto 48px}
+.sentinel-container{position:relative;z-index:1;max-width:1200px;margin:84px auto 40px;padding:0 20px}
+.header-box{text-align:center;margin-bottom:36px}
+.header-tag{font-family:var(--font-m);font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);background:rgba(245,158,11,0.12);padding:3px 10px;border-radius:4px;border:1px solid rgba(245,158,11,0.3);display:inline-block;margin-bottom:10px}
+.header-box h1{font-family:var(--font-d);font-size:clamp(26px,4vw,40px);font-weight:700;color:#fff;margin-bottom:8px}
+.header-box p{color:var(--ink-1);font-size:14px;max-width:68ch;margin:0 auto}
 
-/* PWA mockup + AI flow grid */
-.feature-grid{position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:0 24px 60px;display:grid;grid-template-columns:320px 1fr;gap:32px;align-items:start}
-@media(max-width:860px){.feature-grid{grid-template-columns:1fr}}
+/* Dual Column Layout */
+.sentinel-grid{display:grid;grid-template-columns:360px 1fr;gap:28px;align-items:start}
+@media(max-width:960px){.sentinel-grid{grid-template-columns:1fr}}
 
-/* Phone mockup */
-.phone-wrap{display:flex;justify-content:center}
-.phone{width:260px;border-radius:32px;background:var(--bg-1);border:1.5px solid var(--line);overflow:hidden;box-shadow:0 0 60px -20px var(--gold-soft),0 40px 80px -20px #000;position:relative}
-.phone-notch{height:30px;background:var(--bg-0);display:flex;align-items:center;justify-content:center}
-.phone-notch::after{content:'';width:60px;height:8px;border-radius:100px;background:var(--bg-2)}
-.phone-screen{background:var(--bg-0);padding:16px}
-.phone-cam{width:100%;aspect-ratio:4/3;border-radius:12px;background:var(--bg-2);border:1px solid var(--line);position:relative;overflow:hidden;margin-bottom:14px}
-.cam-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(212,175,55,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(212,175,55,.06) 1px,transparent 1px);background-size:33.3% 33.3%}
-.cam-focus{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:80px;height:80px}
-.cam-focus::before,.cam-focus::after{content:'';position:absolute;width:18px;height:18px;border-color:var(--gold);border-style:solid}
-.cam-focus::before{top:0;left:0;border-width:2px 0 0 2px}
-.cam-focus::after{bottom:0;right:0;border-width:0 2px 2px 0}
-.cam-ai-badge{position:absolute;top:8px;right:8px;background:rgba(0,0,0,.7);border:1px solid var(--green);border-radius:6px;padding:4px 8px;font-family:var(--font-m);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--green);display:flex;align-items:center;gap:4px}
-.cam-ai-badge::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--green);animation:blink 1s infinite}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
-.cam-crack{position:absolute;top:40%;left:30%;width:50px;height:2px;background:linear-gradient(90deg,transparent,rgba(239,68,68,.7),transparent);border-radius:1px;transform:rotate(-15deg)}
-.cam-crack::after{content:'';position:absolute;top:4px;left:20%;width:30px;height:1.5px;background:linear-gradient(90deg,transparent,rgba(239,68,68,.5),transparent);transform:rotate(10deg)}
+/* Smartphone Frame (Left) */
+.phone-frame{width:100%;max-width:340px;margin:0 auto;background:#0d1524;border:2px solid #334155;border-radius:36px;padding:18px;box-shadow:0 20px 60px rgba(0,0,0,0.8),0 0 30px rgba(56,189,248,0.15)}
+.phone-notch{height:22px;background:#060b13;border-radius:12px;margin:0 auto 14px;width:120px;display:flex;align-items:center;justify-content:center}
+.phone-notch-dot{width:8px;height:8px;border-radius:50%;background:#334155}
 
-.phone-result{background:var(--bg-2);border-radius:10px;padding:12px;margin-bottom:12px}
-.pr-label{font-family:var(--font-m);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-2);margin-bottom:8px;display:block}
-.pr-bar-wrap{height:6px;background:var(--line);border-radius:4px;overflow:hidden;margin-bottom:6px}
-.pr-bar-fill{height:100%;width:82%;border-radius:4px;background:linear-gradient(90deg,var(--green),var(--gold));animation:bFill 1.2s ease forwards}
-@keyframes bFill{from{width:0}}
-.pr-conf{display:flex;justify-content:space-between;font-family:var(--font-m);font-size:10px}
-.pr-conf .l{color:var(--ink-1)} .pr-conf .r{color:var(--gold)}
+.phone-screen{background:#060b13;border:1px solid #1e293b;border-radius:20px;padding:14px}
+.pwa-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;border-bottom:1px solid #1e293b;padding-bottom:8px}
+.pwa-title{font-family:var(--font-d);font-size:13px;font-weight:700;color:#fff}
+.pwa-mode-toggle{background:rgba(34,197,94,0.12);border:1px solid rgba(34,197,94,0.4);color:#22c55e;font-family:var(--font-m);font-size:9.5px;padding:2px 8px;border-radius:100px;cursor:pointer;font-weight:700}
 
-.phone-submit-btn{width:100%;padding:11px;background:linear-gradient(135deg,#d4af37,#b8952e);border:none;border-radius:10px;font-family:var(--font-m);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:#000;font-weight:700;cursor:pointer;transition:opacity .2s}
-.phone-submit-btn:hover{opacity:.85}
-.phone-status{display:flex;align-items:center;justify-content:space-between;padding:10px 0 0;font-family:var(--font-m);font-size:9px;letter-spacing:.1em;text-transform:uppercase}
-.ps-offline{color:var(--orange);display:flex;align-items:center;gap:4px}
-.ps-offline::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--orange)}
-.ps-queue{color:var(--ink-2)}
+.camera-preview{width:100%;aspect-ratio:4/3;background:#111b30;border:1px dashed #334155;border-radius:12px;position:relative;overflow:hidden;margin-bottom:12px;display:flex;align-items:center;justify-content:center}
+.crack-scarp-overlay{position:absolute;width:70%;height:3px;background:linear-gradient(90deg,transparent,#ef4444,transparent);transform:rotate(-20deg);box-shadow:0 0 10px #ef4444}
+.camera-crosshair{position:absolute;width:40px;height:40px;border:1px solid rgba(245,158,11,0.6)}
 
-/* AI Pipeline */
-.ai-pipeline{display:flex;flex-direction:column;gap:16px}
-.section-label{font-family:var(--font-m);font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);margin-bottom:8px}
-.section-title{font-family:var(--font-d);font-size:clamp(20px,2.8vw,28px);font-weight:600;margin-bottom:28px}
+.upload-selectors{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:12px}
+.btn-select-sample{background:#111b30;border:1px solid #334155;border-radius:6px;padding:8px 6px;color:#cbd5e1;font-family:var(--font-m);font-size:10px;cursor:pointer;transition:all 0.2s}
+.btn-select-sample.active{border-color:var(--gold);background:rgba(245,158,11,0.1);color:var(--gold)}
 
-.pipe-step{display:flex;gap:16px;align-items:flex-start}
-.pipe-num{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:var(--font-m);font-size:12px;font-weight:700;flex-shrink:0;margin-top:2px}
-.pipe-num.p1{background:rgba(37,99,235,.15);color:var(--teal);border:1px solid rgba(37,99,235,.3)}
-.pipe-num.p2{background:rgba(168,85,247,.15);color:#a855f7;border:1px solid rgba(168,85,247,.3)}
-.pipe-num.p3{background:rgba(212,175,55,.12);color:var(--gold);border:1px solid rgba(212,175,55,.3)}
-.pipe-num.p4{background:rgba(34,197,94,.12);color:var(--green);border:1px solid rgba(34,197,94,.3)}
-.pipe-content{flex:1;background:var(--bg-2);border:1px solid var(--line);border-radius:10px;padding:16px}
-.pipe-content h4{font-family:var(--font-d);font-size:14px;font-weight:600;margin-bottom:6px}
-.pipe-content p{font-size:12px;color:var(--ink-1);line-height:1.6;margin-bottom:10px}
-.pipe-tech{font-family:var(--font-m);font-size:10px;letter-spacing:.1em;text-transform:uppercase;padding:4px 10px;border-radius:6px;display:inline-block}
-.pt-blue{background:rgba(37,99,235,.12);color:#60a5fa}
-.pt-purple{background:rgba(168,85,247,.12);color:#c084fc}
-.pt-gold{background:rgba(212,175,55,.1);color:var(--gold)}
-.pt-green{background:rgba(34,197,94,.1);color:#86efac}
+.ai-triage-box{background:#111b30;border:1px solid #334155;border-radius:8px;padding:10px;margin-bottom:12px;font-size:11px}
+.btn-submit-pwa{width:100%;background:linear-gradient(135deg,#f59e0b,#d97706);border:none;border-radius:8px;padding:10px;font-family:var(--font-d);font-size:12px;font-weight:700;color:#060b13;cursor:pointer}
 
-/* Offline meter */
-.offline-section{position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:0 24px 80px}
-.offline-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-top:32px}
-.off-card{background:var(--bg-2);border:1px solid var(--line);border-radius:10px;padding:22px;position:relative;overflow:hidden}
-.off-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--teal),var(--gold))}
-.off-icon{font-size:26px;margin-bottom:12px;display:block}
-.off-title{font-family:var(--font-d);font-size:14px;font-weight:600;margin-bottom:6px}
-.off-desc{font-size:12px;color:var(--ink-1);line-height:1.5}
+/* Right Column: Tactical Compass & Queue */
+.right-card{background:var(--bg-1);border:1px solid var(--line);border-radius:12px;padding:22px;margin-bottom:20px;box-shadow:0 8px 30px rgba(0,0,0,0.6)}
+.right-card h3{font-family:var(--font-d);font-size:16px;margin-bottom:16px;color:#fff;display:flex;justify-content:space-between;align-items:center}
 
-/* Report form */
-.report-section{position:relative;z-index:1;max-width:760px;margin:0 auto;padding:0 24px 80px}
-.report-form{background:var(--bg-2);border:1px solid var(--line);border-radius:12px;padding:28px}
-.form-row{margin-bottom:20px}
-.form-label{font-family:var(--font-m);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-1);margin-bottom:8px;display:block}
-.form-input{width:100%;background:var(--bg-1);border:1px solid var(--line);border-radius:8px;padding:11px 14px;color:var(--ink-0);font-family:var(--font-b);font-size:13px;outline:none;transition:border-color .2s}
-.form-input:focus{border-color:rgba(212,175,55,.4)}
-.form-select{width:100%;background:var(--bg-1);border:1px solid var(--line);border-radius:8px;padding:11px 14px;color:var(--ink-0);font-family:var(--font-b);font-size:13px;outline:none;appearance:none;cursor:pointer}
-.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-@media(max-width:540px){.form-grid{grid-template-columns:1fr}}
-.upload-zone{border:1.5px dashed var(--line);border-radius:8px;padding:28px;text-align:center;cursor:pointer;transition:border-color .2s}
-.upload-zone:hover{border-color:rgba(212,175,55,.3)}
-.upload-zone .uz-icon{font-size:28px;display:block;margin-bottom:10px}
-.upload-zone p{font-size:12px;color:var(--ink-2)}
-.upload-zone .uz-hint{font-family:var(--font-m);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-2);margin-top:6px;display:block}
-.geo-badge{display:flex;align-items:center;gap:8px;padding:10px 14px;background:rgba(34,197,94,.06);border:1px solid rgba(34,197,94,.2);border-radius:8px}
-.geo-badge svg{width:14px;height:14px;color:var(--green);flex-shrink:0}
-.geo-badge span{font-family:var(--font-m);font-size:10.5px;color:var(--green);letter-spacing:.06em}
-.submit-btn{width:100%;padding:14px;background:linear-gradient(135deg,#d4af37,#b8952e);border:none;border-radius:10px;font-family:var(--font-m);font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;color:#000;font-weight:700;cursor:pointer;transition:opacity .2s,transform .1s;margin-top:8px}
-.submit-btn:hover{opacity:.9;transform:translateY(-1px)}
+/* 360 Compass Graphic (Task 6) */
+.compass-container{display:flex;flex-direction:column;align-items:center;padding:16px 0}
+#compassSvg{width:220px;height:220px}
+.shelter-meta{margin-top:16px;text-align:center;font-size:12px;color:#cbd5e1}
 
-footer{position:relative;z-index:1;padding:32px;border-top:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
-.f-left{font-family:var(--font-m);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-2)}
-.f-left b{color:var(--gold);font-weight:500}
-.next-module{display:flex;align-items:center;gap:8px;font-family:var(--font-m);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-1);text-decoration:none;padding:10px 18px;border:1px solid var(--line);border-radius:8px;transition:border-color .2s,color .2s}
-.next-module:hover{border-color:var(--gold);color:var(--gold)}
-.next-module svg{width:13px;height:13px}
-.fade-up{opacity:0;transform:translateY(20px);transition:opacity .6s ease,transform .6s ease}
-.fade-up.is-visible{opacity:1;transform:translateY(0)}
+/* Local Queue */
+.queue-item{background:#111b30;border:1px solid #1e293b;border-radius:8px;padding:12px 14px;display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.queue-badge{font-family:var(--font-m);font-size:9.5px;padding:3px 8px;border-radius:4px;font-weight:700;background:rgba(34,197,94,0.15);color:#22c55e;border:1px solid rgba(34,197,94,0.4)}
 </style>
 </head>
 <body>
@@ -137,233 +73,218 @@ footer{position:relative;z-index:1;padding:32px;border-top:1px solid var(--line)
 <canvas id="particleCanvas"></canvas>
 <div id="gnavMount"></div>
 
-<section class="hero">
-  <div class="module-tag">Edge AI · Field Sentinel</div>
-  <h1>Edge AI <span>Crack Sentinel</span></h1>
-  <p class="hero-sub">Runs quantized MobileNetV3 on-device to triage structural crack images without cloud connectivity. Queues reports locally and syncs when the network returns.</p>
-</section>
+<div class="sentinel-container">
+  
+  <div class="header-box">
+    <span class="header-tag">Mobile Edge AI &amp; Offline PWA Triage</span>
+    <h1>Offline Field Sentinel &amp; Tactical Compass</h1>
+    <p>Empowers field response personnel and citizens with on-device MobileNetV3 WASM crack triage and real-time shelter navigation when cellular towers fail.</p>
+  </div>
 
-<!-- Phone + Pipeline -->
-<div class="feature-grid fade-up">
+  <div class="sentinel-grid">
+    
+    <!-- LEFT: Mobile Smartphone Viewport Frame (Task 6) -->
+    <div class="phone-wrap">
+      <div class="phone-frame">
+        <div class="phone-notch"><div class="phone-notch-dot"></div></div>
+        
+        <div class="phone-screen">
+          <div class="pwa-header">
+            <span class="pwa-title">📱 Sentinel Edge PWA</span>
+            <button class="pwa-mode-toggle" id="offlineToggleBtn" onclick="toggleOfflineMode()">🟢 ONLINE</button>
+          </div>
 
-  <!-- Phone mockup -->
-  <div class="phone-wrap">
-    <div class="phone">
-      <div class="phone-notch"></div>
-      <div class="phone-screen">
-        <div style="font-family:var(--font-m);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);margin-bottom:10px">⚡ GeoSentinel · Field Capture</div>
-        <div class="phone-cam">
-          <div class="cam-grid"></div>
-          <div class="cam-focus"></div>
-          <div class="cam-crack"></div>
-          <div class="cam-ai-badge">ON-DEVICE AI</div>
+          <!-- Camera Viewfinder -->
+          <div class="camera-preview">
+            <div class="camera-crosshair"></div>
+            <div id="crackOverlay" class="crack-scarp-overlay"></div>
+            <span id="camTag" style="position:absolute; bottom:6px; left:8px; font-family:var(--font-m); font-size:9px; color:#f59e0b;">AI FOCUS: ACTIVE</span>
+          </div>
+
+          <!-- Upload Selectors (Task 6) -->
+          <div class="upload-selectors">
+            <button class="btn-select-sample active" id="btnSampleCrack" onclick="selectSample('crack')">⚡ Hillside Crack</button>
+            <button class="btn-select-sample" id="btnSamplePothole" onclick="selectSample('pothole')">📷 Pothole (Spam)</button>
+          </div>
+
+          <!-- On-Device Edge AI Triage Output (Task 6) -->
+          <div class="ai-triage-box" id="aiTriageBox">
+            <div style="font-family:var(--font-m); font-size:10px; color:#22c55e; font-weight:700; margin-bottom:4px;" id="aiTriageStatus">
+              ✓ VALID HAZARD (94.2%)
+            </div>
+            <div id="aiTriageDetails" style="color:#94a3b8; font-size:10px; line-height:1.4;">
+              Identified transverse shear scarp on &gt;38° slope matched to Cadastral Dag #104/A. GPS: 27.3389° N, 88.6065° E (Locked).
+            </div>
+          </div>
+
+          <button class="btn-submit-pwa" id="btnSubmitQueue" onclick="submitToLocalQueue()">
+            [SUBMIT REPORT TO QUEUE]
+          </button>
         </div>
-        <div class="phone-result">
-          <span class="pr-label">MobileNetV3 — Crack Detected</span>
-          <div class="pr-bar-wrap"><div class="pr-bar-fill"></div></div>
-          <div class="pr-conf"><span class="l">Confidence</span><span class="r">0.82 · HIGH</span></div>
+      </div>
+    </div>
+
+    <!-- RIGHT: Tactical Evacuation Compass & Local Queue (Task 6) -->
+    <div>
+      
+      <!-- Tactical Evacuation Compass Card -->
+      <div class="right-card">
+        <h3>
+          <span>🧭 Tactical Evacuation Compass</span>
+          <span style="font-size:10px; font-family:var(--font-m); color:var(--teal);">MAGNETIC SENSOR LOCKED</span>
+        </h3>
+
+        <div class="compass-container">
+          <!-- 360° Compass Graphic SVG -->
+          <svg id="compassSvg" viewBox="0 0 200 200">
+            <circle cx="100" cy="100" r="90" fill="#060b13" stroke="#1e293b" stroke-width="2"/>
+            <circle cx="100" cy="100" r="82" fill="none" stroke="rgba(245,158,11,0.2)" stroke-width="1" stroke-dasharray="4,4"/>
+            
+            <!-- Cardinal directions -->
+            <text x="100" y="24" fill="#f59e0b" font-size="12" font-family="Space Grotesk" font-weight="700" text-anchor="middle">N</text>
+            <text x="180" y="104" fill="#94a3b8" font-size="10" font-family="Space Grotesk" text-anchor="middle">E</text>
+            <text x="100" y="186" fill="#94a3b8" font-size="10" font-family="Space Grotesk" text-anchor="middle">S</text>
+            <text x="20" y="104" fill="#94a3b8" font-size="10" font-family="Space Grotesk" text-anchor="middle">W</text>
+            
+            <!-- Compass Needle pointing 048° NE -->
+            <g transform="rotate(48, 100, 100)">
+              <polygon points="100,28 108,100 100,90 92,100" fill="#ef4444"/>
+              <polygon points="100,172 108,100 100,110 92,100" fill="#94a3b8"/>
+              <circle cx="100" cy="100" r="6" fill="#f59e0b"/>
+            </g>
+          </svg>
+
+          <div class="shelter-meta">
+            <strong style="color:#fff; font-size:15px; font-family:var(--font-d);">Target: Burtuk Relief Shelter</strong>
+            <div style="font-family:var(--font-m); font-size:11px; color:#38bdf8; margin-top:4px;">
+              Bearing: <strong>048° NE</strong> · Distance: <strong>620m</strong> · Descent: <strong>-42m</strong> · Walk: <strong>8.5 mins</strong>
+            </div>
+          </div>
+
+          <button onclick="playCompassAudio()" style="margin-top:14px; background:rgba(56,189,248,0.12); border:1px solid rgba(56,189,248,0.4); color:#38bdf8; font-family:var(--font-d); font-size:12px; font-weight:700; padding:8px 16px; border-radius:6px; cursor:pointer; display:flex; align-items:center; gap:6px;">
+            <span>🔊</span> Audio Guidance (Bhashini Voice)
+          </button>
         </div>
-        <div style="background:var(--bg-2);border-radius:10px;padding:10px;margin-bottom:12px">
-          <div style="font-family:var(--font-m);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-2);margin-bottom:6px">Classification</div>
-          <div style="display:flex;gap:6px;flex-wrap:wrap">
-            <span style="background:rgba(239,68,68,.15);color:#ef4444;border:1px solid rgba(239,68,68,.3);border-radius:6px;padding:3px 8px;font-family:var(--font-m);font-size:9px;letter-spacing:.08em">Structural Crack</span>
-            <span style="background:rgba(212,175,55,.1);color:var(--gold);border:1px solid rgba(212,175,55,.3);border-radius:6px;padding:3px 8px;font-family:var(--font-m);font-size:9px;letter-spacing:.08em">Width &gt;2mm</span>
+      </div>
+
+      <!-- PWA Local Queue Card -->
+      <div class="right-card">
+        <h3>
+          <span>📦 PWA Local Offline Queue (IndexedDB)</span>
+          <span style="font-size:10px; font-family:var(--font-m); color:var(--gold);" id="queueCount">1 PENDING SYNC</span>
+        </h3>
+
+        <div id="queueList">
+          <div class="queue-item">
+            <div>
+              <strong style="font-family:var(--font-m); font-size:11.5px; color:#fff;">REP-8821: Tension Crack (Dag #104/A)</strong>
+              <div style="font-size:10px; color:#94a3b8;">GPS: 27.3389° N, 88.6065° E · MobileNetV3: 94.2%</div>
+            </div>
+            <span class="queue-badge">READY_SYNC</span>
           </div>
         </div>
-        <button class="phone-submit-btn" onclick="simulateSubmit(this)">📤 Submit Report</button>
-        <div class="phone-status">
-          <span class="ps-offline">Offline Mode</span>
-          <span class="ps-queue">Queue: <b id="queueCount" style="color:var(--gold)">3</b> pending</span>
-        </div>
       </div>
+
     </div>
+
   </div>
 
-  <!-- AI Pipeline -->
-  <div class="ai-pipeline">
-    <div>
-      <div class="section-label">Processing Pipeline</div>
-      <div class="section-title">On-Device AI Flow</div>
-    </div>
-    <div class="pipe-step">
-      <div class="pipe-num p1">01</div>
-      <div class="pipe-content">
-        <h4>Capture &amp; Pre-process</h4>
-        <p>Field sentinel captures geo-tagged image via PWA camera API. Image resized to 224×224, normalized for model input. GPS coordinates and timestamp embedded via EXIF.</p>
-        <span class="pipe-tech pt-blue">HTML5 Camera API · IndexedDB</span>
-      </div>
-    </div>
-    <div class="pipe-step">
-      <div class="pipe-num p2">02</div>
-      <div class="pipe-content">
-        <h4>MobileNetV3 Inference</h4>
-        <p>Quantized INT8 MobileNetV3 model runs entirely on-device via TensorFlow.js + WASM backend. No network required. Classifies crack type, width estimate, and severity. Typical inference: ~140ms on mid-range device.</p>
-        <span class="pipe-tech pt-purple">TensorFlow.js · WASM Backend · MobileNetV3-INT8</span>
-      </div>
-    </div>
-    <div class="pipe-step">
-      <div class="pipe-num p3">03</div>
-      <div class="pipe-content">
-        <h4>Local Triage &amp; Queue</h4>
-        <p>Reports below confidence threshold (0.45) are flagged for human review and stored in IndexedDB. High-confidence reports (≥0.70) are queued for background sync. Low-signal reports are discarded to prevent noise in the risk model.</p>
-        <span class="pipe-tech pt-gold">IndexedDB · Service Worker · Background Sync API</span>
-      </div>
-    </div>
-    <div class="pipe-step">
-      <div class="pipe-num p4">04</div>
-      <div class="pipe-content">
-        <h4>Sync &amp; Bayesian Update</h4>
-        <p>When connectivity returns, Workbox background sync pushes the queue to FastAPI backend. Validated reports trigger a Bayesian weight update in the Geo-Evidence Fusion engine, elevating affected Khasra risk scores.</p>
-        <span class="pipe-tech pt-green">Google Workbox · FastAPI · Geo-Evidence Fusion</span>
-      </div>
-    </div>
-  </div>
 </div>
 
-<!-- Offline Capabilities -->
-<div class="offline-section fade-up">
-  <div class="section-label">PWA Capabilities</div>
-  <div class="section-title">Built for Zero Connectivity</div>
-  <div class="offline-grid stagger-parent">
-    <div class="off-card tilt-card"><span class="off-icon">📵</span><div class="off-title">Full Offline Mode</div><div class="off-desc">All capture, inference, and local triage works with zero network. Service Worker caches the entire app shell and model weights.</div></div>
-    <div class="off-card tilt-card"><span class="off-icon">🔄</span><div class="off-title">Background Sync</div><div class="off-desc">Workbox Background Sync API queues failed POST requests and automatically retries when the connection is restored.</div></div>
-    <div class="off-card tilt-card"><span class="off-icon">📍</span><div class="off-title">GPS Geo-tagging</div><div class="off-desc">Every report stores lat/lon from the Geolocation API, Khasra ID resolved via PostGIS ST_Contains from cached parcel boundaries.</div></div>
-    <div class="off-card tilt-card"><span class="off-icon">🔒</span><div class="off-title">Secure Local Storage</div><div class="off-desc">Reports stored encrypted in IndexedDB using Web Crypto API. Sync payload signed with JWT + RS256 before transmission.</div></div>
-    <div class="off-card tilt-card"><span class="off-icon">🌐</span><div class="off-title">Multilingual Alerts</div><div class="off-desc">Bhashini TTS integration reads back the AI assessment in Hindi, Bengali, Nepali, and other NE region languages.</div></div>
-    <div class="off-card tilt-card"><span class="off-icon">⚡</span><div class="off-title">Instant Install</div><div class="off-desc">PWA manifest enables add-to-homescreen. App loads in &lt;1.5s on 2G, complete with pre-cached model weights.</div></div>
-  </div>
-</div>
-
-<!-- Report Form -->
-<div class="report-section fade-up">
-  <div class="section-label">Field Report</div>
-  <div class="section-title">Submit an Observation</div>
-  <div class="report-form">
-    <div class="form-row">
-      <label class="form-label">Observation Type</label>
-      <select class="form-select">
-        <option>Structural Crack</option>
-        <option>Ground Subsidence</option>
-        <option>Slope Erosion</option>
-        <option>Road Damage</option>
-        <option>Waterlogging</option>
-        <option>Other Hazard Indicator</option>
-      </select>
-    </div>
-    <div class="form-row">
-      <label class="form-label">Photo Evidence</label>
-      <input type="file" accept="image/*" capture="environment" id="sentinelPhotoInput" style="display:none;" onchange="handleImageUpload(this)">
-      <div class="upload-zone" id="imagePreviewBox" onclick="document.getElementById('sentinelPhotoInput').click()" style="cursor:pointer;">
-        <span class="uz-icon">📷</span>
-        <p>Tap to capture photo or upload image</p>
-        <span class="uz-hint">MobileNetV3 will analyze on-device (<strong id="crackConfScore" style="color:#22c55e;">Ready</strong>)</span>
-      </div>
-    </div>
-    <div class="form-grid form-row">
-      <div>
-        <label class="form-label">Severity (Self-assessed)</label>
-        <select class="form-select"><option>Critical</option><option>High</option><option selected>Medium</option><option>Low</option></select>
-      </div>
-      <div>
-        <label class="form-label">Nearest Landmark / Village</label>
-        <input type="text" class="form-input" placeholder="e.g. Tadong Junction" />
-      </div>
-    </div>
-    <div class="form-row">
-      <label class="form-label">Description (Optional)</label>
-      <textarea class="form-input" rows="3" style="resize:vertical" placeholder="Describe what you see…"></textarea>
-    </div>
-    <div class="form-row" style="display:flex; justify-size:space-between; align-items:center; gap:10px;">
-      <div class="geo-badge" style="flex:1;">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
-        <span id="gpsTextDisplay">GPS: 27.3314° N, 88.6138° E · Khasra #GK-4821 · ±4m accuracy</span>
-      </div>
-      <button onclick="captureGPS(this)" style="background:rgba(37,99,235,0.15); border:1px solid rgba(37,99,235,0.4); color:#60a5fa; padding:8px 12px; border-radius:8px; font-family:var(--font-m); font-size:10px; cursor:pointer;">
-        📍 Acquire GPS
-      </button>
-    </div>
-    <button class="submit-btn" onclick="simulateSubmit(this)">📤 Submit to Queue &nbsp;(Offline)</button>
-  </div>
-</div>
-
-<footer>
-  <div class="f-left">GeoResilience-<b>360</b> · Module 04 of 05</div>
-  <a href="resettlement-allocator.html" class="next-module">
-    Next: Resettlement Allocator
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-  </a>
-</footer>
-
-<script>
-function captureGPS(btn) {
-  if ('geolocation' in navigator) {
-    btn.textContent = '🛰️ Acquiring Satellites…';
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        const lat = pos.coords.latitude.toFixed(4);
-        const lng = pos.coords.longitude.toFixed(4);
-        const acc = pos.coords.accuracy ? Math.round(pos.coords.accuracy) : 5;
-        const gpsEl = document.getElementById('gpsTextDisplay');
-        if (gpsEl) gpsEl.textContent = `GPS: ${lat}° N, ${lng}° E · ±${acc}m accuracy`;
-        btn.textContent = '📍 GPS Location Locked';
-        if (window.GEO_API) window.GEO_API.showToast(`GPS Acquired: ${lat}° N, ${lng}° E`);
-      },
-      (err) => {
-        btn.textContent = '📍 GPS: 27.3314° N, 88.6138° E (Default)';
-        if (window.GEO_API) window.GEO_API.showToast('GPS Fallback Active (Sikkim Sentinel)');
-      }
-    );
-  }
-}
-
-function handleImageUpload(input) {
-  if (input.files && input.files[0]) {
-    const reader = new FileReader();
-    reader.onload = function(e) {
-      const prev = document.getElementById('imagePreviewBox');
-      if (prev) {
-        prev.style.backgroundImage = `url(${e.target.result})`;
-        prev.style.backgroundSize = 'cover';
-        prev.style.backgroundPosition = 'center';
-      }
-      const confEl = document.getElementById('crackConfScore');
-      if (confEl) confEl.textContent = '94.2% (Crack Confirmed)';
-      if (window.GEO_API) window.GEO_API.showToast('MobileNetV3 Edge Inference: 94.2% Crack Detected');
-    };
-    reader.readAsDataURL(input.files[0]);
-  }
-}
-
-function simulateSubmit(btn) {
-  const orig = btn.textContent;
-  btn.textContent = '⏳ Queuing…'; btn.disabled = true;
-  setTimeout(() => {
-    const qc = document.getElementById('queueCount');
-    if (qc) qc.textContent = +qc.textContent + 1;
-    
-    // Save to IndexedDB/localStorage queue
-    try {
-      const queue = JSON.parse(localStorage.getItem('geo360_field_queue') || '[]');
-      queue.push({ timestamp: new Date().toISOString(), crackScore: 0.942, status: 'QUEUED_OFFLINE' });
-      localStorage.setItem('geo360_field_queue', JSON.stringify(queue));
-    } catch(e) {}
-
-    btn.textContent = '✓ Queued Locally (Offline Sync Ready)'; 
-    btn.style.background = 'linear-gradient(135deg,#22c55e,#16a34a)';
-    if (window.GEO_API) window.GEO_API.showToast('Report Queued in PWA Offline Storage 📱');
-    setTimeout(() => { btn.textContent = orig; btn.disabled = false; btn.style.background = ''; }, 2200);
-  }, 800);
-}
-
-const obs = new IntersectionObserver(entries => {
-  entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('is-visible'); });
-}, { threshold: 0.1 });
-document.querySelectorAll('.fade-up').forEach(el => obs.observe(el));
-</script>
 <script src="region-config.js"></script>
 <script src="assets/demo/demo-data.js"></script>
 <script src="api-client.js"></script>
 <script src="auth.js"></script>
 <script src="nav.js"></script>
+
+<script>
+let isOffline = false;
+let currentSampleType = 'crack';
+let queueItems = 1;
+
+function toggleOfflineMode() {
+  isOffline = !isOffline;
+  const btn = document.getElementById('offlineToggleBtn');
+  if (btn) {
+    if (isOffline) {
+      btn.textContent = '🔴 OFFLINE (PWA)';
+      btn.style.borderColor = '#ef4444';
+      btn.style.color = '#ef4444';
+      btn.style.background = 'rgba(239,68,68,0.15)';
+    } else {
+      btn.textContent = '🟢 ONLINE';
+      btn.style.borderColor = '#22c55e';
+      btn.style.color = '#22c55e';
+      btn.style.background = 'rgba(34,197,94,0.12)';
+    }
+  }
+  if (window.GEO_API) {
+    window.GEO_API.showToast(`Network Status: ${isOffline ? 'OFFLINE (IndexedDB Cache Enabled)' : 'ONLINE (Direct Cloud Sync)'}`);
+  }
+}
+
+function selectSample(type) {
+  currentSampleType = type;
+  document.getElementById('btnSampleCrack').classList.toggle('active', type === 'crack');
+  document.getElementById('btnSamplePothole').classList.toggle('active', type === 'pothole');
+
+  const overlay = document.getElementById('crackOverlay');
+  const statusEl = document.getElementById('aiTriageStatus');
+  const detailsEl = document.getElementById('aiTriageDetails');
+  const submitBtn = document.getElementById('btnSubmitQueue');
+
+  if (type === 'crack') {
+    overlay.style.display = 'block';
+    statusEl.textContent = '✓ VALID HAZARD (94.2%)';
+    statusEl.style.color = '#22c55e';
+    detailsEl.textContent = 'Identified transverse shear scarp on >38° slope matched to Cadastral Dag #104/A. GPS: 27.3389° N, 88.6065° E (Locked).';
+    submitBtn.disabled = false;
+    submitBtn.textContent = '[SUBMIT REPORT TO QUEUE]';
+    submitBtn.style.opacity = '1';
+  } else {
+    overlay.style.display = 'none';
+    statusEl.textContent = '⚠️ SPAM FILTERED (Rejected)';
+    statusEl.style.color = '#f59e0b';
+    detailsEl.textContent = 'Urban asphalt pothole detected without geomorphological hazard signature. Filtered on-device before queue submission.';
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'FILTERED (CANNOT SUBMIT)';
+    submitBtn.style.opacity = '0.5';
+  }
+}
+
+function submitToLocalQueue() {
+  if (currentSampleType === 'pothole') return;
+  queueItems++;
+  document.getElementById('queueCount').textContent = `${queueItems} PENDING SYNC`;
+
+  const newId = `REP-88${20 + queueItems}`;
+  const itemHtml = `
+    <div class="queue-item" style="animation: geoFadeIn 0.3s ease;">
+      <div>
+        <strong style="font-family:var(--font-m); font-size:11.5px; color:#fff;">${newId}: Field Tension Crack (Dag #104/A)</strong>
+        <div style="font-size:10px; color:#94a3b8;">GPS: 27.3389° N, 88.6065° E · MobileNetV3: 94.2%</div>
+      </div>
+      <span class="queue-badge">READY_SYNC</span>
+    </div>
+  `;
+  document.getElementById('queueList').insertAdjacentHTML('afterbegin', itemHtml);
+
+  if (window.GEO_API) {
+    window.GEO_API.showToast(`Report ${newId} saved to Local PWA Queue! 📦`);
+  }
+}
+
+function playCompassAudio() {
+  const text = 'Compass locked. Proceed north-east bearing zero-four-eight degrees toward Burtuk Relief Shelter. Distance six hundred and twenty meters, descent forty-two meters.';
+  if ('speechSynthesis' in window) {
+    const u = new SpeechSynthesisUtterance(text);
+    u.rate = 0.95;
+    window.speechSynthesis.speak(u);
+  }
+  if (window.GEO_API) {
+    window.GEO_API.showToast('🔊 Synthesizing Bhashini Tactical Audio Navigation');
+  }
+}
+</script>
 </body>
 </html>

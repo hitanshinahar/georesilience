@@ -3,54 +3,46 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Command Center Map — GeoResilience-360</title>
-<meta name="description" content="3D digital twin command center with MapLibre GL terrain rendering, hazard layers, and live incident feed for North Eastern disaster response." />
+<title>GeoShield 🇮🇳 — 3D Operations Command Center</title>
+<meta name="description" content="3D digital twin command center with terrain rendering, live geotechnical ML models, and parcel risk telemetry for national disaster response." />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="nav.css">
 <style>
-:root{--bg-0:#000;--bg-1:#09090b;--bg-2:#111113;--gold:#d4af37;--gold-soft:rgba(212,175,55,.18);--gold-glow:rgba(212,175,55,.06);--teal:#2563eb;--green:#22c55e;--orange:#f97316;--red:#ef4444;--ink-0:#fff;--ink-1:#a1a1aa;--ink-2:#52525b;--line:#27272a;--font-d:'Space Grotesk',sans-serif;--font-b:'Inter',sans-serif;--font-m:'JetBrains Mono',monospace}
+:root{
+  --bg-0:#060b13;--bg-1:#0d1524;--bg-2:#111b30;
+  --gold:#f59e0b;--gold-soft:rgba(245,158,11,.2);--gold-glow:rgba(245,158,11,.08);
+  --teal:#38bdf8;--green:#22c55e;--orange:#f97316;--red:#ef4444;
+  --ink-0:#ffffff;--ink-1:#94a3b8;--ink-2:#64748b;--line:#1e293b;
+  --font-d:'Space Grotesk',sans-serif;--font-b:'Inter',sans-serif;--font-m:'JetBrains Mono',monospace;
+}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 body{background:var(--bg-0);color:var(--ink-0);font-family:var(--font-b);overflow-x:hidden;-webkit-font-smoothing:antialiased}
 ::selection{background:var(--gold-soft);color:var(--bg-0)}
 .stars{position:fixed;inset:0;z-index:0;pointer-events:none;background-image:radial-gradient(1px 1px at 10% 15%,#fff2 0,transparent 70%),radial-gradient(1px 1px at 82% 8%,#fff1 0,transparent 70%),radial-gradient(1.5px 1.5px at 58% 30%,#fff1 0,transparent 70%),radial-gradient(1px 1px at 25% 65%,#fff1 0,transparent 70%),radial-gradient(1px 1px at 91% 72%,#fff2 0,transparent 70%)}
 
-nav{position:fixed;top:0;left:0;right:0;z-index:200;height:60px;display:flex;align-items:center;justify-content:space-between;padding:0 24px;background:rgba(0,0,0,.8);backdrop-filter:blur(16px);border-bottom:1px solid var(--line)}
-.nav-brand{font-family:var(--font-m);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-1)}
-.nav-brand b{color:var(--gold);font-weight:500}
-.nav-pill{font-family:var(--font-m);font-size:10px;letter-spacing:.12em;text-transform:uppercase;padding:5px 12px;border:1px solid rgba(212,175,55,.3);border-radius:100px;color:var(--gold);background:var(--gold-glow)}
-.nav-back{display:flex;align-items:center;gap:8px;font-family:var(--font-m);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-1);text-decoration:none;transition:color .2s}
-.nav-back:hover{color:var(--gold)}
-.nav-back svg{width:14px;height:14px}
-
 /* ── Full-screen layout ── */
-.cc-layout{display:grid;grid-template-columns:240px 1fr 280px;height:calc(100vh - 60px);margin-top:60px;position:relative;z-index:1}
-@media(max-width:900px){.cc-layout{grid-template-columns:1fr}.cc-sidebar-left,.cc-sidebar-right{display:none}}
+.cc-layout{display:grid;grid-template-columns:310px 1fr 340px;height:calc(100vh - 64px);margin-top:64px;position:relative;z-index:1}
+@media(max-width:1100px){.cc-layout{grid-template-columns:1fr;height:auto}.cc-sidebar-left,.cc-sidebar-right{display:none}}
 
-/* ── Left sidebar — Layer Controls ── */
-.cc-sidebar-left{background:var(--bg-1);border-right:1px solid var(--line);overflow-y:auto;padding:20px 16px}
-.sidebar-section{margin-bottom:28px}
-.ss-label{font-family:var(--font-m);font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-2);margin-bottom:14px;display:block}
-.layer-toggle{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-radius:8px;cursor:pointer;transition:background .2s;margin-bottom:6px;border:1px solid transparent}
-.layer-toggle:hover{background:var(--bg-2)}
-.layer-toggle.is-on{background:var(--bg-2);border-color:var(--line)}
-.lt-left{display:flex;align-items:center;gap:10px}
-.lt-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
-.lt-name{font-size:12px;color:var(--ink-1)}
-.layer-toggle.is-on .lt-name{color:var(--ink-0)}
-/* toggle switch */
-.toggle-sw{width:28px;height:16px;border-radius:100px;background:var(--line);position:relative;flex-shrink:0;transition:background .25s}
-.toggle-sw::after{content:'';position:absolute;top:2px;left:2px;width:12px;height:12px;border-radius:50%;background:var(--ink-2);transition:transform .25s,background .25s}
-.layer-toggle.is-on .toggle-sw{background:var(--gold)}
-.layer-toggle.is-on .toggle-sw::after{transform:translateX(12px);background:#000}
+/* ── Left sidebar — Sensors & ML Model Stack ── */
+.cc-sidebar-left{background:var(--bg-1);border-right:1px solid var(--line);overflow-y:auto;padding:18px 14px}
+.sidebar-section{margin-bottom:20px}
+.ss-label{font-family:var(--font-m);font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin-bottom:10px;display:flex;align-items:center;gap:6px;font-weight:700}
 
-/* opacity slider */
-.op-row{padding:0 12px;margin-bottom:14px}
-.op-label{font-family:var(--font-m);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-2);display:flex;justify-content:space-between;margin-bottom:6px}
-.op-label span{color:var(--ink-1)}
-input[type=range]{-webkit-appearance:none;width:100%;height:3px;background:var(--line);border-radius:4px;outline:none}
-input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:12px;height:12px;border-radius:50%;background:var(--gold);cursor:pointer}
+/* Model Stack Cards */
+.model-stack-card{background:var(--bg-2);border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin-bottom:8px;transition:border-color .2s}
+.model-stack-card:hover{border-color:rgba(245,158,11,.4)}
+.msc-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+.msc-num{font-family:var(--font-m);font-size:9px;color:var(--teal);font-weight:700}
+.msc-score{font-family:var(--font-d);font-size:12.5px;font-weight:700;color:#fff}
+.msc-desc{font-size:10.5px;color:var(--ink-1);line-height:1.4}
+
+/* Dynamic Rain Slider */
+.rain-box{background:rgba(245,158,11,0.06);border:1px solid rgba(245,158,11,0.3);border-radius:10px;padding:14px;margin-bottom:16px}
+input[type=range]{-webkit-appearance:none;width:100%;height:4px;background:#334155;border-radius:4px;outline:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:var(--gold);cursor:pointer;box-shadow:0 0 8px var(--gold)}
 
 /* ── Map area ── */
 .cc-map{position:relative;background:var(--bg-0);overflow:hidden}
@@ -58,76 +50,33 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:12px;heigh
 
 /* Map overlays */
 .map-hud{position:absolute;inset:0;pointer-events:none}
-.hud-coords{position:absolute;bottom:16px;left:16px;font-family:var(--font-m);font-size:10px;letter-spacing:.1em;color:var(--gold);background:rgba(0,0,0,.6);padding:6px 10px;border-radius:6px;border:1px solid var(--line)}
-.hud-scale{position:absolute;bottom:16px;right:16px;font-family:var(--font-m);font-size:10px;color:var(--ink-2);background:rgba(0,0,0,.6);padding:6px 10px;border-radius:6px;border:1px solid var(--line)}
+.hud-coords{position:absolute;bottom:16px;left:16px;font-family:var(--font-m);font-size:10.5px;letter-spacing:.1em;color:var(--gold);background:rgba(6,11,19,.85);padding:6px 12px;border-radius:6px;border:1px solid var(--line)}
+.hud-scale{position:absolute;bottom:16px;right:16px;font-family:var(--font-m);font-size:10px;color:var(--teal);background:rgba(6,11,19,.85);padding:6px 12px;border-radius:6px;border:1px solid var(--line)}
 .hud-crosshair{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none}
-.hud-crosshair::before,.hud-crosshair::after{content:'';position:absolute;background:rgba(212,175,55,.4)}
+.hud-crosshair::before,.hud-crosshair::after{content:'';position:absolute;background:rgba(245,158,11,.5)}
 .hud-crosshair::before{width:20px;height:1px;top:0;left:-10px}
 .hud-crosshair::after{width:1px;height:20px;top:-10px;left:0}
 
-.incident-dot{position:absolute;width:14px;height:14px;cursor:pointer;pointer-events:auto}
-.incident-dot .ring{position:absolute;inset:-4px;border-radius:50%;border:1px solid currentColor;animation:ringPulse 2.2s ease-out infinite}
-.incident-dot .core{position:absolute;inset:2px;border-radius:50%;background:currentColor}
-@keyframes ringPulse{0%{transform:scale(.7);opacity:.6}100%{transform:scale(2.4);opacity:0}}
-.incident-dot.ic-red{color:#ef4444}
-.incident-dot.ic-orange{color:#f97316}
-.incident-dot.ic-gold{color:#d4af37}
+/* Highway Banner */
+.highway-banner{position:absolute;top:16px;left:50%;transform:translateX(-50%);background:rgba(6,11,19,0.9);border:1px solid #334155;border-radius:20px;padding:6px 16px;font-family:var(--font-m);font-size:11px;color:#fff;display:flex;align-items:center;gap:8px;box-shadow:0 4px 16px rgba(0,0,0,0.6);pointer-events:auto}
 
-/* ── Right sidebar — Incident Feed ── */
-.cc-sidebar-right{background:var(--bg-1);border-left:1px solid var(--line);overflow-y:auto;display:flex;flex-direction:column}
-.feed-header{padding:16px;border-bottom:1px solid var(--line);flex-shrink:0;display:flex;align-items:center;justify-content:space-between}
-.feed-header h3{font-family:var(--font-d);font-size:13px;font-weight:600}
-.live-badge{display:flex;align-items:center;gap:6px;font-family:var(--font-m);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--red)}
-.live-dot{width:6px;height:6px;border-radius:50%;background:var(--red);animation:blink 1s infinite}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+/* ── Right sidebar — Inspector & Detour Actions ── */
+.cc-sidebar-right{background:var(--bg-1);border-left:1px solid var(--line);overflow-y:auto;display:flex;flex-direction:column;padding:16px}
+.inspector-card{background:var(--bg-2);border:1px solid rgba(245,158,11,0.3);border-radius:10px;padding:14px;margin-bottom:14px}
+.insp-badge{font-family:var(--font-m);font-size:9.5px;color:var(--gold);background:rgba(245,158,11,0.12);padding:2px 6px;border-radius:4px;font-weight:700}
+.shap-bar-row{margin-bottom:8px}
+.shap-label{display:flex;justify-content:space-between;font-size:10.5px;color:var(--ink-1);margin-bottom:3px}
+.shap-track{height:5px;background:#1e293b;border-radius:4px;overflow:hidden}
+.shap-fill{height:100%;border-radius:4px;transition:width 0.3s ease}
 
-.incident-feed{flex:1;overflow-y:auto;padding:8px}
-.inc-card{padding:14px;border-radius:8px;background:var(--bg-2);border:1px solid var(--line);margin-bottom:8px;cursor:pointer;transition:border-color .2s}
-.inc-card:hover{border-color:rgba(212,175,55,.3)}
-.inc-card-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:8px;gap:8px}
-.inc-severity{font-family:var(--font-m);font-size:9px;letter-spacing:.12em;text-transform:uppercase;padding:3px 8px;border-radius:100px;flex-shrink:0}
-.sev-critical{background:rgba(239,68,68,.15);color:#ef4444;border:1px solid rgba(239,68,68,.3)}
-.sev-high{background:rgba(249,115,22,.15);color:#f97316;border:1px solid rgba(249,115,22,.3)}
-.sev-medium{background:rgba(212,175,55,.12);color:var(--gold);border:1px solid rgba(212,175,55,.3)}
-.inc-title{font-family:var(--font-d);font-size:12px;font-weight:600;line-height:1.3}
-.inc-meta{font-family:var(--font-m);font-size:9.5px;color:var(--ink-2);margin-bottom:8px}
-.inc-desc{font-size:11px;color:var(--ink-1);line-height:1.5;margin-bottom:10px}
-.inc-action{font-family:var(--font-m);font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);text-decoration:none;display:flex;align-items:center;gap:4px}
-.inc-action svg{width:10px;height:10px}
-
-/* Route panel */
-.route-panel{padding:14px;border-top:1px solid var(--line);flex-shrink:0}
-.route-label{font-family:var(--font-m);font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-2);margin-bottom:12px;display:block}
-.route-option{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;border:1px solid var(--line);margin-bottom:8px;cursor:pointer;transition:border-color .2s}
-.route-option:hover,.route-option.is-active{border-color:var(--gold)}
-.route-option.is-active{background:var(--gold-glow)}
-.ro-icon{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
-.ro-icon.green{background:rgba(34,197,94,.12)} .ro-icon.orange{background:rgba(249,115,22,.12)} .ro-icon.red{background:rgba(239,68,68,.12)}
-.ro-info{flex:1;min-width:0}
-.ro-name{font-family:var(--font-m);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-0);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.ro-time{font-family:var(--font-m);font-size:9.5px;color:var(--ink-2)}
-.ro-status{font-family:var(--font-m);font-size:9px;letter-spacing:.08em;text-transform:uppercase;padding:2px 6px;border-radius:4px}
-.st-open{background:rgba(34,197,94,.15);color:#22c55e}
-.st-risk{background:rgba(249,115,22,.15);color:#f97316}
-.st-block{background:rgba(239,68,68,.15);color:#ef4444}
-
-/* Below-fold content */
-.below-fold{position:relative;z-index:1;padding:60px 24px 80px;max-width:1100px;margin:0 auto}
-.section-label{font-family:var(--font-m);font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);margin-bottom:8px}
-.section-title{font-family:var(--font-d);font-size:clamp(20px,2.8vw,30px);font-weight:600;margin-bottom:32px}
-.stack-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}
-.stack-card{background:var(--bg-2);border:1px solid var(--line);border-radius:10px;padding:20px}
-.sc-icon{font-size:24px;margin-bottom:12px;display:block}
-.sc-name{font-family:var(--font-m);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin-bottom:6px;display:block}
-.sc-tech{font-family:var(--font-d);font-size:14px;font-weight:600;margin-bottom:6px}
-.sc-desc{font-size:12px;color:var(--ink-1);line-height:1.5}
-
-footer{position:relative;z-index:1;padding:32px;border-top:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
-.f-left{font-family:var(--font-m);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-2)}
-.f-left b{color:var(--gold);font-weight:500}
-.next-module{display:flex;align-items:center;gap:8px;font-family:var(--font-m);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-1);text-decoration:none;padding:10px 18px;border:1px solid var(--line);border-radius:8px;transition:border-color .2s,color .2s}
-.next-module:hover{border-color:var(--gold);color:var(--gold)}
-.next-module svg{width:13px;height:13px}
+/* Route Detour Panel */
+.route-card{background:var(--bg-2);border:1px solid var(--line);border-radius:8px;padding:12px;margin-bottom:8px}
+.route-active{border-color:var(--green);background:rgba(34,197,94,0.06)}
+.btn-action{width:100%;border:none;border-radius:6px;padding:10px;font-family:var(--font-d);font-size:11.5px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:filter .2s,transform .15s;margin-top:6px}
+.btn-action:hover{filter:brightness(1.15);transform:translateY(-1px)}
+.btn-voice{background:linear-gradient(135deg,#38bdf8,#0284c7);color:#060b13}
+.btn-cascade{background:linear-gradient(135deg,#ef4444,#b91c1c);color:#fff}
+.btn-shelter{background:linear-gradient(135deg,#f59e0b,#d97706);color:#060b13}
 </style>
 </head>
 <body>
@@ -135,436 +84,353 @@ footer{position:relative;z-index:1;padding:32px;border-top:1px solid var(--line)
 <canvas id="particleCanvas"></canvas>
 <div id="gnavMount"></div>
 
-<!-- Main 3-column layout -->
 <div class="cc-layout">
 
-  <!-- LEFT: Layer Controls -->
+  <!-- LEFT DOCK: Dynamic Rain Slider & 3-Layer ML Model Stack -->
   <div class="cc-sidebar-left">
-    <div class="sidebar-section">
-      <span class="ss-label">Map Layers</span>
-      <div class="layer-toggle is-on" onclick="this.classList.toggle('is-on')">
-        <div class="lt-left"><div class="lt-dot" style="background:#d4af37"></div><span class="lt-name">Khasra Parcels</span></div>
-        <div class="toggle-sw"></div>
+    
+    <!-- Dynamic Rainfall Slider -->
+    <div class="rain-box">
+      <div class="ss-label">🌧️ DYNAMIC RAINFALL INTENSITY</div>
+      <div style="display:flex; justify-content:space-between; align-items:center; margin:8px 0 6px;">
+        <span style="font-size:11px; color:#94a3b8;">Rate:</span>
+        <strong id="rainValDisplay" style="font-family:var(--font-m); font-size:16px; color:#f59e0b;">30 mm/hr</strong>
       </div>
-      <div class="layer-toggle is-on" onclick="this.classList.toggle('is-on')">
-        <div class="lt-left"><div class="lt-dot" style="background:#ef4444"></div><span class="lt-name">Hazard Zones</span></div>
-        <div class="toggle-sw"></div>
-      </div>
-      <div class="layer-toggle is-on" onclick="this.classList.toggle('is-on')">
-        <div class="lt-left"><div class="lt-dot" style="background:#3b82f6"></div><span class="lt-name">Road Network</span></div>
-        <div class="toggle-sw"></div>
-      </div>
-      <div class="layer-toggle" id="overlayCascadeToggle" onclick="this.classList.toggle('is-on'); toggleCascadeOverlay();">
-        <div class="lt-left"><div class="lt-dot" style="background:#a855f7"></div><span class="lt-name">🌊 Cascading Hazards</span></div>
-        <div class="toggle-sw"></div>
-      </div>
-      <div class="layer-toggle" id="overlayUrbanToggle" onclick="this.classList.toggle('is-on'); toggleUrbanStressOverlay();">
-        <div class="lt-left"><div class="lt-dot" style="background:#f97316"></div><span class="lt-name">🏢 Urban Stress & Hill-Cut</span></div>
-        <div class="toggle-sw"></div>
-      </div>
-      <div class="layer-toggle is-on" onclick="this.classList.toggle('is-on')">
-        <div class="lt-left"><div class="lt-dot" style="background:#0ea5e9"></div><span class="lt-name">Rainfall Sim</span></div>
-        <div class="toggle-sw"></div>
+      <input type="range" id="rainSlider" min="20" max="140" value="30" step="5" oninput="onRainSliderChange(this.value)" />
+      <div style="display:flex; justify-content:space-between; font-size:9px; color:#64748b; margin-top:4px; font-family:var(--font-m);">
+        <span>30 Watch</span>
+        <span>60 Warning</span>
+        <span>95 Torrential</span>
       </div>
     </div>
 
-    <!-- DYNAMIC RAINFALL SLIDER (POINT 3 & 4) -->
-    <div class="sidebar-section" style="background:rgba(212,175,55,0.08); border:1px solid rgba(212,175,55,0.3); border-radius:10px; padding:14px; margin-bottom:14px;">
-      <span class="ss-label" style="color:#d4af37; font-weight:700;">🌧️ DYNAMIC RAINFALL STRESSER (20-140 mm/hr)</span>
-      <div style="margin:10px 0 6px; display:flex; justify-content:space-between; align-items:center;">
-        <span style="font-size:12px; color:#94a3b8;">Precipitation Rate:</span>
-        <strong id="rainValDisplay" style="font-family:var(--font-m); font-size:16px; color:#ef4444; margin-left:auto;">30 mm/hr</strong>
-      </div>
-      <input type="range" id="rainSlider" min="20" max="140" value="30" step="5" oninput="updateRainfallSimulation(this.value)" style="width:100%; accent-color:#d4af37; cursor:pointer;" />
+    <!-- 3-Layer ML Model Stack (Task 4) -->
+    <div class="sidebar-section">
+      <div class="ss-label">🧠 3-LAYER ML MODEL STACK</div>
       
-      <div style="display:flex; justify-content:space-between; font-size:9.5px; color:#64748b; margin-top:4px; font-family:var(--font-m);">
-        <span>20 (Low)</span>
-        <span>65 (Warning)</span>
-        <span>95 (Critical)</span>
-        <span>140 (Torrential)</span>
+      <div class="model-stack-card">
+        <div class="msc-head">
+          <span class="msc-num">01. STATIC SUSCEPTIBILITY</span>
+          <span class="msc-score" id="mscXGB">68 / 100</span>
+        </div>
+        <div class="msc-desc">Trained XGBoost evaluating slope gradient (44.5°), geology & CartoDEM.</div>
       </div>
 
-      <!-- Real-Time Environmental Sensor Indicators -->
-      <div style="margin-top:12px; font-size:11px; padding:10px; border-radius:6px; background:#161e31; border:1px solid #2a3652; color:#cbd5e1;">
-        <div style="font-size:9.5px; font-family:var(--font-m); color:#d4af37; letter-spacing:.12em; text-transform:uppercase; margin-bottom:6px;">📡 TELEMETRY SENSOR READINGS</div>
-        <div style="display:flex; justify-content:space-between; margin-bottom:4px;"><span>Pore Pressure:</span> <strong id="sensorPore" style="color:#60a5fa;">12.4 kPa</strong></div>
-        <div style="display:flex; justify-content:space-between; margin-bottom:4px;"><span>Soil Saturation:</span> <strong id="sensorSoil" style="color:#34d399;">32%</strong></div>
-        <div style="display:flex; justify-content:space-between; margin-bottom:4px;"><span>InSAR Velocity:</span> <strong id="sensorInsar" style="color:#f97316;">-14.2 mm/yr</strong></div>
-        <div style="display:flex; justify-content:space-between;"><span>Tilt Displacement:</span> <strong id="sensorTilt" style="color:#a78bfa;">0.12°</strong></div>
+      <div class="model-stack-card">
+        <div class="msc-head">
+          <span class="msc-num">02. TEMPORAL ESCALATION</span>
+          <span class="msc-score" id="mscLSTM" style="color:#f59e0b;">+18 pts ↑</span>
+        </div>
+        <div class="msc-desc">LSTM temporal decay tracking 72h antecedent rainfall & pore saturation.</div>
       </div>
 
-      <div id="rainStatusAlert" style="margin-top:10px; font-size:11px; padding:8px; border-radius:6px; background:#161e31; border:1px solid #2a3652; color:#cbd5e1;">
-        Status: 🟢 Normal slope stability (FoS > 1.4)
+      <div class="model-stack-card" style="border-color:rgba(239,68,68,0.4); background:rgba(239,68,68,0.06);">
+        <div class="msc-head">
+          <span class="msc-num" style="color:#ef4444;">03. GEO-EVIDENCE FUSION</span>
+          <span class="msc-score" id="mscFusion" style="color:#ef4444;">88 • CRITICAL</span>
+        </div>
+        <div class="msc-desc">Bayesian multimodal fusion with 96.4% confidence rating.</div>
       </div>
-
-      <button onclick="triggerCascadeSimulation()" style="width:100%; margin-top:10px; background:linear-gradient(135deg,#ef4444,#b91c1c); border:none; border-radius:6px; padding:8px; color:#ffffff; font-family:var(--font-d); font-size:11px; font-weight:700; cursor:pointer;">
-        🌊 SIMULATE CASCADE CHAIN & REROUTE
-      </button>
     </div>
 
+    <!-- Live Telemetry Gauges -->
     <div class="sidebar-section">
-      <span class="ss-label">Opacity</span>
-      <div class="op-row">
-        <div class="op-label">Hazard Zones <span id="hzOpVal">75%</span></div>
-        <input type="range" min="0" max="100" value="75" oninput="document.getElementById('hzOpVal').textContent=this.value+'%'">
-      </div>
-      <div class="op-row">
-        <div class="op-label">Parcels <span id="parOpVal">60%</span></div>
-        <input type="range" min="0" max="100" value="60" oninput="document.getElementById('parOpVal').textContent=this.value+'%'">
-      </div>
-    </div>
-    <div class="sidebar-section">
-      <span class="ss-label">Time Window</span>
-      <div style="display:flex;flex-direction:column;gap:6px">
-        <div class="layer-toggle is-on" onclick="document.querySelectorAll('.tw-opt').forEach(e=>e.classList.remove('is-on'));this.classList.add('is-on')"><div class="lt-left"><span class="lt-name" style="font-size:11px">Live — Now</span></div></div>
-        <div class="layer-toggle tw-opt" onclick="document.querySelectorAll('.tw-opt').forEach(e=>e.classList.remove('is-on'));this.classList.toggle('is-on')"><div class="lt-left"><span class="lt-name" style="font-size:11px">-6 Hours</span></div></div>
-        <div class="layer-toggle tw-opt" onclick="document.querySelectorAll('.tw-opt').forEach(e=>e.classList.remove('is-on'));this.classList.toggle('is-on')"><div class="lt-left"><span class="lt-name" style="font-size:11px">-24 Hours</span></div></div>
-        <div class="layer-toggle tw-opt" onclick="document.querySelectorAll('.tw-opt').forEach(e=>e.classList.remove('is-on'));this.classList.toggle('is-on')"><div class="lt-left"><span class="lt-name" style="font-size:11px">-72 Hours</span></div></div>
+      <div class="ss-label">📡 LIVE TELEMETRY GAUGES</div>
+      <div style="background:var(--bg-2); border:1px solid var(--line); border-radius:8px; padding:12px; font-size:11px;">
+        <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+          <span style="color:#94a3b8;">InSAR Ground Creep:</span>
+          <strong id="gaugeInsar" style="color:#f97316; font-family:var(--font-m);">-14.2 mm/yr</strong>
+        </div>
+        <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+          <span style="color:#94a3b8;">Soil Saturation (VWC):</span>
+          <strong id="gaugeSoil" style="color:#38bdf8; font-family:var(--font-m);">86.4%</strong>
+        </div>
+        <div style="display:flex; justify-content:space-between;">
+          <span style="color:#94a3b8;">Pore Water Pressure:</span>
+          <strong id="gaugePore" style="color:#22c55e; font-family:var(--font-m);">18.2 kPa</strong>
+        </div>
       </div>
     </div>
+
   </div>
 
-  <!-- CENTER: Map Canvas -->
+  <!-- CENTER CANVAS: 3D Cadastral Digital Twin (5 Khasra Parcels + Highway + Debris Flow) -->
   <div class="cc-map">
     <canvas id="mapCanvas"></canvas>
+    
+    <div class="highway-banner" id="highwayBanner">
+      <span id="highwayDot" style="width:8px;height:8px;border-radius:50%;background:#22c55e;box-shadow:0 0 6px #22c55e;"></span>
+      <span id="highwayStatusText">NH-10 ARTERIAL HIGHWAY: OPEN (KM-42 CLEAR)</span>
+    </div>
+
     <div class="map-hud">
       <div class="hud-crosshair"></div>
-      <div class="hud-coords">27.3314° N &nbsp;88.6138° E &nbsp;· &nbsp;1420 m</div>
-      <div class="hud-scale">Scale 1:25,000 · NE Region</div>
-      <!-- Incident markers (positioned via JS) -->
-      <div class="incident-dot ic-red"  id="inc1" style="left:38%;top:32%"><div class="ring"></div><div class="core"></div></div>
-      <div class="incident-dot ic-orange" id="inc2" style="left:55%;top:48%"><div class="ring"></div><div class="core"></div></div>
-      <div class="incident-dot ic-gold"  id="inc3" style="left:65%;top:62%"><div class="ring"></div><div class="core"></div></div>
+      <div class="hud-coords" id="hudCoordsDisplay">27.3389° N · 88.6065° E · 1,420m MSL</div>
+      <div class="hud-scale">3D Cadastral Twin · PostGIS 3.4</div>
     </div>
   </div>
 
-  <!-- RIGHT: Incident Feed + Route Panel -->
+  <!-- RIGHT DOCK: Inspector Panel ("Why Red?") & Actions -->
   <div class="cc-sidebar-right">
-    <div class="feed-header">
-      <h3>Incident Feed</h3>
-      <div class="live-badge"><div class="live-dot"></div>LIVE</div>
-    </div>
-    <div class="incident-feed">
-      <div class="inc-card">
-        <div class="inc-card-top"><div class="inc-title">Slope Collapse — NH-10 KM 42</div><span class="inc-severity sev-critical">Critical</span></div>
-        <div class="inc-meta">22:14 IST · Khasra #GK-4821 · 27.3314°N 88.6138°E</div>
-        <div class="inc-desc">Major slope failure blocking NH-10. ~200m road buried. NDRF Team 3 dispatched. OSRM alternate route computed via Ranipool bypass.</div>
-        <a href="#" class="inc-action">View Details <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a>
+    
+    <!-- Inspector Card -->
+    <div class="inspector-card" id="inspectorCard">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+        <span class="insp-badge">INSPECTOR: WHY RED?</span>
+        <span id="plotFosBadge" style="font-family:var(--font-m); font-size:11px; color:#ef4444; font-weight:700;">Fs = 0.76 (CRITICAL)</span>
       </div>
-      <div class="inc-card">
-        <div class="inc-card-top"><div class="inc-title">Flash Flood Warning — Teesta R.</div><span class="inc-severity sev-high">High</span></div>
-        <div class="inc-meta">21:40 IST · Mangan Sub-Division · River km 18</div>
-        <div class="inc-desc">Upstream debris dam formed. Flow gauge 3.8× normal. 3 riverside Khasra clusters in inundation zone. Evacuation advisory issued.</div>
-        <a href="#" class="inc-action">View Details <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a>
+      <h3 style="font-family:var(--font-d); font-size:16px; margin-bottom:4px;" id="plotNameHeader">Khasra Dag #104/A (Upper Ridge)</h3>
+      <div style="font-size:11px; color:#94a3b8; line-height:1.5; margin-bottom:12px;">
+        Owner: <strong style="color:#fff;" id="plotOwner">Tashi Lepcha</strong> · Residents: <strong style="color:#fff;" id="plotResidents">6</strong><br>
+        Aadhaar: <span style="color:#22c55e;">VERIFIED (9812-XXXX-7701)</span> · Slope: <strong style="color:#fff;" id="plotSlope">44.5°</strong>
       </div>
-      <div class="inc-card">
-        <div class="inc-card-top"><div class="inc-title">Crack Report — Tadong Area</div><span class="inc-severity sev-medium">Medium</span></div>
-        <div class="inc-meta">19:55 IST · Field Sentinel · Tadong</div>
-        <div class="inc-desc">Citizen report with geo-tagged photo. MobileNetV3 crack confidence: 0.82. Khasra risk score elevated to Watch status. Field team assigned.</div>
-        <a href="#" class="inc-action">View Details <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a>
+
+      <!-- Field Sentinel Badge -->
+      <div style="background:rgba(56,189,248,0.08); border:1px solid rgba(56,189,248,0.3); padding:8px 10px; border-radius:6px; font-size:10.5px; margin-bottom:12px; display:flex; align-items:center; gap:8px;">
+        <span>📷</span>
+        <div>
+          <strong style="color:#38bdf8;">Field Sentinel AI Crack Verified</strong>
+          <div style="color:#94a3b8; font-size:9.5px;">Transverse shear scarp identified (94.2% WASM match)</div>
+        </div>
+      </div>
+
+      <!-- SHAP Explainability Breakdown -->
+      <div style="font-family:var(--font-m); font-size:10px; color:var(--gold); letter-spacing:.1em; margin-bottom:8px;">
+        SHAP FEATURE CONTRIBUTIONS:
+      </div>
+      
+      <div class="shap-bar-row">
+        <div class="shap-label"><span>🌧️ 72h Rain Intensity</span><span id="shapRainVal">+38%</span></div>
+        <div class="shap-track"><div id="shapRainBar" class="shap-fill" style="width:38%; background:#ef4444;"></div></div>
+      </div>
+      <div class="shap-bar-row">
+        <div class="shap-label"><span>⛰️ Slope Gradient (44.5°)</span><span>+28%</span></div>
+        <div class="shap-track"><div class="shap-fill" style="width:28%; background:#f97316;"></div></div>
+      </div>
+      <div class="shap-bar-row">
+        <div class="shap-label"><span>💧 Soil Moisture Content</span><span>+18%</span></div>
+        <div class="shap-track"><div class="shap-fill" style="width:18%; background:#eab308;"></div></div>
+      </div>
+      <div class="shap-bar-row">
+        <div class="shap-label"><span>🛰️ InSAR Displacement (-4.2mm)</span><span>+16%</span></div>
+        <div class="shap-track"><div class="shap-fill" style="width:16%; background:#38bdf8;"></div></div>
       </div>
     </div>
 
-    <!-- Route Re-router -->
-    <div class="route-panel">
-      <span class="route-label">OSRM Route Status · NH-10 Corridor</span>
-      <div class="route-option is-active">
-        <div class="ro-icon green">🟢</div>
-        <div class="ro-info"><div class="ro-name">Ranipool Bypass</div><div class="ro-time">+22 min · 14.3 km</div></div>
-        <span class="ro-status st-open">Open</span>
+    <!-- Lifeline Detour Card -->
+    <div class="route-card route-active">
+      <div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:4px;">
+        <strong style="color:#22c55e;">🟢 Ranipool Bypass Corridor</strong>
+        <span style="font-family:var(--font-m); color:#94a3b8;">ACTIVE</span>
       </div>
-      <div class="route-option">
-        <div class="ro-icon orange">🟡</div>
-        <div class="ro-info"><div class="ro-name">Singtam via Rangpo</div><div class="ro-time">+47 min · 31.8 km</div></div>
-        <span class="ro-status st-risk">At Risk</span>
-      </div>
-      <div class="route-option">
-        <div class="ro-icon red">🔴</div>
-        <div class="ro-info"><div class="ro-name">NH-10 Direct</div><div class="ro-time">Blocked · KM 42</div></div>
-        <span class="ro-status st-block">Blocked</span>
-      </div>
+      <div style="font-size:10.5px; color:#cbd5e1;">OSRM Emergency Detour: +22 mins ambulance route active.</div>
     </div>
+
+    <!-- Action Buttons -->
+    <button class="btn-action btn-voice" onclick="dispatchBhashiniVoice()">
+      <span>🔊</span> DISPATCH BHASHINI VOICE ALERT
+    </button>
+    <button class="btn-action btn-shelter" onclick="highlightSafeShelter()">
+      <span>🧭</span> HIGHLIGHT SAFE SHELTER ROUTE
+    </button>
+    <button class="btn-action btn-cascade" onclick="navigateToCascade()">
+      <span>🌊</span> TRIGGER CASCADE SIMULATION
+    </button>
+
   </div>
+
 </div>
 
-<!-- Below-fold tech stack section -->
-<div class="below-fold">
-  <div class="section-label">Technology Stack</div>
-  <div class="section-title">3D Digital Twin Engine</div>
-  <div class="stack-grid stagger-parent">
-    <div class="stack-card tilt-card"><span class="sc-icon">🗺️</span><span class="sc-name">GIS Engine</span><div class="sc-tech">MapLibre GL JS</div><div class="sc-desc">Vector tile rendering with custom terrain shading and WebGL overlay layers for hazard zones and parcels.</div></div>
-    <div class="stack-card tilt-card"><span class="sc-icon">📐</span><span class="sc-name">Deck.gl v9</span><div class="sc-tech">WebGL/WebGPU Layers</div><div class="sc-desc">High-performance 3D terrain, hexbin aggregation, and scatterplot layers for 100k+ parcel rendering at 60fps.</div></div>
-    <div class="stack-card tilt-card"><span class="sc-icon">🛣️</span><span class="sc-name">OSRM Router</span><div class="sc-tech">Highway Re-Router</div><div class="sc-desc">Real-time road graph traversal with hazard-exclusion zones to compute safe alternate emergency routes.</div></div>
-    <div class="stack-card tilt-card"><span class="sc-icon">🛰️</span><span class="sc-name">InSAR Layer</span><div class="sc-tech">MintPy + Sentinel-1</div><div class="sc-desc">SAR interferometry ground deformation rasters overlaid as animated displacement heatmaps.</div></div>
-    <div class="stack-card tilt-card"><span class="sc-icon">🌧️</span><span class="sc-name">Rainfall Sim</span><div class="sc-tech">Open-Meteo + IMD</div><div class="sc-desc">Live precipitation overlay with animated particle simulation showing flow direction and accumulation.</div></div>
-    <div class="stack-card tilt-card"><span class="sc-icon">🏛️</span><span class="sc-name">Cadastre Engine</span><div class="sc-tech">PostGIS + Shapely</div><div class="sc-desc">Khasra parcel topology with ST_Intersects spatial queries linking hazard layers to individual land records.</div></div>
-  </div>
-</div>
-
-<footer>
-  <div class="f-left">GeoResilience-<b>360</b> · Module 03 of 05</div>
-  <a href="edge-sentinel.html" class="next-module">
-    Next: Edge AI Sentinel
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-  </a>
-</footer>
-
-<script>
-/* ── 3D Terrain Canvas ── */
-function drawTerrain() {
-  const canvas = document.getElementById('mapCanvas');
-  const W = canvas.offsetWidth, H = canvas.offsetHeight;
-  canvas.width = W; canvas.height = H;
-  const ctx = canvas.getContext('2d');
-
-  // Sky gradient
-  const sky = ctx.createLinearGradient(0, 0, 0, H * 0.4);
-  sky.addColorStop(0, '#04080f'); sky.addColorStop(1, '#0a1628');
-  ctx.fillStyle = sky; ctx.fillRect(0, 0, W, H * 0.4);
-
-  // Terrain layers (parallax mountain silhouettes)
-  const layers = [
-    { color: '#0d1f35', yBase: 0.55, amp: 0.18, freq: 0.004, phase: 0 },
-    { color: '#0e2540', yBase: 0.52, amp: 0.14, freq: 0.006, phase: 1.2 },
-    { color: '#112a45', yBase: 0.50, amp: 0.10, freq: 0.009, phase: 2.4 },
-    { color: '#163350', yBase: 0.48, amp: 0.07, freq: 0.014, phase: 0.8 },
-  ];
-
-  layers.forEach((l, li) => {
-    ctx.beginPath();
-    ctx.moveTo(0, H);
-    for (let x = 0; x <= W; x++) {
-      const y = H * l.yBase - Math.sin(x * l.freq + l.phase) * H * l.amp
-                - Math.sin(x * l.freq * 2.3 + l.phase * 1.7) * H * l.amp * 0.4;
-      if (x === 0) ctx.lineTo(0, y); else ctx.lineTo(x, y);
-    }
-    ctx.lineTo(W, H); ctx.closePath();
-    const grd = ctx.createLinearGradient(0, H * (l.yBase - l.amp), 0, H);
-    grd.addColorStop(0, l.color + 'ff'); grd.addColorStop(1, '#000');
-    ctx.fillStyle = grd; ctx.fill();
-  });
-
-  // Ground / valley floor
-  const floor = ctx.createLinearGradient(0, H * 0.6, 0, H);
-  floor.addColorStop(0, '#0a1a10'); floor.addColorStop(1, '#040d08');
-  ctx.fillStyle = floor;
-  ctx.fillRect(0, H * 0.6, W, H * 0.4);
-
-  // Grid overlay (cadastre effect)
-  ctx.strokeStyle = 'rgba(212,175,55,0.04)';
-  ctx.lineWidth = 0.8;
-  const gs = 36;
-  for (let x = 0; x < W; x += gs) { ctx.beginPath(); ctx.moveTo(x,H*0.55); ctx.lineTo(x,H); ctx.stroke(); }
-  for (let y = H*0.55; y < H; y += gs) { ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
-
-  // Hazard zone (red gradient blob)
-  const hz = ctx.createRadialGradient(W*0.38, H*0.62, 0, W*0.38, H*0.62, W*0.12);
-  hz.addColorStop(0, 'rgba(239,68,68,0.18)'); hz.addColorStop(1, 'transparent');
-  ctx.fillStyle = hz; ctx.fillRect(0,0,W,H);
-
-  // Road line
-  ctx.beginPath();
-  ctx.moveTo(0, H * 0.68);
-  ctx.bezierCurveTo(W * 0.2, H * 0.66, W * 0.45, H * 0.72, W * 0.6, H * 0.65);
-  ctx.bezierCurveTo(W * 0.75, H * 0.58, W * 0.88, H * 0.60, W, H * 0.58);
-  ctx.strokeStyle = 'rgba(37,99,235,0.6)'; ctx.lineWidth = 2.5;
-  ctx.setLineDash([8, 4]); ctx.stroke(); ctx.setLineDash([]);
-
-  // Blocked section highlight
-  ctx.beginPath();
-  ctx.moveTo(W * 0.33, H * 0.695); ctx.lineTo(W * 0.44, H * 0.705);
-  ctx.strokeStyle = 'rgba(239,68,68,0.8)'; ctx.lineWidth = 4;
-  ctx.stroke();
-
-  // River
-  ctx.beginPath();
-  ctx.moveTo(0, H * 0.80);
-  ctx.bezierCurveTo(W * 0.25, H * 0.78, W * 0.5, H * 0.82, W * 0.7, H * 0.76);
-  ctx.bezierCurveTo(W * 0.85, H * 0.72, W * 0.95, H * 0.78, W, H * 0.80);
-  ctx.strokeStyle = 'rgba(59,130,246,0.45)'; ctx.lineWidth = 3;
-  ctx.stroke();
-
-  // Title
-  ctx.fillStyle = 'rgba(212,175,55,0.6)';
-  ctx.font = `500 ${Math.max(11,W*0.012)}px 'JetBrains Mono', monospace`;
-  ctx.textAlign = 'left'; ctx.fillText('GANGTOK — NORTH SIKKIM PILOT ZONE', 16, 24);
-}
-
-/* ================================================================
-   DYNAMIC RAINFALL & JUDGE DEMO FLOW HANDLERS
-   ================================================================ */
-function updateRainfallSimulation(val) {
-  const display = document.getElementById('rainValDisplay');
-  const alertBox = document.getElementById('rainStatusAlert');
-  if (display) display.textContent = val + ' mm/hr';
-
-  const v = parseInt(val, 10);
-  if (v < 50) {
-    if (alertBox) {
-      alertBox.style.borderColor = '#2a3652';
-      alertBox.style.color = '#cbd5e1';
-      alertBox.innerHTML = 'Status: 🟢 Normal slope stability (FoS > 1.4)';
-    }
-  } else if (v >= 50 && v < 85) {
-    if (alertBox) {
-      alertBox.style.borderColor = '#f59e0b';
-      alertBox.style.color = '#f59e0b';
-      alertBox.innerHTML = 'Status: ⚠️ Elevated Pore-water Pressure (FoS = 1.12) — Watch Status';
-    }
-  } else {
-    if (alertBox) {
-      alertBox.style.borderColor = '#ef4444';
-      alertBox.style.color = '#ef4444';
-      alertBox.innerHTML = 'Status: 🔴 CRITICAL SLOPE FAILURE! FoS < 1.0 (Khasra 104/A & 104/B RED)';
-    }
-    // Highlight Khasra 104/A & 104/B on map
-    const inc1 = document.getElementById('inc1');
-    if (inc1) {
-      inc1.style.transform = 'scale(1.5)';
-      inc1.style.boxShadow = '0 0 25px #ef4444';
-    }
-    prependIncidentFeed({
-      title: '🚨 CRITICAL RISK: Khasra 104/A & 104/B',
-      severity: 'sev-critical',
-      meta: '22:15 IST · Khasra #104/A & #104/B · 9 Residents at Risk',
-      desc: `Rainfall reached ${v} mm/hr. Factor of Safety dropped to 0.84. High risk of debris flow impacting 9 residents across 2 land parcels. Evacuation advisory pending.`,
-      khasraId: '104A'
-    });
-  }
-}
-
-function prependIncidentFeed(inc) {
-  const feed = document.querySelector('.incident-feed');
-  if (!feed) return;
-  const existing = document.getElementById('incCard' + inc.khasraId);
-  if (existing) return; // Prevent duplicate injection
-
-  const cardHtml = `
-    <div class="inc-card" id="incCard${inc.khasraId}" style="border-left: 3px solid #ef4444; animation: geoFadeIn 0.3s ease-out;">
-      <div class="inc-card-top">
-        <div class="inc-title">${inc.title}</div>
-        <span class="inc-severity ${inc.severity}">Critical</span>
-      </div>
-      <div class="inc-meta">${inc.meta}</div>
-      <div class="inc-desc">${inc.desc}</div>
-      <button class="inc-action" onclick="openKhasraInspector('${inc.khasraId}')" style="background:none; border:none; color:var(--gold); cursor:pointer; font-size:11px; font-weight:600; padding:0; display:inline-flex; align-items:center; gap:4px; margin-top:6px;">
-        Inspect Parcel 104/A <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" style="width:12px;height:12px;"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-      </button>
-    </div>
-  `;
-  feed.insertAdjacentHTML('afterbegin', cardHtml);
-}
-
-function triggerCascadeSimulation() {
-  const slider = document.getElementById('rainSlider');
-  if (slider) {
-    slider.value = 95;
-    updateRainfallSimulation(95);
-  }
-  
-  // Highlight alternate route
-  const routes = document.querySelectorAll('.route-option');
-  if (routes.length >= 3) {
-    routes[0].classList.add('is-active'); // Ranipool Bypass
-    routes[2].classList.add('is-active'); // NH-10 Blocked
-  }
-
-  alert('🌊 CASCADE SIMULATION COMPLETE:\n1. Heavy Rainfall (95 mm/hr)\n2. Landslide triggered on Khasra 104/A\n3. Debris flow filled Jhora stream channel\n4. NH-10 Highway BLOCKED at KM 42\n5. Ranipool Bypass route HIGHLIGHTED (+22 min)');
-}
-
-function toggleCascadeOverlay() {
-  const isChecked = document.getElementById('overlayCascadeToggle')?.classList.contains('is-on');
-  if (window.GEO_API) {
-    window.GEO_API.showToast(`Cascading Hazards Overlay ${isChecked ? 'ENABLED 🌊' : 'DISABLED'}`);
-  }
-  drawTerrain();
-}
-
-function toggleUrbanStressOverlay() {
-  const isChecked = document.getElementById('overlayUrbanToggle')?.classList.contains('is-on');
-  if (window.GEO_API) {
-    window.GEO_API.showToast(`Urban Stress & Hill-Cut Forensics Overlay ${isChecked ? 'ENABLED 🏢' : 'DISABLED'}`);
-  }
-  drawTerrain();
-}
-
-function openKhasraInspector(khasraId) {
-  const modalId = 'khasraModal';
-  let modal = document.getElementById(modalId);
-  if (modal) modal.remove();
-
-  const mode = window.GEO_API ? window.GEO_API.getMode() : 'DEMO';
-  const rainVal = document.getElementById('rainSlider') ? document.getElementById('rainSlider').value : 30;
-
-  const modalHtml = `
-    <div id="${modalId}" class="geo-auth-overlay" style="display:flex; z-index:9999;">
-      <div class="geo-auth-card" style="max-width:580px; background:#09090b; border:1px solid #d4af37; border-radius:12px; padding:24px;">
-        <button class="geo-auth-close" onclick="document.getElementById('${modalId}').remove()" style="position:absolute; top:16px; right:16px; background:none; border:none; color:#a1a1aa; font-size:20px; cursor:pointer;">&times;</button>
-        
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid #27272a; padding-bottom:12px;">
-          <div>
-            <div style="font-family:var(--font-m); font-size:9.5px; color:#d4af37; letter-spacing:.18em; text-transform:uppercase;">EXPLAINABLE AI PARCEL INSPECTOR</div>
-            <h2 style="font-family:var(--font-d); font-size:20px; color:#fff; margin-top:2px;">Why is this area RED? — Khasra #${khasraId || '104/A'}</h2>
-          </div>
-          <div style="background:${mode==='LIVE'?'rgba(34,197,94,0.15)':'rgba(212,175,55,0.15)'}; border:1px solid ${mode==='LIVE'?'#22c55e':'#d4af37'}; color:${mode==='LIVE'?'#22c55e':'#d4af37'}; padding:4px 10px; border-radius:100px; font-family:var(--font-m); font-size:10px; font-weight:700;">
-            DATA MODE: ${mode} ${mode==='LIVE'?'🟢':'🟡'}
-          </div>
-        </div>
-
-        <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px; font-size:12px; margin-bottom:16px;">
-          <div style="background:#111113; padding:10px; border-radius:8px; border:1px solid #ef4444;"><span style="color:#a1a1aa; font-size:10px; display:block;">Factor of Safety (FoS)</span> <strong style="color:#ef4444; font-size:18px;">0.84</strong></div>
-          <div style="background:#111113; padding:10px; border-radius:8px; border:1px solid #27272a;"><span style="color:#a1a1aa; font-size:10px; display:block;">Fused Risk Score</span> <strong style="color:#f97316; font-size:18px;">92 / 100</strong></div>
-          <div style="background:#111113; padding:10px; border-radius:8px; border:1px solid #27272a;"><span style="color:#a1a1aa; font-size:10px; display:block;">AI Confidence</span> <strong style="color:#34d399; font-size:18px;">94.2%</strong></div>
-        </div>
-
-        <!-- SHAP Explainability Feature Contributions (Point 3) -->
-        <div style="background:#111113; border:1px solid #27272a; border-radius:8px; padding:14px; margin-bottom:16px;">
-          <div style="font-family:var(--font-m); font-size:10px; color:#d4af37; letter-spacing:.14em; text-transform:uppercase; margin-bottom:10px;">📊 SHAP EXPLAINABILITY FEATURE CONTRIBUTIONS</div>
-          
-          <div style="display:flex; flex-direction:column; gap:8px;">
-            <div>
-              <div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:2px;"><span>🌧️ Simulated Rainfall (${rainVal} mm/hr)</span><span style="color:#ef4444; font-weight:700;">+42% Impact</span></div>
-              <div style="height:4px; background:#27272a; border-radius:4px; overflow:hidden;"><div style="width:42%; height:100%; background:#ef4444;"></div></div>
-            </div>
-            <div>
-              <div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:2px;"><span>⛰️ Slope Steepness (42.6°)</span><span style="color:#f97316; font-weight:700;">+28% Impact</span></div>
-              <div style="height:4px; background:#27272a; border-radius:4px; overflow:hidden;"><div style="width:28%; height:100%; background:#f97316;"></div></div>
-            </div>
-            <div>
-              <div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:2px;"><span>💧 Soil Moisture Saturation (88%)</span><span style="color:#eab308; font-weight:700;">+18% Impact</span></div>
-              <div style="height:4px; background:#27272a; border-radius:4px; overflow:hidden;"><div style="width:18%; height:100%; background:#eab308;"></div></div>
-            </div>
-            <div>
-              <div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:2px;"><span>🛰️ InSAR Ground Velocity (-14.2 mm/yr)</span><span style="color:#60a5fa; font-weight:700;">+12% Impact</span></div>
-              <div style="height:4px; background:#27272a; border-radius:4px; overflow:hidden;"><div style="width:12%; height:100%; background:#60a5fa;"></div></div>
-            </div>
-          </div>
-        </div>
-
-        <div style="background:rgba(212,175,55,0.06); border:1px solid rgba(212,175,55,0.2); padding:12px; border-radius:8px; margin-bottom:16px;">
-          <div style="font-size:11px; color:#d4af37; font-weight:700; margin-bottom:4px;">📷 FIELD SENTINEL AI VERIFICATION</div>
-          <div style="font-size:12px; color:#cbd5e1;">Crack Photo Attached · MobileNetV3 Validation Confidence: <strong style="color:#10b981;">94.2%</strong></div>
-          <div style="font-size:11px; color:#64748b; margin-top:2px;">GPS: 27.3314° N, 88.6138° E · Field Officer #FO-09</div>
-        </div>
-
-        <div style="display:flex; gap:10px;">
-          <button onclick="if(window.GEO_AUTH && window.GEO_AUTH.requireRole('admin', 'Authorize Evacuation')) { if(window.navigateTo) window.navigateTo('admin-governance.html'); else window.location.href='admin-governance.html'; }" class="geo-auth-btn-primary" style="background:linear-gradient(135deg,#ef4444,#b91c1c); color:#fff; font-weight:700; width:100%; padding:10px; border-radius:8px; border:none; cursor:pointer;">
-            🏛️ AUTHORIZE EVACUATION (DISTRICT MAGISTRATE)
-          </button>
-        </div>
-      </div>
-    </div>
-  `;
-  document.body.insertAdjacentHTML('beforeend', modalHtml);
-}
-
-window.addEventListener('load', () => { drawTerrain(); });
-window.addEventListener('resize', () => { drawTerrain(); });
-</script>
 <script src="region-config.js"></script>
 <script src="assets/demo/demo-data.js"></script>
 <script src="api-client.js"></script>
 <script src="auth.js"></script>
 <script src="nav.js"></script>
+
+<script>
+let currentRain = 30;
+let activeKhasra = '104/A';
+
+function initCommandCenter() {
+  const reg = window.getDefaultRegion ? window.getDefaultRegion() : { name: 'Sikkim', lat: 27.53, lng: 88.51 };
+  const coords = document.getElementById('hudCoordsDisplay');
+  if (coords) coords.textContent = `${reg.lat.toFixed(4)}° N · ${reg.lng.toFixed(4)}° E · 1,420m MSL`;
+  
+  window.addEventListener('resize', drawCadastreTwin);
+  drawCadastreTwin();
+}
+
+async function onRainSliderChange(val) {
+  currentRain = parseFloat(val);
+  const display = document.getElementById('rainValDisplay');
+  if (display) display.textContent = `${currentRain} mm/hr`;
+
+  // Call real ML inference via API client
+  const res = await window.GEO_API.simulateRainfall(activeKhasra, currentRain, 44.5, 86.4, -4.2);
+  const data = res.data;
+
+  // Update FoS and Risk Gauge
+  const fosBadge = document.getElementById('plotFosBadge');
+  const mscLSTM = document.getElementById('mscLSTM');
+  const mscFusion = document.getElementById('mscFusion');
+  const gaugePore = document.getElementById('gaugePore');
+  const shapRainVal = document.getElementById('shapRainVal');
+  const shapRainBar = document.getElementById('shapRainBar');
+
+  if (fosBadge) {
+    fosBadge.textContent = `Fs = ${data.factor_of_safety.toFixed(2)} (${data.risk_level})`;
+    fosBadge.style.color = data.risk_level === 'GREEN' ? '#22c55e' : (data.risk_level === 'AMBER' ? '#f59e0b' : '#ef4444');
+  }
+
+  if (mscLSTM) mscLSTM.textContent = `+${Math.round(currentRain * 0.25)} pts ↑`;
+  if (mscFusion) {
+    mscFusion.textContent = `${data.risk_score} • ${data.risk_level === 'RED' ? 'CRITICAL' : (data.risk_level === 'AMBER' ? 'WATCH' : 'STABLE')}`;
+    mscFusion.style.color = data.risk_level === 'GREEN' ? '#22c55e' : (data.risk_level === 'AMBER' ? '#f59e0b' : '#ef4444');
+  }
+  if (gaugePore) gaugePore.textContent = `${data.pore_pressure_kpa || (currentRain * 0.4).toFixed(1)} kPa`;
+  
+  if (shapRainVal && shapRainBar) {
+    const rainPct = Math.min(65, Math.round(currentRain * 0.48));
+    shapRainVal.textContent = `+${rainPct}%`;
+    shapRainBar.style.width = `${rainPct}%`;
+  }
+
+  // Update Highway and Canvas
+  const hwBanner = document.getElementById('highwayBanner');
+  const hwDot = document.getElementById('highwayDot');
+  const hwText = document.getElementById('highwayStatusText');
+  
+  if (data.factor_of_safety < 1.0) {
+    if (hwDot) { hwDot.style.background = '#ef4444'; hwDot.style.boxShadow = '0 0 10px #ef4444'; }
+    if (hwText) hwText.textContent = '🚨 NH-10 HIGHWAY: SEVERED AT KM-42 (DEBRIS FLOW OVERTOPPING)';
+    if (hwBanner) hwBanner.style.borderColor = 'rgba(239,68,68,0.6)';
+  } else {
+    if (hwDot) { hwDot.style.background = '#22c55e'; hwDot.style.boxShadow = '0 0 6px #22c55e'; }
+    if (hwText) hwText.textContent = 'NH-10 ARTERIAL HIGHWAY: OPEN (KM-42 CLEAR)';
+    if (hwBanner) hwBanner.style.borderColor = '#334155';
+  }
+
+  drawCadastreTwin();
+}
+
+function drawCadastreTwin() {
+  const canvas = document.getElementById('mapCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  canvas.width = canvas.parentElement.clientWidth;
+  canvas.height = canvas.parentElement.clientHeight;
+
+  const W = canvas.width;
+  const H = canvas.height;
+  const isCritical = currentRain >= 65;
+
+  ctx.clearRect(0, 0, W, H);
+
+  // Background 3D terrain grid
+  ctx.strokeStyle = 'rgba(56, 189, 248, 0.05)';
+  ctx.lineWidth = 1;
+  for (let x = 0; x < W; x += 40) {
+    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke();
+  }
+  for (let y = 0; y < H; y += 40) {
+    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
+  }
+
+  // 5 Registered Khasra Parcels (Task 4)
+  const parcels = [
+    { id: '104/A', name: 'Dag #104/A (Tashi Lepcha)', x: W * 0.32, y: H * 0.36, w: W * 0.16, h: H * 0.14, critical: isCritical },
+    { id: '104/B', name: 'Dag #104/B (Pem Bhutia)', x: W * 0.49, y: H * 0.34, w: W * 0.15, h: H * 0.15, critical: isCritical },
+    { id: '108', name: 'Dag #108 (Valley Terrace)', x: W * 0.28, y: H * 0.54, w: W * 0.18, h: H * 0.13, critical: false },
+    { id: '112', name: 'Dag #112 (Highway Buffer)', x: W * 0.48, y: H * 0.52, w: W * 0.19, h: H * 0.14, critical: false },
+    { id: '118/Govt', name: 'Dag #118/Govt (Safe Pool)', x: W * 0.70, y: H * 0.44, w: W * 0.20, h: H * 0.18, critical: false, safe: true }
+  ];
+
+  parcels.forEach(p => {
+    ctx.beginPath();
+    ctx.rect(p.x, p.y, p.w, p.h);
+    
+    if (p.critical) {
+      ctx.fillStyle = 'rgba(239, 68, 68, 0.25)';
+      ctx.strokeStyle = '#ef4444';
+      ctx.lineWidth = 2.5;
+    } else if (p.safe) {
+      ctx.fillStyle = 'rgba(34, 197, 94, 0.15)';
+      ctx.strokeStyle = '#22c55e';
+      ctx.lineWidth = 2;
+    } else {
+      ctx.fillStyle = 'rgba(245, 158, 11, 0.1)';
+      ctx.strokeStyle = 'rgba(245, 158, 11, 0.4)';
+      ctx.lineWidth = 1.5;
+    }
+    ctx.fill();
+    ctx.stroke();
+
+    // Parcel Label
+    ctx.font = 'bold 11px JetBrains Mono';
+    ctx.fillStyle = p.critical ? '#ef4444' : (p.safe ? '#22c55e' : '#f59e0b');
+    ctx.fillText(p.name, p.x + 8, p.y + 20);
+    ctx.font = '10px Inter';
+    ctx.fillStyle = '#94a3b8';
+    ctx.fillText(p.critical ? 'Fs: 0.76 • FAILURE RISK' : (p.safe ? 'Fs: 2.65 • SAFE POOL' : 'Fs: 1.48 • STABLE'), p.x + 8, p.y + 36);
+  });
+
+  // NH-10 Arterial Highway
+  ctx.beginPath();
+  ctx.moveTo(W * 0.1, H * 0.75);
+  ctx.bezierCurveTo(W * 0.35, H * 0.72, W * 0.55, H * 0.78, W * 0.9, H * 0.74);
+  ctx.lineWidth = 6;
+  ctx.strokeStyle = isCritical ? '#ef4444' : '#38bdf8';
+  ctx.stroke();
+
+  // Highway Label
+  ctx.font = 'bold 12px Space Grotesk';
+  ctx.fillStyle = isCritical ? '#ef4444' : '#38bdf8';
+  ctx.fillText(isCritical ? '⚠️ NH-10 HIGHWAY: SEVERED AT KM-42' : '🛣️ NH-10 ARTERIAL HIGHWAY: ACTIVE', W * 0.38, H * 0.82);
+
+  // Animated Debris Flow Vector if Critical
+  if (isCritical) {
+    ctx.beginPath();
+    ctx.moveTo(W * 0.40, H * 0.46);
+    ctx.lineTo(W * 0.46, H * 0.74);
+    ctx.strokeStyle = 'rgba(245, 158, 11, 0.8)';
+    ctx.lineWidth = 4;
+    ctx.setLineDash([8, 6]);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    ctx.font = 'bold 11px JetBrains Mono';
+    ctx.fillStyle = '#f59e0b';
+    ctx.fillText('⚡ 2.4 km Debris Runout Vector ──► River Surge', W * 0.42, H * 0.62);
+  }
+}
+
+function dispatchBhashiniVoice() {
+  const reg = window.getDefaultRegion ? window.getDefaultRegion() : { name: 'Sikkim' };
+  const text = `Urgent alert from GeoShield India for ${reg.name}. High landslide risk on Khasra 104/A. Immediate evacuation advised toward Burtuk Relief Shelter.`;
+  
+  if ('speechSynthesis' in window) {
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.rate = 0.95;
+    window.speechSynthesis.speak(utterance);
+  }
+  if (window.GEO_API) {
+    window.GEO_API.showToast('🔊 Bhashini Automated IVR Voice Broadcast Dispatched!');
+  }
+}
+
+function highlightSafeShelter() {
+  if (window.GEO_API) {
+    window.GEO_API.showToast('🧭 Safe Route to Burtuk Shelter Highlighted (Bearing 048° NE)');
+  }
+}
+
+function navigateToCascade() {
+  localStorage.setItem('geo360_cascade_rain', currentRain);
+  if (window.navigateTo) window.navigateTo('cascading-simulator.html');
+  else window.location.href = 'cascading-simulator.html';
+}
+
+window.addEventListener('DOMContentLoaded', initCommandCenter);
+</script>
 </body>
 </html>

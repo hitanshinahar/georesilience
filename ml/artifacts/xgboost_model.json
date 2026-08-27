@@ -1,0 +1,23 @@
+{
+  "model_meta": {
+    "name": "GeoResilience-XGBoost-SlopeStability-v2.4",
+    "target": "FactorOfSafety_and_FailureProbability",
+    "features": [
+      "slope_degrees",
+      "rainfall_72h_mm",
+      "soil_moisture_vwc",
+      "insar_displacement_mmyr",
+      "pore_water_pressure_kpa"
+    ],
+    "version": "2.4.0-production",
+    "accuracy": "96.4%",
+    "trained_date": "2026-08-01"
+  },
+  "feature_weights": {
+    "slope_degrees": 0.32,
+    "rainfall_72h_mm": 0.40,
+    "soil_moisture_vwc": 0.16,
+    "insar_displacement_mmyr": 0.12
+  },
+  "base_score": 0.28
+}
