@@ -1,0 +1,21 @@
+{
+  "name": "geoshield-india-frontend",
+  "version": "2.4.0",
+  "description": "GeoShield 🇮🇳 — National Disaster Resilience Platform",
+  "main": "index.html",
+  "scripts": {
+    "dev": "npx -y serve -l 5500 .",
+    "start": "npx -y serve -l 5500 .",
+    "serve": "npx -y serve -l 5500 .",
+    "preview": "npx -y serve -l 5500 ."
+  },
+  "keywords": [
+    "geoshield",
+    "disaster-resilience",
+    "gis",
+    "khasra",
+    "insar"
+  ],
+  "author": "Govt of India • MDoNER × MoRD",
+  "license": "ISC"
+}

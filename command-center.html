@@ -4,10 +4,10 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>GeoShield 🇮🇳 — 3D Operations Command Center</title>
-<meta name="description" content="3D digital twin command center with terrain rendering, live geotechnical ML models, and parcel risk telemetry for national disaster response." />
+<meta name="description" content="3D digital twin command center with terrain rendering, live geotechnical ML models, dynamic English & Hindi voice dispatch, and state-aware highway detour routing." />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="nav.css">
 <style>
 :root{
@@ -22,11 +22,11 @@ body{background:var(--bg-0);color:var(--ink-0);font-family:var(--font-b);overflo
 ::selection{background:var(--gold-soft);color:var(--bg-0)}
 .stars{position:fixed;inset:0;z-index:0;pointer-events:none;background-image:radial-gradient(1px 1px at 10% 15%,#fff2 0,transparent 70%),radial-gradient(1px 1px at 82% 8%,#fff1 0,transparent 70%),radial-gradient(1.5px 1.5px at 58% 30%,#fff1 0,transparent 70%),radial-gradient(1px 1px at 25% 65%,#fff1 0,transparent 70%),radial-gradient(1px 1px at 91% 72%,#fff2 0,transparent 70%)}
 
-/* ── Full-screen layout ── */
-.cc-layout{display:grid;grid-template-columns:310px 1fr 340px;height:calc(100vh - 64px);margin-top:64px;position:relative;z-index:1}
-@media(max-width:1100px){.cc-layout{grid-template-columns:1fr;height:auto}.cc-sidebar-left,.cc-sidebar-right{display:none}}
+/* Full-screen layout */
+.cc-layout{display:grid;grid-template-columns:320px 1fr 370px;height:calc(100vh - 64px);margin-top:64px;position:relative;z-index:1}
+@media(max-width:1180px){.cc-layout{grid-template-columns:1fr;height:auto}.cc-sidebar-left,.cc-sidebar-right{display:none}}
 
-/* ── Left sidebar — Sensors & ML Model Stack ── */
+/* Left sidebar */
 .cc-sidebar-left{background:var(--bg-1);border-right:1px solid var(--line);overflow-y:auto;padding:18px 14px}
 .sidebar-section{margin-bottom:20px}
 .ss-label{font-family:var(--font-m);font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin-bottom:10px;display:flex;align-items:center;gap:6px;font-weight:700}
@@ -44,23 +44,21 @@ body{background:var(--bg-0);color:var(--ink-0);font-family:var(--font-b);overflo
 input[type=range]{-webkit-appearance:none;width:100%;height:4px;background:#334155;border-radius:4px;outline:none}
 input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:var(--gold);cursor:pointer;box-shadow:0 0 8px var(--gold)}
 
-/* ── Map area ── */
+/* Map area */
 .cc-map{position:relative;background:var(--bg-0);overflow:hidden}
-#mapCanvas{width:100%;height:100%;display:block}
+#mapCanvas{width:100%;height:100%;display:block;cursor:pointer;}
 
 /* Map overlays */
 .map-hud{position:absolute;inset:0;pointer-events:none}
 .hud-coords{position:absolute;bottom:16px;left:16px;font-family:var(--font-m);font-size:10.5px;letter-spacing:.1em;color:var(--gold);background:rgba(6,11,19,.85);padding:6px 12px;border-radius:6px;border:1px solid var(--line)}
 .hud-scale{position:absolute;bottom:16px;right:16px;font-family:var(--font-m);font-size:10px;color:var(--teal);background:rgba(6,11,19,.85);padding:6px 12px;border-radius:6px;border:1px solid var(--line)}
-.hud-crosshair{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none}
-.hud-crosshair::before,.hud-crosshair::after{content:'';position:absolute;background:rgba(245,158,11,.5)}
-.hud-crosshair::before{width:20px;height:1px;top:0;left:-10px}
-.hud-crosshair::after{width:1px;height:20px;top:-10px;left:0}
 
-/* Highway Banner */
-.highway-banner{position:absolute;top:16px;left:50%;transform:translateX(-50%);background:rgba(6,11,19,0.9);border:1px solid #334155;border-radius:20px;padding:6px 16px;font-family:var(--font-m);font-size:11px;color:#fff;display:flex;align-items:center;gap:8px;box-shadow:0 4px 16px rgba(0,0,0,0.6);pointer-events:auto}
+/* Highway Status & Detour Header Banners */
+.highway-banner-container{position:absolute;top:16px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;gap:6px;align-items:center;pointer-events:auto;z-index:20;}
+.highway-banner{background:rgba(6,11,19,0.92);border:1px solid #334155;border-radius:20px;padding:6px 16px;font-family:var(--font-m);font-size:11px;color:#fff;display:flex;align-items:center;gap:8px;box-shadow:0 4px 16px rgba(0,0,0,0.6)}
+.detour-banner{background:rgba(34,197,94,0.12);border:1px solid rgba(34,197,94,0.45);color:#22c55e;border-radius:20px;padding:4px 14px;font-family:var(--font-m);font-size:10px;font-weight:700;display:none;}
 
-/* ── Right sidebar — Inspector & Detour Actions ── */
+/* Right sidebar */
 .cc-sidebar-right{background:var(--bg-1);border-left:1px solid var(--line);overflow-y:auto;display:flex;flex-direction:column;padding:16px}
 .inspector-card{background:var(--bg-2);border:1px solid rgba(245,158,11,0.3);border-radius:10px;padding:14px;margin-bottom:14px}
 .insp-badge{font-family:var(--font-m);font-size:9.5px;color:var(--gold);background:rgba(245,158,11,0.12);padding:2px 6px;border-radius:4px;font-weight:700}
@@ -69,9 +67,17 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;heigh
 .shap-track{height:5px;background:#1e293b;border-radius:4px;overflow:hidden}
 .shap-fill{height:100%;border-radius:4px;transition:width 0.3s ease}
 
-/* Route Detour Panel */
-.route-card{background:var(--bg-2);border:1px solid var(--line);border-radius:8px;padding:12px;margin-bottom:8px}
-.route-active{border-color:var(--green);background:rgba(34,197,94,0.06)}
+/* Multilingual Voice Broadcast Box (English & Hindi ONLY) */
+.voice-advisory-box{background:rgba(56,189,248,0.06);border:1px solid rgba(56,189,248,0.3);border-radius:10px;padding:12px;margin-bottom:12px}
+.voice-lang-bar{display:flex;gap:6px;margin-bottom:8px;}
+.btn-lang{flex:1;background:#111b30;border:1px solid #334155;color:#cbd5e1;font-family:var(--font-m);font-size:10.5px;padding:7px 4px;border-radius:6px;cursor:pointer;transition:all 0.2s;text-align:center;}
+.btn-lang.active{background:rgba(56,189,248,0.2);border-color:var(--teal);color:#fff;font-weight:700;}
+.voice-transcript-text{background:#060b13;border:1px solid #1e293b;border-radius:6px;padding:10px;font-size:11px;color:#e2e8f0;line-height:1.45;margin-bottom:8px;min-height:60px;}
+
+/* Route Telemetry Box */
+.shelter-telemetry-box{background:rgba(34,197,94,0.06);border:1px solid rgba(34,197,94,0.35);border-radius:8px;padding:10px;font-size:10.5px;margin-bottom:10px;display:none;}
+.shelter-telemetry-box strong{color:#22c55e;font-family:var(--font-m);display:block;margin-bottom:4px;}
+
 .btn-action{width:100%;border:none;border-radius:6px;padding:10px;font-family:var(--font-d);font-size:11.5px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:filter .2s,transform .15s;margin-top:6px}
 .btn-action:hover{filter:brightness(1.15);transform:translateY(-1px)}
 .btn-voice{background:linear-gradient(135deg,#38bdf8,#0284c7);color:#060b13}
@@ -89,39 +95,46 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;heigh
   <!-- LEFT DOCK: Dynamic Rain Slider & 3-Layer ML Model Stack -->
   <div class="cc-sidebar-left">
     
+    <!-- Active State Header Banner -->
+    <div style="background:rgba(56,189,248,0.08); border:1px solid rgba(56,189,248,0.3); border-radius:8px; padding:10px; margin-bottom:14px;">
+      <span style="font-family:var(--font-m); font-size:9.5px; color:var(--teal); font-weight:700; letter-spacing:1px; text-transform:uppercase; display:block; margin-bottom:2px;">ACTIVE STATE COMMAND</span>
+      <h3 style="font-family:var(--font-d); font-size:15px; color:#fff; margin:0;" id="leftActiveStateTitle">Sikkim</h3>
+      <div style="font-size:10px; color:#94a3b8; margin-top:2px;" id="leftActiveStateSub">Sector-04 · 5 Cadastral Blocks</div>
+    </div>
+
     <!-- Dynamic Rainfall Slider -->
     <div class="rain-box">
       <div class="ss-label">🌧️ DYNAMIC RAINFALL INTENSITY</div>
       <div style="display:flex; justify-content:space-between; align-items:center; margin:8px 0 6px;">
-        <span style="font-size:11px; color:#94a3b8;">Rate:</span>
-        <strong id="rainValDisplay" style="font-family:var(--font-m); font-size:16px; color:#f59e0b;">30 mm/hr</strong>
+        <span style="font-size:11px; color:#94a3b8;">Trigger Rate:</span>
+        <strong id="rainValDisplay" style="font-family:var(--font-m); font-size:16px; color:#f59e0b;">55 mm/hr</strong>
       </div>
-      <input type="range" id="rainSlider" min="20" max="140" value="30" step="5" oninput="onRainSliderChange(this.value)" />
+      <input type="range" id="rainSlider" min="20" max="140" value="55" step="5" oninput="onRainSliderChange(this.value)" />
       <div style="display:flex; justify-content:space-between; font-size:9px; color:#64748b; margin-top:4px; font-family:var(--font-m);">
-        <span>30 Watch</span>
-        <span>60 Warning</span>
+        <span>30 Normal</span>
+        <span>55 Warning</span>
         <span>95 Torrential</span>
       </div>
     </div>
 
-    <!-- 3-Layer ML Model Stack (Task 4) -->
+    <!-- 3-Layer ML Model Stack -->
     <div class="sidebar-section">
       <div class="ss-label">🧠 3-LAYER ML MODEL STACK</div>
       
       <div class="model-stack-card">
         <div class="msc-head">
           <span class="msc-num">01. STATIC SUSCEPTIBILITY</span>
-          <span class="msc-score" id="mscXGB">68 / 100</span>
+          <span class="msc-score" id="mscXGB">74 / 100</span>
         </div>
-        <div class="msc-desc">Trained XGBoost evaluating slope gradient (44.5°), geology & CartoDEM.</div>
+        <div class="msc-desc" id="mscXgbDesc">Trained XGBoost evaluating slope gradient, geology &amp; CartoDEM.</div>
       </div>
 
       <div class="model-stack-card">
         <div class="msc-head">
           <span class="msc-num">02. TEMPORAL ESCALATION</span>
-          <span class="msc-score" id="mscLSTM" style="color:#f59e0b;">+18 pts ↑</span>
+          <span class="msc-score" id="mscLSTM" style="color:#f59e0b;">+22 pts ↑</span>
         </div>
-        <div class="msc-desc">LSTM temporal decay tracking 72h antecedent rainfall & pore saturation.</div>
+        <div class="msc-desc">LSTM temporal decay tracking 72h antecedent rainfall &amp; pore saturation.</div>
       </div>
 
       <div class="model-stack-card" style="border-color:rgba(239,68,68,0.4); background:rgba(239,68,68,0.06);">
@@ -147,30 +160,34 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;heigh
         </div>
         <div style="display:flex; justify-content:space-between;">
           <span style="color:#94a3b8;">Pore Water Pressure:</span>
-          <strong id="gaugePore" style="color:#22c55e; font-family:var(--font-m);">18.2 kPa</strong>
+          <strong id="gaugePore" style="color:#ef4444; font-family:var(--font-m);">22.4 kPa</strong>
         </div>
       </div>
     </div>
 
   </div>
 
-  <!-- CENTER CANVAS: 3D Cadastral Digital Twin (5 Khasra Parcels + Highway + Debris Flow) -->
+  <!-- CENTER CANVAS: 3D Cadastral Digital Twin (Renders 4 to 5 Blocks per State) -->
   <div class="cc-map">
     <canvas id="mapCanvas"></canvas>
     
-    <div class="highway-banner" id="highwayBanner">
-      <span id="highwayDot" style="width:8px;height:8px;border-radius:50%;background:#22c55e;box-shadow:0 0 6px #22c55e;"></span>
-      <span id="highwayStatusText">NH-10 ARTERIAL HIGHWAY: OPEN (KM-42 CLEAR)</span>
+    <div class="highway-banner-container">
+      <div class="highway-banner" id="highwayBanner">
+        <span id="highwayDot" style="width:8px;height:8px;border-radius:50%;background:#22c55e;box-shadow:0 0 8px #22c55e;"></span>
+        <span id="highwayStatusText">🛣️ HIGHWAY CORRIDOR: CLEAR</span>
+      </div>
+      <div class="detour-banner" id="detourBanner">
+        🟢 SAFE DETOUR BYPASS: CLEAR (ALL-WEATHER ACCESS ACTIVATED)
+      </div>
     </div>
 
     <div class="map-hud">
-      <div class="hud-crosshair"></div>
       <div class="hud-coords" id="hudCoordsDisplay">27.3389° N · 88.6065° E · 1,420m MSL</div>
-      <div class="hud-scale">3D Cadastral Twin · PostGIS 3.4</div>
+      <div class="hud-scale">3D Cadastral Twin · PostGIS 3.4 Spatial Grid · Click Plot to Select</div>
     </div>
   </div>
 
-  <!-- RIGHT DOCK: Inspector Panel ("Why Red?") & Actions -->
+  <!-- RIGHT DOCK: Inspector Panel & Multilingual Voice (ENGLISH & HINDI ONLY) -->
   <div class="cc-sidebar-right">
     
     <!-- Inspector Card -->
@@ -179,18 +196,18 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;heigh
         <span class="insp-badge">INSPECTOR: WHY RED?</span>
         <span id="plotFosBadge" style="font-family:var(--font-m); font-size:11px; color:#ef4444; font-weight:700;">Fs = 0.76 (CRITICAL)</span>
       </div>
-      <h3 style="font-family:var(--font-d); font-size:16px; margin-bottom:4px;" id="plotNameHeader">Khasra Dag #104/A (Upper Ridge)</h3>
-      <div style="font-size:11px; color:#94a3b8; line-height:1.5; margin-bottom:12px;">
-        Owner: <strong style="color:#fff;" id="plotOwner">Tashi Lepcha</strong> · Residents: <strong style="color:#fff;" id="plotResidents">6</strong><br>
-        Aadhaar: <span style="color:#22c55e;">VERIFIED (9812-XXXX-7701)</span> · Slope: <strong style="color:#fff;" id="plotSlope">44.5°</strong>
+      <h3 style="font-family:var(--font-d); font-size:15px; margin-bottom:4px;" id="plotNameHeader">Dag #104/A (Pemba Tenzing Bhutia)</h3>
+      <div style="font-size:11px; color:#94a3b8; line-height:1.5; margin-bottom:10px;">
+        Tenure: <strong style="color:var(--gold);" id="plotTenure">Dag / Khasra / Jamabandi RoR</strong><br>
+        Residents: <strong style="color:#fff;" id="plotResidents">5</strong> · Slope: <strong style="color:#fff;" id="plotSlope">42.6°</strong> · Structure: <strong style="color:#cbd5e1;" id="plotStructure">Upper Ridge Dwelling</strong>
       </div>
 
       <!-- Field Sentinel Badge -->
-      <div style="background:rgba(56,189,248,0.08); border:1px solid rgba(56,189,248,0.3); padding:8px 10px; border-radius:6px; font-size:10.5px; margin-bottom:12px; display:flex; align-items:center; gap:8px;">
+      <div style="background:rgba(56,189,248,0.08); border:1px solid rgba(56,189,248,0.3); padding:8px 10px; border-radius:6px; font-size:10.5px; margin-bottom:10px; display:flex; align-items:center; gap:8px;">
         <span>📷</span>
         <div>
-          <strong style="color:#38bdf8;">Field Sentinel AI Crack Verified</strong>
-          <div style="color:#94a3b8; font-size:9.5px;">Transverse shear scarp identified (94.2% WASM match)</div>
+          <strong style="color:#38bdf8;">Field Sentinel Edge AI Crack Verified</strong>
+          <div style="color:#94a3b8; font-size:9.5px;">Transverse shear fracture on &gt;38° slope (94.2% match)</div>
         </div>
       </div>
 
@@ -200,36 +217,55 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;heigh
       </div>
       
       <div class="shap-bar-row">
-        <div class="shap-label"><span>🌧️ 72h Rain Intensity</span><span id="shapRainVal">+38%</span></div>
-        <div class="shap-track"><div id="shapRainBar" class="shap-fill" style="width:38%; background:#ef4444;"></div></div>
+        <div class="shap-label"><span>🌧️ Rainfall Trigger</span><span id="shapRainVal">+42%</span></div>
+        <div class="shap-track"><div id="shapRainBar" class="shap-fill" style="width:42%; background:#ef4444;"></div></div>
       </div>
       <div class="shap-bar-row">
-        <div class="shap-label"><span>⛰️ Slope Gradient (44.5°)</span><span>+28%</span></div>
-        <div class="shap-track"><div class="shap-fill" style="width:28%; background:#f97316;"></div></div>
+        <div class="shap-label"><span>⛰️ Slope Gradient</span><span id="shapSlopeVal">+28%</span></div>
+        <div class="shap-track"><div id="shapSlopeBar" class="shap-fill" style="width:28%; background:#f97316;"></div></div>
       </div>
       <div class="shap-bar-row">
-        <div class="shap-label"><span>💧 Soil Moisture Content</span><span>+18%</span></div>
+        <div class="shap-label"><span>💧 Soil Moisture</span><span>+18%</span></div>
         <div class="shap-track"><div class="shap-fill" style="width:18%; background:#eab308;"></div></div>
       </div>
       <div class="shap-bar-row">
-        <div class="shap-label"><span>🛰️ InSAR Displacement (-4.2mm)</span><span>+16%</span></div>
-        <div class="shap-track"><div class="shap-fill" style="width:16%; background:#38bdf8;"></div></div>
+        <div class="shap-label"><span>🛰️ InSAR Displacement (-14.2mm)</span><span>+12%</span></div>
+        <div class="shap-track"><div class="shap-fill" style="width:12%; background:#38bdf8;"></div></div>
       </div>
     </div>
 
-    <!-- Lifeline Detour Card -->
-    <div class="route-card route-active">
-      <div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:4px;">
-        <strong style="color:#22c55e;">🟢 Ranipool Bypass Corridor</strong>
-        <span style="font-family:var(--font-m); color:#94a3b8;">ACTIVE</span>
+    <!-- Safe Route Telemetry Box -->
+    <div class="shelter-telemetry-box" id="shelterTelemetryBox">
+      <strong>🧭 SAFE EVACUATION TELEMETRY:</strong>
+      <div style="color:#cbd5e1; line-height:1.45;">
+        Target: <strong style="color:#fff;" id="telShelterName">Burtuk Relief Shelter</strong><br>
+        Bearing: <strong>048° NE</strong> · Distance: <strong>620m</strong> · Elevation Descent: <strong>-42m</strong><br>
+        Walk Time: <strong>8.5 mins</strong> · Clearance: <strong>Heavy Ambulance &amp; NDRF Vehicles</strong>
       </div>
-      <div style="font-size:10.5px; color:#cbd5e1;">OSRM Emergency Detour: +22 mins ambulance route active.</div>
+    </div>
+
+    <!-- Multilingual Voice Broadcast Box (ENGLISH & HINDI ONLY) -->
+    <div class="voice-advisory-box">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+        <span style="font-family:var(--font-m); font-size:9.5px; color:var(--teal); font-weight:700;">🔊 BHASHINI VOICE DISPATCH &amp; TRANSCRIPT</span>
+        <span id="voiceStatusBadge" style="font-size:9px; color:#22c55e; font-family:var(--font-m);">READY</span>
+      </div>
+
+      <div class="voice-lang-bar">
+        <button class="btn-lang active" id="btnLangEn" onclick="switchLanguage('en')">English</button>
+        <button class="btn-lang" id="btnLangHi" onclick="switchLanguage('hi')">हिंदी (Hindi)</button>
+      </div>
+
+      <div class="voice-transcript-text" id="bhashini-transcript">
+        Emergency Evacuation Warning: Heavy rainfall has triggered critical slope instability at Khasra Dag 104 belonging to Resident. Please evacuate to Burtuk Relief Shelter immediately.
+      </div>
+
+      <button class="btn-action btn-voice" onclick="playCurrentPlotVoice()">
+        <span>🔊</span> PLAY SYNTHESIZED VOICE DISPATCH
+      </button>
     </div>
 
     <!-- Action Buttons -->
-    <button class="btn-action btn-voice" onclick="dispatchBhashiniVoice()">
-      <span>🔊</span> DISPATCH BHASHINI VOICE ALERT
-    </button>
     <button class="btn-action btn-shelter" onclick="highlightSafeShelter()">
       <span>🧭</span> HIGHLIGHT SAFE SHELTER ROUTE
     </button>
@@ -248,16 +284,179 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;heigh
 <script src="nav.js"></script>
 
 <script>
-let currentRain = 30;
-let activeKhasra = '104/A';
+let currentRain = 55;
+let currentLang = 'en';
+let activeRegion = null;
+let currentParcels = [];
+let selectedParcelIndex = 0;
+let showShelterRoute = false;
+
+// Populate browser voices
+if ('speechSynthesis' in window) {
+  window.speechSynthesis.onvoiceschanged = () => {
+    window.speechSynthesis.getVoices();
+  };
+}
 
 function initCommandCenter() {
-  const reg = window.getDefaultRegion ? window.getDefaultRegion() : { name: 'Sikkim', lat: 27.53, lng: 88.51 };
+  activeRegion = window.getDefaultRegion ? window.getDefaultRegion() : { id: 'sikkim', name: 'Sikkim', lat: 27.3389, lng: 88.6065, cadastreTerm: 'Dag / Khasra / Jamabandi RoR', shelterName: 'Burtuk Relief Shelter', highway: 'NH-10 Highway Corridor', detour: 'Ranipool Bypass Detour' };
+  currentParcels = window.getParcelsForRegion ? window.getParcelsForRegion(activeRegion.id) : [];
+
+  const leftTitle = document.getElementById('leftActiveStateTitle');
+  const leftSub = document.getElementById('leftActiveStateSub');
+  if (leftTitle) leftTitle.textContent = activeRegion.name;
+  if (leftSub) leftSub.textContent = `${activeRegion.sector || 'Sector-01'} · ${currentParcels.length} Cadastral Blocks`;
+
   const coords = document.getElementById('hudCoordsDisplay');
-  if (coords) coords.textContent = `${reg.lat.toFixed(4)}° N · ${reg.lng.toFixed(4)}° E · 1,420m MSL`;
+  if (coords) coords.textContent = `${activeRegion.lat.toFixed(4)}° N · ${activeRegion.lng.toFixed(4)}° E · 1,420m MSL`;
   
+  syncParcelInspector();
+  updateTranscript();
+  updateHighwayStatusUI();
+
+  const canvas = document.getElementById('mapCanvas');
+  if (canvas) {
+    canvas.addEventListener('click', onCanvasClick);
+  }
+
   window.addEventListener('resize', drawCadastreTwin);
   drawCadastreTwin();
+}
+
+function getActivePlotData() {
+  const p = currentParcels[selectedParcelIndex] || {
+    id: "Dag #104/A",
+    name: "Dag #104/A",
+    owner: "Resident",
+    ownerName: "Resident",
+    slope: 42.6,
+    familyCount: 5,
+    structure: "Hillside Dwelling",
+    safeShelter: activeRegion.shelterName || "Burtuk Relief Shelter"
+  };
+  p.safeShelter = activeRegion.shelterName || "Burtuk Relief Shelter";
+  return p;
+}
+
+function syncParcelInspector() {
+  const p = getActivePlotData();
+  
+  const header = document.getElementById('plotNameHeader');
+  const tenure = document.getElementById('plotTenure');
+  const res = document.getElementById('plotResidents');
+  const slope = document.getElementById('plotSlope');
+  const struct = document.getElementById('plotStructure');
+  const telShelter = document.getElementById('telShelterName');
+
+  if (header) header.textContent = `${p.name || p.id} (${p.owner || p.ownerName})`;
+  if (tenure) tenure.textContent = activeRegion.cadastreTerm || 'Dag / Khasra RoR';
+  if (res) res.textContent = p.familyCount || '5';
+  if (slope) slope.textContent = `${p.slope || 42.6}°`;
+  if (struct) struct.textContent = p.structure || 'Hillside Dwelling';
+  if (telShelter) telShelter.textContent = p.safeShelter;
+}
+
+function switchLanguage(lang) {
+  currentLang = (lang === 'hi' || lang === 'hindi') ? 'hi' : 'en';
+  document.querySelectorAll('.btn-lang').forEach(b => b.classList.remove('active'));
+  const btnId = currentLang === 'hi' ? 'btnLangHi' : 'btnLangEn';
+  const btn = document.getElementById(btnId);
+  if (btn) btn.classList.add('active');
+  updateTranscript();
+}
+
+function updateTranscript() {
+  const plotData = getActivePlotData();
+  const plotId = plotData?.name || plotData?.id || "Dag 104";
+  const owner = plotData?.ownerName || plotData?.owner || "Resident";
+  const shelter = plotData?.safeShelter || activeRegion.shelterName || "Burtuk Relief Shelter";
+
+  let text = "";
+  if (currentLang === "hindi" || currentLang === "hi") {
+    text = `आपातकालीन निकासी चेतावनी: अत्यधिक वर्षा के कारण खसरा दाग क्रमांक ${plotId}, स्वामी ${owner} के स्थान पर भूस्खलन का गंभीर खतरा है। कृपया तुरंत ${shelter} की ओर प्रस्थान करें।`;
+  } else {
+    text = `Emergency Evacuation Warning: Heavy rainfall has triggered critical slope instability at Khasra ${plotId} belonging to ${owner}. Please evacuate to ${shelter} immediately.`;
+  }
+
+  const box = document.getElementById('bhashini-transcript');
+  if (box) box.innerText = text;
+  return text;
+}
+
+// Requirement 4: Spoken English & Hindi only
+function playDynamicVoiceAlert(language, plotData) {
+  window.speechSynthesis.cancel();
+  const plotId = plotData?.name || plotData?.id || "Dag 104";
+  const owner = plotData?.ownerName || plotData?.owner || "Resident";
+  const shelter = plotData?.safeShelter || activeRegion.shelterName || "Burtuk Relief Shelter";
+  
+  let text = "";
+  let langCode = "en-IN";
+
+  if (language === "hindi" || language === "hi") {
+    text = `आपातकालीन निकासी चेतावनी: अत्यधिक वर्षा के कारण खसरा दाग क्रमांक ${plotId}, स्वामी ${owner} के स्थान पर भूस्खलन का गंभीर खतरा है। कृपया तुरंत ${shelter} की ओर प्रस्थान करें।`;
+    langCode = "hi-IN";
+  } else {
+    text = `Emergency Evacuation Warning: Heavy rainfall has triggered critical slope instability at Khasra ${plotId} belonging to ${owner}. Please evacuate to ${shelter} immediately.`;
+    langCode = "en-IN";
+  }
+
+  const transcriptBox = document.getElementById("bhashini-transcript");
+  if (transcriptBox) transcriptBox.innerText = text;
+
+  const badge = document.getElementById('voiceStatusBadge');
+  if (badge) badge.textContent = 'TRANSMITTING...';
+
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.lang = langCode;
+  utterance.rate = 0.88;
+
+  const voices = window.speechSynthesis.getVoices();
+  const regionalVoice = voices.find(v => v.lang === langCode || v.lang.startsWith(langCode.split('-')[0]));
+  if (regionalVoice) utterance.voice = regionalVoice;
+
+  utterance.onend = () => {
+    if (badge) badge.textContent = 'DISPATCHED';
+  };
+  utterance.onerror = () => {
+    if (badge) badge.textContent = 'READY';
+  };
+
+  window.speechSynthesis.speak(utterance);
+
+  if (window.GEO_API && window.GEO_API.showToast) {
+    window.GEO_API.showToast(`🔊 Voice Alert Spoken (${langCode}) for ${plotId}`);
+  }
+}
+
+function playCurrentPlotVoice() {
+  playDynamicVoiceAlert(currentLang, getActivePlotData());
+}
+
+function updateHighwayStatusUI() {
+  const hwDot = document.getElementById('highwayDot');
+  const hwText = document.getElementById('highwayStatusText');
+  const hwBanner = document.getElementById('highwayBanner');
+  const detourBanner = document.getElementById('detourBanner');
+  
+  const isSevered = currentRain >= 65;
+  const highwayName = activeRegion.highway || "State Arterial Highway";
+  const detourName = activeRegion.detour || "Bypass Detour Corridor";
+
+  if (isSevered) {
+    if (hwDot) { hwDot.style.background = '#ef4444'; hwDot.style.boxShadow = '0 0 12px #ef4444'; }
+    if (hwText) hwText.textContent = `🔴 ${highwayName}: SEVERED BY SLOPE FAILURE`;
+    if (hwBanner) hwBanner.style.borderColor = 'rgba(239,68,68,0.7)';
+    if (detourBanner) {
+      detourBanner.textContent = `🟢 ${detourName}: CLEAR (ALL-WEATHER ACCESS ACTIVATED)`;
+      detourBanner.style.display = 'block';
+    }
+  } else {
+    if (hwDot) { hwDot.style.background = '#22c55e'; hwDot.style.boxShadow = '0 0 6px #22c55e'; }
+    if (hwText) hwText.textContent = `🛣️ ${highwayName}: CLEAR &amp; ACTIVE`;
+    if (hwBanner) hwBanner.style.borderColor = '#334155';
+    if (detourBanner) detourBanner.style.display = 'none';
+  }
 }
 
 async function onRainSliderChange(val) {
@@ -265,11 +464,10 @@ async function onRainSliderChange(val) {
   const display = document.getElementById('rainValDisplay');
   if (display) display.textContent = `${currentRain} mm/hr`;
 
-  // Call real ML inference via API client
-  const res = await window.GEO_API.simulateRainfall(activeKhasra, currentRain, 44.5, 86.4, -4.2);
+  const p = getActivePlotData();
+  const res = await window.GEO_API.simulateRainfall(p.id, currentRain, p.slope || 42.6, 86.4, -14.2);
   const data = res.data;
 
-  // Update FoS and Risk Gauge
   const fosBadge = document.getElementById('plotFosBadge');
   const mscLSTM = document.getElementById('mscLSTM');
   const mscFusion = document.getElementById('mscFusion');
@@ -282,37 +480,51 @@ async function onRainSliderChange(val) {
     fosBadge.style.color = data.risk_level === 'GREEN' ? '#22c55e' : (data.risk_level === 'AMBER' ? '#f59e0b' : '#ef4444');
   }
 
-  if (mscLSTM) mscLSTM.textContent = `+${Math.round(currentRain * 0.25)} pts ↑`;
+  if (mscLSTM) mscLSTM.textContent = `+${Math.round(currentRain * 0.35)} pts ↑`;
   if (mscFusion) {
     mscFusion.textContent = `${data.risk_score} • ${data.risk_level === 'RED' ? 'CRITICAL' : (data.risk_level === 'AMBER' ? 'WATCH' : 'STABLE')}`;
     mscFusion.style.color = data.risk_level === 'GREEN' ? '#22c55e' : (data.risk_level === 'AMBER' ? '#f59e0b' : '#ef4444');
   }
-  if (gaugePore) gaugePore.textContent = `${data.pore_pressure_kpa || (currentRain * 0.4).toFixed(1)} kPa`;
+  if (gaugePore) gaugePore.textContent = `${data.pore_pressure_kpa || (currentRain * 0.42).toFixed(1)} kPa`;
   
   if (shapRainVal && shapRainBar) {
-    const rainPct = Math.min(65, Math.round(currentRain * 0.48));
+    const rainPct = Math.min(65, Math.round(currentRain * 0.52));
     shapRainVal.textContent = `+${rainPct}%`;
     shapRainBar.style.width = `${rainPct}%`;
   }
 
-  // Update Highway and Canvas
-  const hwBanner = document.getElementById('highwayBanner');
-  const hwDot = document.getElementById('highwayDot');
-  const hwText = document.getElementById('highwayStatusText');
-  
-  if (data.factor_of_safety < 1.0) {
-    if (hwDot) { hwDot.style.background = '#ef4444'; hwDot.style.boxShadow = '0 0 10px #ef4444'; }
-    if (hwText) hwText.textContent = '🚨 NH-10 HIGHWAY: SEVERED AT KM-42 (DEBRIS FLOW OVERTOPPING)';
-    if (hwBanner) hwBanner.style.borderColor = 'rgba(239,68,68,0.6)';
-  } else {
-    if (hwDot) { hwDot.style.background = '#22c55e'; hwDot.style.boxShadow = '0 0 6px #22c55e'; }
-    if (hwText) hwText.textContent = 'NH-10 ARTERIAL HIGHWAY: OPEN (KM-42 CLEAR)';
-    if (hwBanner) hwBanner.style.borderColor = '#334155';
-  }
-
+  updateHighwayStatusUI();
+  updateTranscript();
   drawCadastreTwin();
 }
 
+function onCanvasClick(e) {
+  const canvas = document.getElementById('mapCanvas');
+  const rect = canvas.getBoundingClientRect();
+  const clickX = e.clientX - rect.left;
+  const clickY = e.clientY - rect.top;
+  const W = canvas.width;
+  const H = canvas.height;
+
+  const count = currentParcels.length || 5;
+  const itemW = Math.min(W * 0.16, 140);
+  const startX = W * 0.12;
+
+  currentParcels.forEach((p, idx) => {
+    const posX = startX + idx * (itemW + 16);
+    const posY = H * (0.35 + (idx % 2 === 0 ? 0 : 0.08));
+    const posH = H * 0.16;
+
+    if (clickX >= posX && clickX <= posX + itemW && clickY >= posY && clickY <= posY + posH) {
+      selectedParcelIndex = idx;
+      syncParcelInspector();
+      updateTranscript();
+      drawCadastreTwin();
+    }
+  });
+}
+
+// Requirement 3: Renders all 4 to 5 blocks per state dynamically
 function drawCadastreTwin() {
   const canvas = document.getElementById('mapCanvas');
   if (!canvas) return;
@@ -322,11 +534,11 @@ function drawCadastreTwin() {
 
   const W = canvas.width;
   const H = canvas.height;
-  const isCritical = currentRain >= 65;
+  const isSevered = currentRain >= 65;
 
   ctx.clearRect(0, 0, W, H);
 
-  // Background 3D terrain grid
+  // Background 3D grid
   ctx.strokeStyle = 'rgba(56, 189, 248, 0.05)';
   ctx.lineWidth = 1;
   for (let x = 0; x < W; x += 40) {
@@ -336,91 +548,143 @@ function drawCadastreTwin() {
     ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
   }
 
-  // 5 Registered Khasra Parcels (Task 4)
-  const parcels = [
-    { id: '104/A', name: 'Dag #104/A (Tashi Lepcha)', x: W * 0.32, y: H * 0.36, w: W * 0.16, h: H * 0.14, critical: isCritical },
-    { id: '104/B', name: 'Dag #104/B (Pem Bhutia)', x: W * 0.49, y: H * 0.34, w: W * 0.15, h: H * 0.15, critical: isCritical },
-    { id: '108', name: 'Dag #108 (Valley Terrace)', x: W * 0.28, y: H * 0.54, w: W * 0.18, h: H * 0.13, critical: false },
-    { id: '112', name: 'Dag #112 (Highway Buffer)', x: W * 0.48, y: H * 0.52, w: W * 0.19, h: H * 0.14, critical: false },
-    { id: '118/Govt', name: 'Dag #118/Govt (Safe Pool)', x: W * 0.70, y: H * 0.44, w: W * 0.20, h: H * 0.18, critical: false, safe: true }
-  ];
+  // Draw All 4 to 5 Cadastral Parcels
+  const count = currentParcels.length || 5;
+  const itemW = Math.min(W * 0.16, 140);
+  const startX = W * 0.10;
 
-  parcels.forEach(p => {
+  currentParcels.forEach((p, idx) => {
+    const posX = startX + idx * (itemW + 18);
+    const posY = H * (0.34 + (idx % 2 === 0 ? 0 : 0.08));
+    const posH = H * 0.16;
+
+    // Calculate Factor of Safety for each plot based on slope and rain
+    let calculatedFos = (p.baseFos || 1.2) - (currentRain > 40 ? (currentRain - 40) * 0.012 : 0);
+    if (p.id.includes('Govt') || (p.status && p.status.includes('Safe'))) {
+      calculatedFos = Math.max(2.1, (p.baseFos || 2.5));
+    }
+    calculatedFos = Math.max(0.45, parseFloat(calculatedFos.toFixed(2)));
+
+    const isSafe = calculatedFos >= 1.5;
+    const isCrit = calculatedFos < 1.0;
+    const isSelected = idx === selectedParcelIndex;
+
     ctx.beginPath();
-    ctx.rect(p.x, p.y, p.w, p.h);
+    ctx.rect(posX, posY, itemW, posH);
     
-    if (p.critical) {
-      ctx.fillStyle = 'rgba(239, 68, 68, 0.25)';
+    if (isCrit) {
+      ctx.fillStyle = isSelected ? 'rgba(239, 68, 68, 0.4)' : 'rgba(239, 68, 68, 0.22)';
       ctx.strokeStyle = '#ef4444';
-      ctx.lineWidth = 2.5;
-    } else if (p.safe) {
-      ctx.fillStyle = 'rgba(34, 197, 94, 0.15)';
+      ctx.lineWidth = isSelected ? 3.5 : 2;
+    } else if (isSafe) {
+      ctx.fillStyle = isSelected ? 'rgba(34, 197, 94, 0.3)' : 'rgba(34, 197, 94, 0.15)';
       ctx.strokeStyle = '#22c55e';
-      ctx.lineWidth = 2;
+      ctx.lineWidth = isSelected ? 3 : 2;
     } else {
-      ctx.fillStyle = 'rgba(245, 158, 11, 0.1)';
-      ctx.strokeStyle = 'rgba(245, 158, 11, 0.4)';
-      ctx.lineWidth = 1.5;
+      ctx.fillStyle = isSelected ? 'rgba(245, 158, 11, 0.3)' : 'rgba(245, 158, 11, 0.14)';
+      ctx.strokeStyle = '#f59e0b';
+      ctx.lineWidth = isSelected ? 3 : 1.5;
     }
     ctx.fill();
     ctx.stroke();
 
-    // Parcel Label
-    ctx.font = 'bold 11px JetBrains Mono';
-    ctx.fillStyle = p.critical ? '#ef4444' : (p.safe ? '#22c55e' : '#f59e0b');
-    ctx.fillText(p.name, p.x + 8, p.y + 20);
-    ctx.font = '10px Inter';
-    ctx.fillStyle = '#94a3b8';
-    ctx.fillText(p.critical ? 'Fs: 0.76 • FAILURE RISK' : (p.safe ? 'Fs: 2.65 • SAFE POOL' : 'Fs: 1.48 • STABLE'), p.x + 8, p.y + 36);
+    // Parcel Text Labels
+    ctx.font = 'bold 10.5px JetBrains Mono';
+    ctx.fillStyle = isCrit ? '#ef4444' : (isSafe ? '#22c55e' : '#f59e0b');
+    ctx.fillText(p.name || p.id, posX + 6, posY + 18);
+
+    ctx.font = '9.5px Inter';
+    ctx.fillStyle = '#cbd5e1';
+    ctx.fillText((p.owner || p.ownerName).slice(0, 15), posX + 6, posY + 32);
+    ctx.fillText(`${p.slope}° slope`, posX + 6, posY + 44);
+
+    ctx.font = 'bold 9.5px JetBrains Mono';
+    ctx.fillStyle = isCrit ? '#ef4444' : (isSafe ? '#22c55e' : '#f59e0b');
+    ctx.fillText(`Fs: ${calculatedFos} ${isCrit ? '🔴' : (isSafe ? '🟢' : '🟡')}`, posX + 6, posY + 58);
+
+    if (isSelected) {
+      ctx.strokeStyle = '#f59e0b';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(posX - 2, posY - 2, itemW + 4, posH + 4);
+    }
   });
 
-  // NH-10 Arterial Highway
+  // State's Arterial Highway Line
   ctx.beginPath();
-  ctx.moveTo(W * 0.1, H * 0.75);
-  ctx.bezierCurveTo(W * 0.35, H * 0.72, W * 0.55, H * 0.78, W * 0.9, H * 0.74);
+  ctx.moveTo(W * 0.06, H * 0.75);
+  ctx.bezierCurveTo(W * 0.35, H * 0.72, W * 0.55, H * 0.78, W * 0.94, H * 0.74);
   ctx.lineWidth = 6;
-  ctx.strokeStyle = isCritical ? '#ef4444' : '#38bdf8';
+  ctx.strokeStyle = isSevered ? '#ef4444' : '#38bdf8';
   ctx.stroke();
 
-  // Highway Label
+  // Highway Status Label
+  const hwTitle = activeRegion.highway || 'Arterial Highway Corridor';
   ctx.font = 'bold 12px Space Grotesk';
-  ctx.fillStyle = isCritical ? '#ef4444' : '#38bdf8';
-  ctx.fillText(isCritical ? '⚠️ NH-10 HIGHWAY: SEVERED AT KM-42' : '🛣️ NH-10 ARTERIAL HIGHWAY: ACTIVE', W * 0.38, H * 0.82);
+  ctx.fillStyle = isSevered ? '#ef4444' : '#38bdf8';
+  ctx.fillText(isSevered ? `🔴 ${hwTitle}: SEVERED BY SLOPE FAILURE` : `🛣️ ${hwTitle}: CLEAR`, W * 0.32, H * 0.82);
 
-  // Animated Debris Flow Vector if Critical
-  if (isCritical) {
+  // Requirement 6: State-Aware Safe Detour Line
+  if (isSevered) {
     ctx.beginPath();
-    ctx.moveTo(W * 0.40, H * 0.46);
-    ctx.lineTo(W * 0.46, H * 0.74);
-    ctx.strokeStyle = 'rgba(245, 158, 11, 0.8)';
-    ctx.lineWidth = 4;
-    ctx.setLineDash([8, 6]);
+    ctx.moveTo(W * 0.06, H * 0.85);
+    ctx.bezierCurveTo(W * 0.32, H * 0.88, W * 0.65, H * 0.86, W * 0.94, H * 0.84);
+    ctx.lineWidth = 5;
+    ctx.strokeStyle = '#22c55e';
+    ctx.setLineDash([8, 5]);
     ctx.stroke();
     ctx.setLineDash([]);
 
+    const detourTitle = activeRegion.detour || 'Bypass Detour Corridor';
     ctx.font = 'bold 11px JetBrains Mono';
-    ctx.fillStyle = '#f59e0b';
-    ctx.fillText('⚡ 2.4 km Debris Runout Vector ──► River Surge', W * 0.42, H * 0.62);
+    ctx.fillStyle = '#22c55e';
+    ctx.fillText(`🟢 ${detourTitle} (CLEAR - ALL-WEATHER ACCESS)`, W * 0.30, H * 0.92);
   }
-}
 
-function dispatchBhashiniVoice() {
-  const reg = window.getDefaultRegion ? window.getDefaultRegion() : { name: 'Sikkim' };
-  const text = `Urgent alert from GeoShield India for ${reg.name}. High landslide risk on Khasra 104/A. Immediate evacuation advised toward Burtuk Relief Shelter.`;
-  
-  if ('speechSynthesis' in window) {
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.rate = 0.95;
-    window.speechSynthesis.speak(utterance);
-  }
-  if (window.GEO_API) {
-    window.GEO_API.showToast('🔊 Bhashini Automated IVR Voice Broadcast Dispatched!');
+  // Animated Green Evacuation Route to Shelter
+  if (showShelterRoute) {
+    const startX = W * 0.10;
+    const posX = startX + selectedParcelIndex * (itemW + 18) + itemW / 2;
+    const posY = H * (0.34 + (selectedParcelIndex % 2 === 0 ? 0 : 0.08));
+
+    const shelterX = W * 0.80;
+    const shelterY = H * 0.22;
+
+    // Draw Shelter Marker
+    ctx.beginPath();
+    ctx.arc(shelterX, shelterY, 18, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(34, 197, 94, 0.25)';
+    ctx.strokeStyle = '#22c55e';
+    ctx.lineWidth = 2.5;
+    ctx.fill(); ctx.stroke();
+
+    ctx.font = 'bold 12px Space Grotesk';
+    ctx.fillStyle = '#22c55e';
+    ctx.fillText(`🏛️ ${activeRegion.shelterName || 'Safe Relief Shelter'}`, shelterX - 70, shelterY - 26);
+
+    // Connecting Route Line
+    ctx.beginPath();
+    ctx.moveTo(posX, posY);
+    ctx.bezierCurveTo(posX + 40, posY - 50, shelterX - 60, shelterY + 40, shelterX, shelterY);
+    ctx.lineWidth = 4;
+    ctx.strokeStyle = '#22c55e';
+    ctx.setLineDash([6, 4]);
+    ctx.stroke();
+    ctx.setLineDash([]);
   }
 }
 
 function highlightSafeShelter() {
-  if (window.GEO_API) {
-    window.GEO_API.showToast('🧭 Safe Route to Burtuk Shelter Highlighted (Bearing 048° NE)');
+  showShelterRoute = true;
+  const p = getActivePlotData();
+  const shelter = p.safeShelter;
+  
+  const telBox = document.getElementById('shelterTelemetryBox');
+  if (telBox) telBox.style.display = 'block';
+
+  drawCadastreTwin();
+
+  if (window.GEO_API && window.GEO_API.showToast) {
+    window.GEO_API.showToast(`🧭 Safe Route to ${shelter} Highlighted (Bearing 048° NE, Distance 620m)`);
   }
 }
 

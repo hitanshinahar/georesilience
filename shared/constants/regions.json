@@ -4,6 +4,7 @@
     "code": "SK",
     "name": "Sikkim",
     "type": "State",
+    "sector": "Gangtok Sector-04",
     "center": [27.5330, 88.5122],
     "bbox": [88.01, 27.08, 88.92, 28.13],
     "primaryRisk": "Glacial Lake Outburst (GLOF) & Tectonic Schist Landslide",
@@ -11,9 +12,27 @@
     "languages": ["Nepali", "Bhutia", "Lepcha"],
     "rainTriggerLimit": 55.0,
     "sampleParcels": [
-      { "id": "104/A", "owner": "Tashi Lepcha", "familyCount": 6, "slope": 44.5, "baseFos": 1.42, "status": "Watch" },
-      { "id": "104/B", "owner": "Pem Bhutia", "familyCount": 4, "slope": 42.0, "baseFos": 1.38, "status": "Watch" },
-      { "id": "118/Govt", "owner": "Govt Revenue Reserve (Burtuk)", "familyCount": 0, "slope": 8.2, "baseFos": 2.65, "status": "Stable Safe Zone" }
+      { "id": "104/A", "name": "Dag #104/A", "owner": "Pemba Tenzing Bhutia", "familyCount": 5, "slope": 42.6, "baseFos": 1.38, "status": "Watch" },
+      { "id": "104/B", "name": "Dag #104/B", "owner": "Dawa Lepcha", "familyCount": 4, "slope": 39.4, "baseFos": 1.45, "status": "Watch" },
+      { "id": "118/Govt", "name": "Dag #118/Govt", "owner": "Govt Safe Resettlement Pool", "familyCount": 0, "slope": 8.2, "baseFos": 2.65, "status": "Stable Safe Zone" }
+    ]
+  },
+  {
+    "id": "assam",
+    "code": "AS",
+    "name": "Assam",
+    "type": "State",
+    "sector": "Dima Hasao - Haflong Railway Sector",
+    "center": [26.2006, 92.9376],
+    "bbox": [89.70, 24.13, 96.02, 28.00],
+    "primaryRisk": "Railway Cut & Riverbank Toe Slip",
+    "cadastreTerm": "Dag / Patta / Jamabandi",
+    "languages": ["Assamese", "Bengali", "Bodo"],
+    "rainTriggerLimit": 85.0,
+    "sampleParcels": [
+      { "id": "482/Patta-12", "name": "Dag #482/Patta-12", "owner": "Biren Bodo", "familyCount": 6, "slope": 38.2, "baseFos": 1.40, "status": "Watch" },
+      { "id": "483/Patta-08", "name": "Dag #483/Patta-08", "owner": "Anil Das", "familyCount": 4, "slope": 41.5, "baseFos": 1.28, "status": "Watch" },
+      { "id": "512/Govt", "name": "Dag #512/Govt", "owner": "Govt Safe Valley Reserve", "familyCount": 0, "slope": 6.5, "baseFos": 2.80, "status": "Stable Safe Zone" }
     ]
   },
   {
@@ -21,15 +40,53 @@
     "code": "HP",
     "name": "Himachal Pradesh",
     "type": "State",
+    "sector": "Shimla / Kullu Ridge Sector",
     "center": [31.1048, 77.1734],
     "bbox": [75.58, 30.38, 79.07, 33.26],
     "primaryRisk": "Cloudburst & Urban Overburden Cut-Slope Failure",
-    "cadastreTerm": "Khatauni / Khasra Girdawari",
+    "cadastreTerm": "Khasra / Khatauni / Girdawari",
     "languages": ["Hindi", "Pahari"],
     "rainTriggerLimit": 65.0,
     "sampleParcels": [
-      { "id": "HP-302", "owner": "Rajesh Verma", "familyCount": 5, "slope": 38.2, "baseFos": 1.51, "status": "Stable" },
-      { "id": "HP-303", "owner": "Sunita Devi", "familyCount": 3, "slope": 46.1, "baseFos": 1.25, "status": "Watch" }
+      { "id": "302/Girdawari", "name": "Khasra #302/Girdawari", "owner": "Rajesh Verma", "familyCount": 5, "slope": 38.2, "baseFos": 1.35, "status": "Watch" },
+      { "id": "303", "name": "Khasra #303", "owner": "Sunita Devi", "familyCount": 3, "slope": 46.1, "baseFos": 1.22, "status": "Watch" },
+      { "id": "410/Govt", "name": "Khasra #410/Govt", "owner": "Govt Stable Ridge Pool", "familyCount": 0, "slope": 7.8, "baseFos": 2.70, "status": "Stable Safe Zone" }
+    ]
+  },
+  {
+    "id": "kerala",
+    "code": "KL",
+    "name": "Kerala",
+    "type": "State",
+    "sector": "Wayanad - Meppadi Sector",
+    "center": [10.8505, 76.2711],
+    "bbox": [74.85, 8.28, 77.41, 12.79],
+    "primaryRisk": "Thandaper / Re-survey Landslides & Flooding",
+    "cadastreTerm": "Re-survey / Thandaper Ledger",
+    "languages": ["Malayalam", "Tamil"],
+    "rainTriggerLimit": 110.0,
+    "sampleParcels": [
+      { "id": "142/8", "name": "Re-survey #142/8", "owner": "Muhammed Shafi", "familyCount": 5, "slope": 36.5, "baseFos": 1.42, "status": "Watch" },
+      { "id": "142/9", "name": "Re-survey #142/9", "owner": "Sujatha Nair", "familyCount": 4, "slope": 40.2, "baseFos": 1.30, "status": "Watch" },
+      { "id": "88/Govt", "name": "Thandaper #88/Govt", "owner": "Govt Plantation Safe Buffer", "familyCount": 0, "slope": 9.0, "baseFos": 2.55, "status": "Stable Safe Zone" }
+    ]
+  },
+  {
+    "id": "maharashtra",
+    "code": "MH",
+    "name": "Maharashtra",
+    "type": "State",
+    "sector": "Western Ghats - Mahad / Raigad Sector",
+    "center": [19.7515, 75.7139],
+    "bbox": [72.6, 15.6, 80.9, 22.0],
+    "primaryRisk": "Western Ghats Basalt Scarp & Landslide",
+    "cadastreTerm": "7/12 (Satbara) Extract / Gat Number",
+    "languages": ["Marathi", "Hindi"],
+    "rainTriggerLimit": 100.0,
+    "sampleParcels": [
+      { "id": "204/7-12", "name": "Gat #204/7-12", "owner": "Suresh Patil", "familyCount": 6, "slope": 37.8, "baseFos": 1.41, "status": "Watch" },
+      { "id": "205", "name": "Gat #205", "owner": "Ganesh Shinde", "familyCount": 4, "slope": 42.0, "baseFos": 1.29, "status": "Watch" },
+      { "id": "310/Govt", "name": "Gat #310/Govt", "owner": "Govt Plateau Safe Pool", "familyCount": 0, "slope": 8.5, "baseFos": 2.75, "status": "Stable Safe Zone" }
     ]
   },
   {
@@ -48,36 +105,6 @@
     ]
   },
   {
-    "id": "kerala",
-    "code": "KL",
-    "name": "Kerala",
-    "type": "State",
-    "center": [10.8505, 76.2711],
-    "bbox": [74.85, 8.28, 77.41, 12.79],
-    "primaryRisk": "Wayanad-Style Deep Soil Liquefaction & Debris Slip",
-    "cadastreTerm": "Thandaper / Re-survey Pokkuvaravu",
-    "languages": ["Malayalam", "Tamil"],
-    "rainTriggerLimit": 110.0,
-    "sampleParcels": [
-      { "id": "KL-701", "owner": "Venu Nair", "familyCount": 5, "slope": 36.5, "baseFos": 1.48, "status": "Stable" }
-    ]
-  },
-  {
-    "id": "assam",
-    "code": "AS",
-    "name": "Assam",
-    "type": "State",
-    "center": [26.2006, 92.9376],
-    "bbox": [89.70, 24.13, 96.02, 28.00],
-    "primaryRisk": "Railway Cut & Brahmaputra Riverbank Toe Slip",
-    "cadastreTerm": "Dag / Patta / Jamabandi",
-    "languages": ["Assamese", "Bengali", "Bodo"],
-    "rainTriggerLimit": 85.0,
-    "sampleParcels": [
-      { "id": "AS-88", "owner": "Biren Das", "familyCount": 4, "slope": 29.0, "baseFos": 1.62, "status": "Stable" }
-    ]
-  },
-  {
     "id": "uttarakhand",
     "code": "UK",
     "name": "Uttarakhand",
@@ -85,26 +112,11 @@
     "center": [30.0668, 79.0193],
     "bbox": [77.57, 28.72, 81.04, 31.45],
     "primaryRisk": "High-Altitude Shear Rupture & Joshimath Subsidence",
-    "cadastreTerm": "Khasra / Khewat / RoR",
+    "cadastreTerm": "Khatauni / Khasra / Khewat RoR",
     "languages": ["Hindi", "Garhwali", "Kumaoni"],
     "rainTriggerLimit": 70.0,
     "sampleParcels": [
       { "id": "UK-409", "owner": "Harish Rawat", "familyCount": 6, "slope": 48.0, "baseFos": 1.18, "status": "High Risk" }
-    ]
-  },
-  {
-    "id": "maharashtra",
-    "code": "MH",
-    "name": "Maharashtra",
-    "type": "State",
-    "center": [19.7515, 75.7139],
-    "bbox": [72.6, 15.6, 80.9, 22.0],
-    "primaryRisk": "Western Ghats Basalt Scarp & Konkan Landslide",
-    "cadastreTerm": "7/12 Extract (Satbara) & Bhu-Aadhaar",
-    "languages": ["Marathi"],
-    "rainTriggerLimit": 100.0,
-    "sampleParcels": [
-      { "id": "MH-109", "owner": "Sanjay Patil", "familyCount": 5, "slope": 39.5, "baseFos": 1.40, "status": "Watch" }
     ]
   },
   {

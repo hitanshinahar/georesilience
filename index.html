@@ -4,19 +4,15 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>GeoShield 🇮🇳 — National Disaster Resilience Platform</title>
+<meta name="description" content="Official National Disaster Resilience & Cadastral Risk Intelligence Platform of India. Integrated Spaceborne InSAR, Real-time XGBoost Susceptibility, and Parcel-Level Protection across all 36 States and Union Territories." />
 
-<!-- ============================================================
-     FONTS
-     Display: Space Grotesk (geometric, technical, futuristic)
-     Body:    Inter
-     Mono:    JetBrains Mono (labels, coordinates, indices)
-============================================================ -->
+<!-- FONTS -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="nav.css">
 
-<!-- Three.js (globe) + GSAP / ScrollTrigger (scroll-driven timeline) -->
+<!-- Three.js & GSAP -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
@@ -36,6 +32,8 @@
     --gold: #f59e0b;            /* Amber Gold */
     --gold-soft: rgba(245, 158, 11, 0.35);
     --teal: #38bdf8;            /* Cyan Sky Accent */
+    --green: #22c55e;
+    --red: #ef4444;
     --ink-0: #ffffff;           /* White text */
     --ink-1: #94a3b8;           /* Muted Slate text */
     --line: #1e293b;            /* Slate Border */
@@ -60,7 +58,7 @@
 
   a { color: inherit; }
 
-  /* ---------- ambient starfield (fixed, behind everything) ---------- */
+  /* Ambient starfield */
   .stars {
     position: fixed; inset: 0; z-index: 0; pointer-events: none;
     background-image:
@@ -76,14 +74,6 @@
     background-size: 100% 100%;
   }
 
-  /* ---------- fixed chrome ---------- */
-  .brand {
-    position: fixed; top: 28px; left: 32px; z-index: 50;
-    font-family: var(--font-mono); font-size: 12px; letter-spacing: .18em;
-    text-transform: uppercase; color: var(--ink-1);
-  }
-  .brand b { color: var(--gold); font-weight: 500; }
-
   .progress-rail {
     position: fixed; right: 28px; top: 50%; translate: 0 -50%;
     height: 120px; width: 1px; background: var(--line); z-index: 50;
@@ -97,10 +87,9 @@
   }
   @media (min-width: 768px) { .progress-rail { display: block; } }
 
-  /* ── Particle canvas sits behind everything ── */
   #particleCanvas { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
 
-  /* ── Hero word-stagger ── */
+  /* Hero word-stagger */
   .word-char {
     display: inline-block;
     opacity: 0;
@@ -111,7 +100,7 @@
     to { opacity: 1; transform: translateY(0); }
   }
 
-  /* ── Metrics Ribbon ── */
+  /* Metrics Ribbon */
   .metrics-ribbon {
     display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     gap: 14px; max-width: 1080px; margin: 0 auto 36px; padding: 0 16px;
@@ -134,10 +123,6 @@
     font-family: var(--font-mono); font-size: 10px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px;
   }
 
-  /* ── Closing section entrance ── */
-  .closing { opacity: 0; transform: translateY(30px); transition: opacity .8s ease, transform .8s ease; }
-  .closing.is-visible { opacity: 1; transform: translateY(0); }
-
   /* ==========================================================
      SCROLL STAGE
   ========================================================== */
@@ -158,7 +143,7 @@
 
   .intro-copy {
     position: absolute;
-    bottom: 12%;
+    bottom: 10%;
     left: 50%;
     translate: -50% 0;
     text-align: center;
@@ -175,9 +160,9 @@
   }
   .intro-copy h1 {
     font-family: var(--font-display);
-    font-size: clamp(28px, 5vw, 56px);
+    font-size: clamp(28px, 5vw, 54px);
     font-weight: 700;
-    margin: 8px 0 16px;
+    margin: 8px 0 14px;
     letter-spacing: -0.02em;
     color: var(--ink-0);
   }
@@ -197,7 +182,7 @@
     100% { transform: translateY(-6px); opacity: .2; }
   }
 
-  /* globe canvas layer */
+  /* Globe Layer */
   .globe-layer {
     position: absolute; inset: 0;
     display: flex; align-items: center; justify-content: center;
@@ -205,7 +190,7 @@
   }
   .globe-layer canvas { display: block; }
 
-  /* india layer (svg map) — starts hidden, crossfades in */
+  /* India Vector Map Layer */
   .india-layer {
     position: absolute; inset: 0;
     display: flex; align-items: center; justify-content: center;
@@ -217,28 +202,78 @@
 
   .india-stage {
     position: relative;
-    width: min(90vw, 640px);
-    aspect-ratio: 400 / 450;
+    width: min(92vw, 680px);
+    aspect-ratio: 560 / 640;
+    max-height: 82vh;
   }
   .india-stage svg { width: 100%; height: 100%; overflow: visible; }
 
-  .india-outline {
-    fill: url(#indiaFill);
-    stroke: var(--gold);
+  .map-caption {
+    position: absolute; top: -38px; left: 50%; translate: -50% 0;
+    font-family: var(--font-mono); font-size: 11px; letter-spacing: .2em;
+    text-transform: uppercase; color: var(--gold);
+    white-space: nowrap;
+    background: rgba(6, 11, 19, 0.85); padding: 4px 12px; border-radius: 100px;
+    border: 1px solid rgba(245, 158, 11, 0.3);
+  }
+
+  /* State Vector Styles */
+  .state-polygon {
+    fill: rgba(13, 21, 36, 0.75);
+    stroke: rgba(56, 189, 248, 0.4);
     stroke-width: 1.2;
     stroke-linejoin: round;
-    filter: drop-shadow(0 0 16px rgba(245, 158, 11, 0.2));
+    transition: all 0.2s ease;
+    cursor: pointer;
   }
-  .india-dot { fill: var(--gold); }
+  .state-polygon:hover {
+    fill: rgba(245, 158, 11, 0.28);
+    stroke: var(--gold);
+    stroke-width: 2;
+    filter: drop-shadow(0 0 8px rgba(245, 158, 11, 0.6));
+  }
+  .state-polygon.is-active {
+    fill: rgba(245, 158, 11, 0.4);
+    stroke: #f59e0b;
+    stroke-width: 2.4;
+    filter: drop-shadow(0 0 12px rgba(245, 158, 11, 0.8));
+  }
+  .state-label {
+    font-family: var(--font-mono);
+    font-size: 8px;
+    fill: #cbd5e1;
+    font-weight: 600;
+    pointer-events: none;
+    text-anchor: middle;
+    letter-spacing: 0.3px;
+    transition: fill 0.2s;
+  }
+  .state-polygon:hover + .state-label, .state-polygon.is-active + .state-label {
+    fill: #ffffff;
+    font-weight: 700;
+  }
 
-  .map-caption {
-    position: absolute; top: -46px; left: 50%; translate: -50% 0;
-    font-family: var(--font-mono); font-size: 11px; letter-spacing: .2em;
-    text-transform: uppercase; color: var(--ink-1);
+  /* Interactive Map Tooltip */
+  .map-tooltip {
+    position: absolute;
+    background: rgba(6, 11, 19, 0.95);
+    border: 1px solid var(--gold);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.8), 0 0 14px rgba(245,158,11,0.3);
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 11px;
+    pointer-events: none;
+    z-index: 100;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+    transform: translate(-50%, -120%);
     white-space: nowrap;
   }
+  .map-tooltip.is-visible { opacity: 1; }
+  .map-tooltip strong { color: #fff; display: block; font-family: var(--font-display); font-size: 12px; }
+  .map-tooltip span { color: var(--teal); font-family: var(--font-mono); font-size: 9.5px; }
 
-  /* ---------- feature markers ---------- */
+  /* Feature markers */
   .marker {
     position: absolute;
     width: 14px; height: 14px;
@@ -272,18 +307,18 @@
   }
   .marker .label {
     position: absolute; top: 16px; left: 50%; translate: -50% 0;
-    font-family: var(--font-mono); font-size: 9.5px; letter-spacing: .1em;
+    font-family: var(--font-mono); font-size: 9px; letter-spacing: .1em;
     color: var(--ink-1); white-space: nowrap; text-transform: uppercase;
-    opacity: .75;
+    opacity: .85; background: rgba(6, 11, 19, 0.8); padding: 1px 4px; border-radius: 3px;
   }
 
-  /* ---------- feature card ---------- */
+  /* Feature Card */
   .feature-card {
     position: absolute;
     width: 230px;
-    padding: 16px 16px 14px;
+    padding: 14px 16px;
     background: var(--card-bg);
-    border: 1px solid var(--line);
+    border: 1px solid var(--gold);
     border-radius: 8px;
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
@@ -298,52 +333,14 @@
     opacity: 1; transform: translateY(0) scale(1);
     pointer-events: auto;
   }
-  .feature-card .icon {
-    font-size: 18px; margin-bottom: 8px; display: block;
-  }
-  .feature-card .index {
-    font-family: var(--font-mono); font-size: 10px; color: var(--gold);
-    letter-spacing: .15em; margin-bottom: 4px; display: block;
-  }
-  .feature-card h3 {
-    margin: 0 0 6px; font-family: var(--font-display); font-size: 15px;
-    font-weight: 600; color: var(--ink-0);
-  }
-  .feature-card p {
-    margin: 0 0 12px; font-size: 12px; line-height: 1.5; color: var(--ink-1);
-  }
+  .feature-card .icon { font-size: 18px; margin-bottom: 6px; display: block; }
+  .feature-card .index { font-family: var(--font-mono); font-size: 9.5px; color: var(--gold); letter-spacing: .15em; margin-bottom: 4px; display: block; }
+  .feature-card h3 { margin: 0 0 4px; font-family: var(--font-display); font-size: 14px; font-weight: 600; color: #fff; }
+  .feature-card p { margin: 0 0 10px; font-size: 11px; line-height: 1.4; color: var(--ink-1); }
   .feature-card .explore {
     display: inline-flex; align-items: center; gap: 6px;
-    font-family: var(--font-mono); font-size: 11px; letter-spacing: .08em;
+    font-family: var(--font-mono); font-size: 10.5px; letter-spacing: .08em;
     text-transform: uppercase; color: var(--gold); text-decoration: none;
-    transition: color 0.2s ease;
-  }
-  .feature-card .explore:hover {
-    color: var(--ink-0);
-  }
-  .feature-card .explore svg { width: 11px; height: 11px; }
-
-  /* ---------- closing section ---------- */
-  .closing {
-    position: relative; z-index: 1;
-    min-height: 50vh;
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    text-align: center; padding: 60px 24px;
-    border-top: 1px solid var(--line);
-    background: var(--bg-1);
-  }
-  .closing .eyebrow {
-    font-family: var(--font-mono); font-size: 11px; letter-spacing: .25em;
-    text-transform: uppercase; color: var(--gold); margin-bottom: 14px;
-  }
-  .closing h2 {
-    font-family: var(--font-display); font-weight: 600;
-    font-size: clamp(28px, 4vw, 44px); margin: 0 0 14px; max-width: 20ch;
-    color: var(--ink-0);
-  }
-  .closing p {
-    max-width: 52ch; color: var(--ink-1); line-height: 1.6; margin: 0;
-    font-size: 14px;
   }
 
   /* ---------- National Region Selector Section ---------- */
@@ -362,9 +359,9 @@
     color: #94a3b8; max-width: 68ch; margin: 0 auto 28px; font-size: 14px; line-height: 1.5;
   }
   .region-select-controls {
-    display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; align-items: center; max-width: 900px; margin: 0 auto 28px;
+    display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; align-items: center; max-width: 960px; margin: 0 auto 28px;
   }
-  .search-box { position: relative; flex: 1 1 300px; }
+  .search-box { position: relative; flex: 1 1 320px; }
   .search-box svg { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #64748b; }
   .search-box input {
     width: 100%; background: #0d1524; border: 1px solid #334155; border-radius: 8px;
@@ -373,7 +370,7 @@
   .search-box input:focus { border-color: var(--gold); }
   .search-results-dropdown {
     position: absolute; top: 100%; left: 0; right: 0; background: #0d1524; border: 1px solid #334155;
-    border-radius: 8px; max-height: 220px; overflow-y: auto; z-index: 100; display: none; text-align: left;
+    border-radius: 8px; max-height: 240px; overflow-y: auto; z-index: 100; display: none; text-align: left;
     box-shadow: 0 10px 25px rgba(0,0,0,0.8); margin-top: 4px;
   }
   .autocomplete-item {
@@ -383,7 +380,7 @@
   .autocomplete-item:hover { background: rgba(245, 158, 11, 0.15); color: var(--gold); }
   .region-select-dropdown {
     background: #0d1524; border: 1px solid #334155; border-radius: 8px; padding: 12px 16px;
-    color: #f8fafc; font-size: 13.5px; outline: none; cursor: pointer; transition: border-color 0.2s; min-width: 240px;
+    color: #f8fafc; font-size: 13.5px; outline: none; cursor: pointer; transition: border-color 0.2s; min-width: 260px;
   }
   .region-select-dropdown:focus { border-color: var(--gold); }
   .cta-enter-btn {
@@ -396,7 +393,7 @@
 
   .active-region-card {
     background: #0d1524; border: 1px solid rgba(245, 158, 11, 0.4); border-radius: 12px;
-    padding: 24px 28px; max-width: 860px; margin: 0 auto 36px; text-align: left;
+    padding: 24px 28px; max-width: 900px; margin: 0 auto 36px; text-align: left;
     box-shadow: 0 12px 30px rgba(0, 0, 0, 0.7), 0 0 20px rgba(245, 158, 11, 0.12);
   }
   .reg-card-header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; border-bottom: 1px solid #1e293b; padding-bottom: 12px; }
@@ -408,13 +405,26 @@
   .reg-card-item .val { font-size: 13px; color: #cbd5e1; font-weight: 500; }
   .reg-card-item .val.gold { color: var(--gold); font-weight: 700; font-family: var(--font-mono); }
 
-  @media (max-width: 767px) {
-    .india-stage { width: min(92vw, 420px); }
-    .feature-card { width: 180px; padding: 13px 13px 11px; }
-    .feature-card h3 { font-size: 13.5px; }
-    .feature-card p { font-size: 11px; }
-    .brand { top: 18px; left: 18px; font-size: 10.5px; }
-    .marker .label { display: none; }
+  /* Closing Section */
+  .closing {
+    position: relative; z-index: 1;
+    min-height: 40vh;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center; padding: 60px 24px;
+    border-top: 1px solid var(--line);
+    background: var(--bg-1);
+  }
+  .closing .eyebrow {
+    font-family: var(--font-mono); font-size: 11px; letter-spacing: .25em;
+    text-transform: uppercase; color: var(--gold); margin-bottom: 14px;
+  }
+  .closing h2 {
+    font-family: var(--font-display); font-weight: 600;
+    font-size: clamp(26px, 4vw, 40px); margin: 0 0 14px; max-width: 22ch;
+    color: var(--ink-0);
+  }
+  .closing p {
+    max-width: 54ch; color: var(--ink-1); line-height: 1.6; margin: 0; font-size: 14px;
   }
 </style>
 </head>
@@ -426,8 +436,7 @@
 <div class="progress-rail"><div class="dot" id="railDot"></div></div>
 
 <!-- ============================================================
-     SCROLL STAGE — globe grows with scroll, then dissolves into
-     the India map.
+     SCROLL STAGE — Globe zooms into Interactive India Vector Map
 ============================================================ -->
 <section class="scroll-stage" id="scrollStage">
   <div class="stage-pin" id="stagePin">
@@ -436,17 +445,135 @@
 
     <div class="india-layer" id="indiaLayer">
       <div class="india-stage">
-        <span class="map-caption">GeoShield · National Coverage (36 States & UTs)</span>
-        <svg viewBox="0 0 400 450" xmlns="http://www.w3.org/2000/svg">
+        <span class="map-caption">GeoShield · National Administrative Map (28 States &amp; 8 UTs)</span>
+        
+        <!-- Interactive India SVG Map with labeled States and Union Territories -->
+        <svg viewBox="0 0 600 680" id="indiaVectorSvg" xmlns="http://www.w3.org/2000/svg">
           <defs>
-            <radialGradient id="indiaFill" cx="45%" cy="35%" r="75%">
-              <stop offset="0%" stop-color="rgba(245, 158, 11, 0.2)"/>
-              <stop offset="100%" stop-color="rgba(245, 158, 11, 0.0)"/>
+            <radialGradient id="indiaGlow" cx="50%" cy="45%" r="60%">
+              <stop offset="0%" stop-color="rgba(56, 189, 248, 0.15)"/>
+              <stop offset="100%" stop-color="rgba(6, 11, 19, 0)"/>
             </radialGradient>
           </defs>
-          <polygon class="india-outline" id="indiaOutline" points=""></polygon>
-          <g id="indiaDots"></g>
+
+          <!-- Ambient Map Background Outline -->
+          <rect width="600" height="680" fill="url(#indiaGlow)" />
+
+          <!-- Group of States & UTs -->
+          <g id="statesGroup">
+            <!-- Northern States -->
+            <polygon class="state-polygon" id="poly-ladakh" data-id="ladakh" points="200,20 280,35 295,95 240,110 205,80" />
+            <text x="245" y="70" class="state-label">LADAKH</text>
+
+            <polygon class="state-polygon" id="poly-jammu-and-kashmir" data-id="jammu-and-kashmir" points="160,45 200,20 205,80 185,115 145,95" />
+            <text x="175" y="80" class="state-label">J&amp;K</text>
+
+            <polygon class="state-polygon" id="poly-himachal-pradesh" data-id="himachal-pradesh" points="185,115 240,110 250,150 205,160 180,140" />
+            <text x="215" y="138" class="state-label">HP</text>
+
+            <polygon class="state-polygon" id="poly-punjab" data-id="punjab" points="145,115 185,115 180,165 140,155" />
+            <text x="160" y="145" class="state-label">PUNJAB</text>
+
+            <polygon class="state-polygon" id="poly-uttarakhand" data-id="uttarakhand" points="240,110 290,135 275,180 230,165 250,150" />
+            <text x="260" y="155" class="state-label">UK</text>
+
+            <polygon class="state-polygon" id="poly-haryana" data-id="haryana" points="175,160 215,155 210,200 165,195" />
+            <text x="190" y="180" class="state-label">HR</text>
+
+            <circle class="state-polygon" id="poly-delhi" data-id="delhi" cx="205" cy="182" r="7" />
+            <text x="205" y="172" class="state-label" style="font-size:7px;">DELHI</text>
+
+            <!-- Western & Central States -->
+            <polygon class="state-polygon" id="poly-rajasthan" data-id="rajasthan" points="80,165 165,195 190,260 120,285 70,220" />
+            <text x="130" y="230" class="state-label">RAJASTHAN</text>
+
+            <polygon class="state-polygon" id="poly-gujarat" data-id="gujarat" points="40,265 110,270 125,345 75,360 30,315" />
+            <text x="75" y="315" class="state-label">GUJARAT</text>
+
+            <polygon class="state-polygon" id="poly-madhya-pradesh" data-id="madhya-pradesh" points="140,265 260,250 280,340 180,360 130,310" />
+            <text x="205" y="305" class="state-label">MADHYA PRADESH</text>
+
+            <polygon class="state-polygon" id="poly-uttar-pradesh" data-id="uttar-pradesh" points="215,175 320,185 340,255 235,260 210,200" />
+            <text x="270" y="225" class="state-label">UTTAR PRADESH</text>
+
+            <!-- Eastern & Himalayan States -->
+            <polygon class="state-polygon" id="poly-bihar" data-id="bihar" points="325,200 395,210 390,265 325,255" />
+            <text x="360" y="238" class="state-label">BIHAR</text>
+
+            <polygon class="state-polygon" id="poly-sikkim" data-id="sikkim" points="392,185 418,185 415,208 390,208" />
+            <text x="404" y="200" class="state-label" style="font-size:7.5px; fill:#f59e0b; font-weight:700;">SIKKIM</text>
+
+            <polygon class="state-polygon" id="poly-west-bengal" data-id="west-bengal" points="385,215 415,210 405,315 375,300 380,260" />
+            <text x="395" y="270" class="state-label">WB</text>
+
+            <polygon class="state-polygon" id="poly-jharkhand" data-id="jharkhand" points="325,255 385,260 375,320 320,310" />
+            <text x="350" y="285" class="state-label">JHARKHAND</text>
+
+            <polygon class="state-polygon" id="poly-odisha" data-id="odisha" points="320,315 380,315 360,405 300,375" />
+            <text x="340" y="355" class="state-label">ODISHA</text>
+
+            <polygon class="state-polygon" id="poly-chhattisgarh" data-id="chhattisgarh" points="270,305 315,315 300,410 260,375" />
+            <text x="285" y="350" class="state-label">CG</text>
+
+            <!-- North-Eastern States -->
+            <polygon class="state-polygon" id="poly-assam" data-id="assam" points="430,205 510,210 495,250 440,240" />
+            <text x="468" y="228" class="state-label">ASSAM</text>
+
+            <polygon class="state-polygon" id="poly-arunachal-pradesh" data-id="arunachal-pradesh" points="470,165 550,175 540,215 465,200" />
+            <text x="508" y="190" class="state-label">ARUNACHAL</text>
+
+            <polygon class="state-polygon" id="poly-meghalaya" data-id="meghalaya" points="430,238 475,238 470,262 425,260" />
+            <text x="450" y="252" class="state-label" style="font-size:7px;">MEGHALAYA</text>
+
+            <polygon class="state-polygon" id="poly-nagaland" data-id="nagaland" points="510,215 540,225 530,255 505,245" />
+            <text x="522" y="238" class="state-label" style="font-size:7px;">NAGALAND</text>
+
+            <polygon class="state-polygon" id="poly-manipur" data-id="manipur" points="505,255 535,260 525,295 495,290" />
+            <text x="515" y="278" class="state-label" style="font-size:7px;">MANIPUR</text>
+
+            <polygon class="state-polygon" id="poly-mizoram" data-id="mizoram" points="485,290 515,295 505,340 475,335" />
+            <text x="495" y="318" class="state-label" style="font-size:7px;">MIZORAM</text>
+
+            <polygon class="state-polygon" id="poly-tripura" data-id="tripura" points="455,275 480,275 475,310 450,305" />
+            <text x="465" y="295" class="state-label" style="font-size:7px;">TRIPURA</text>
+
+            <!-- Southern & Western States -->
+            <polygon class="state-polygon" id="poly-maharashtra" data-id="maharashtra" points="110,345 235,355 245,435 150,445 105,395" />
+            <text x="180" y="395" class="state-label">MAHARASHTRA</text>
+
+            <polygon class="state-polygon" id="poly-goa" data-id="goa" points="135,465 152,465 148,485 132,485" />
+            <text x="142" y="478" class="state-label" style="font-size:6.5px;">GOA</text>
+
+            <polygon class="state-polygon" id="poly-telangana" data-id="telangana" points="215,400 280,395 270,470 205,455" />
+            <text x="245" y="435" class="state-label">TELANGANA</text>
+
+            <polygon class="state-polygon" id="poly-andhra-pradesh" data-id="andhra-pradesh" points="265,435 340,410 270,545 225,520 270,470" />
+            <text x="275" y="495" class="state-label">ANDHRA PRADESH</text>
+
+            <polygon class="state-polygon" id="poly-karnataka" data-id="karnataka" points="140,445 210,455 215,560 155,550 135,470" />
+            <text x="175" y="505" class="state-label">KARNATAKA</text>
+
+            <polygon class="state-polygon" id="poly-kerala" data-id="kerala" points="160,555 190,560 180,640 155,620" />
+            <text x="172" y="595" class="state-label" style="font-size:7px;">KERALA</text>
+
+            <polygon class="state-polygon" id="poly-tamil-nadu" data-id="tamil-nadu" points="190,545 260,535 225,650 180,640" />
+            <text x="220" y="595" class="state-label">TAMIL NADU</text>
+
+            <!-- Union Territories (Islands & Coast) -->
+            <polygon class="state-polygon" id="poly-andaman-and-nicobar" data-id="andaman-and-nicobar" points="490,520 515,520 510,640 485,640" />
+            <text x="500" y="580" class="state-label" style="font-size:7px;">A&amp;N UT</text>
+
+            <polygon class="state-polygon" id="poly-lakshadweep" data-id="lakshadweep" points="100,560 120,560 115,620 95,620" />
+            <text x="108" y="590" class="state-label" style="font-size:6.5px;">LAKSHADWEEP</text>
+          </g>
         </svg>
+
+        <!-- Floating Tooltip -->
+        <div id="mapTooltip" class="map-tooltip">
+          <strong id="tooltipTitle">Sikkim</strong>
+          <span id="tooltipSub">Dag / Khasra • Fs: 0.76</span>
+        </div>
+
         <div id="markerLayer"></div>
       </div>
     </div>
@@ -454,14 +581,14 @@
     <div class="intro-copy" id="introCopy">
       <div class="eyebrow">GOVT OF INDIA • MDoNER × MoRD | GeoShield 🇮🇳</div>
       <h1 id="heroTitle">Resilience in Every Khasra</h1>
-      <div class="cue"><span>From National Hazard Intelligence to Parcel-Level Protection • Scroll to zoom</span><span class="stick"></span></div>
+      <div class="cue"><span>From National Hazard Intelligence to Parcel-Level Protection • Scroll to explore</span><span class="stick"></span></div>
     </div>
 
   </div>
 </section>
 
 <!-- ============================================================
-     METRICS RIBBON (Task 2 Requirement)
+     METRICS RIBBON
 ============================================================ -->
 <section style="position:relative; z-index:2; background:#060b13; padding-top:20px;">
   <div class="metrics-ribbon">
@@ -509,7 +636,7 @@
       <!-- Search Input with Autocomplete -->
       <div class="search-box">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        <input type="text" id="regionSearchInput" placeholder="Search state, district, or hazard (e.g. Sikkim, Shimla, Wayanad)..." onkeyup="filterRegionSearch(this.value)" onfocus="filterRegionSearch(this.value)" />
+        <input type="text" id="regionSearchInput" placeholder="Search state, district, or hazard (e.g. Sikkim, Shimla, Wayanad, Mahad)..." onkeyup="filterRegionSearch(this.value)" onfocus="filterRegionSearch(this.value)" />
         <div id="searchResultsList" class="search-results-dropdown"></div>
       </div>
 
@@ -564,27 +691,27 @@
         <div>
           <label style="font-size:11px; color:var(--ink-1); display:block; margin-bottom:4px;">District Selection:</label>
           <select id="hierarchyDistrictSelect" class="region-select-dropdown" style="width:100%; font-size:11px; padding:6px 10px;" onchange="onDistrictSelected(this.value)">
-            <option value="">East Sikkim (Gangtok)</option>
+            <option value="">East District (Gangtok)</option>
           </select>
         </div>
         <div>
           <label style="font-size:11px; color:var(--ink-1); display:block; margin-bottom:4px;">Local Area / Sub-Division:</label>
           <select id="hierarchyLocalAreaSelect" class="region-select-dropdown" style="width:100%; font-size:11px; padding:6px 10px;" onchange="onLocalAreaSelected(this.value)">
-            <option value="">Gangtok Urban &amp; Ridge Corridor</option>
+            <option value="">Gangtok Sector-04</option>
           </select>
         </div>
         <div>
           <label style="font-size:11px; color:var(--ink-1); display:block; margin-bottom:4px;">Cadastral Land Parcel / Khasra:</label>
           <select id="hierarchyParcelSelect" class="region-select-dropdown" style="width:100%; font-size:11px; padding:6px 10px;">
-            <option value="104A">Khasra #104/A (Upper Ridge)</option>
+            <option value="104A">Dag #104/A (Pemba Tenzing Bhutia)</option>
           </select>
         </div>
       </div>
 
       <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
-        <span style="font-size:11px; color:var(--ink-1); font-family:var(--font-mono);">Camera Transition: <strong style="color:var(--gold);">map.fitBounds(bbox, { padding: 40, duration: 1200 })</strong></span>
+        <span style="font-size:11px; color:var(--ink-1); font-family:var(--font-mono);">Spatial Resolution: <strong style="color:var(--gold);">PostGIS 3.4 Cadastre Polygon</strong></span>
         <button onclick="launchHierarchyCommandCenter()" class="cta-enter-btn" style="padding:8px 16px; font-size:11px;">
-          🧭 LAUNCH COMMAND CENTER FOR SELECTED PARCEL
+          🧭 LAUNCH COMMAND CENTER FOR SELECTED STATE
         </button>
       </div>
     </div>
@@ -599,57 +726,22 @@
 
 <script>
 /* ================================================================
-   CONFIG
+   CONFIG & UTILITIES
    ================================================================ */
 const CONFIG = {
-  scrollDurationVh: window.innerWidth < 768 ? 320 : 420,
-
+  scrollDurationVh: window.innerWidth < 768 ? 320 : 400,
   globeMinScale: 0.34,
   globeMaxScale: 15.5,
-
   idleRotationSpeed: 0.0016,
   scrollRotationAmount: Math.PI * 3.2,
+  crossfadeStart: 0.70,
+  crossfadeEnd: 0.92,
 
-  crossfadeStart: 0.72,
-  crossfadeEnd: 0.94,
-
-  // Precise India outline projected coordinates (viewBox 400x450)
-  indiaOutline: [
-    [0.348, 0.05], [0.381, 0.088], [0.378, 0.115], [0.39, 0.132], [0.389, 0.148],
-    [0.367, 0.144], [0.376, 0.18], [0.406, 0.201], [0.448, 0.224], [0.429, 0.238],
-    [0.417, 0.269], [0.447, 0.281], [0.476, 0.297], [0.516, 0.316], [0.558, 0.32],
-    [0.576, 0.337], [0.6, 0.34], [0.637, 0.347], [0.663, 0.347], [0.666, 0.334],
-    [0.662, 0.313], [0.664, 0.299], [0.684, 0.292], [0.686, 0.318], [0.686, 0.324],
-    [0.715, 0.337], [0.734, 0.332], [0.76, 0.334], [0.785, 0.333], [0.787, 0.313],
-    [0.775, 0.302], [0.799, 0.298], [0.828, 0.274], [0.863, 0.253], [0.889, 0.261],
-    [0.91, 0.248], [0.925, 0.268], [0.915, 0.282], [0.948, 0.286], [0.95, 0.299],
-    [0.939, 0.305], [0.942, 0.325], [0.919, 0.319], [0.88, 0.342], [0.881, 0.36],
-    [0.864, 0.388], [0.863, 0.404], [0.848, 0.431], [0.825, 0.423], [0.823, 0.457],
-    [0.817, 0.468], [0.82, 0.482], [0.805, 0.49], [0.788, 0.438], [0.78, 0.438],
-    [0.775, 0.459], [0.758, 0.442], [0.767, 0.423], [0.782, 0.422], [0.796, 0.394],
-    [0.777, 0.388], [0.749, 0.389], [0.72, 0.384], [0.717, 0.362], [0.703, 0.36],
-    [0.678, 0.346], [0.667, 0.368], [0.689, 0.385], [0.67, 0.397], [0.663, 0.409],
-    [0.682, 0.418], [0.677, 0.438], [0.688, 0.462], [0.693, 0.489], [0.688, 0.501],
-    [0.667, 0.501], [0.629, 0.508], [0.631, 0.532], [0.614, 0.552], [0.57, 0.574],
-    [0.535, 0.612], [0.513, 0.633], [0.482, 0.654], [0.482, 0.669], [0.467, 0.677],
-    [0.439, 0.689], [0.424, 0.691], [0.415, 0.716], [0.422, 0.758], [0.423, 0.785],
-    [0.41, 0.816], [0.41, 0.872], [0.394, 0.873], [0.38, 0.898], [0.39, 0.909],
-    [0.361, 0.918], [0.351, 0.941], [0.339, 0.95], [0.309, 0.919], [0.295, 0.874],
-    [0.283, 0.841], [0.272, 0.825], [0.256, 0.794], [0.248, 0.753], [0.243, 0.733],
-    [0.216, 0.688], [0.202, 0.624], [0.193, 0.582], [0.193, 0.543], [0.187, 0.512],
-    [0.143, 0.532], [0.121, 0.528], [0.081, 0.488], [0.095, 0.476], [0.087, 0.464],
-    [0.05, 0.436], [0.071, 0.414], [0.139, 0.414], [0.133, 0.386], [0.115, 0.369],
-    [0.112, 0.344], [0.092, 0.33], [0.125, 0.295], [0.161, 0.298], [0.193, 0.264],
-    [0.212, 0.23], [0.242, 0.198], [0.242, 0.174], [0.268, 0.155], [0.243, 0.139],
-    [0.233, 0.117], [0.221, 0.088], [0.237, 0.074], [0.283, 0.082], [0.318, 0.077]
-  ],
-
-  // Real core modules mapped to real geographical locations of landslide/tech interest
   features: [
     { 
       id: 'dehradun',
       city: 'Dehradun',
-      x: 0.38, y: 0.17,
+      x: 0.44, y: 0.23,
       name: 'Cascading Simulator',
       desc: 'Simulates landslide-to-debris-to-flood hazard chains along vital Himalayan lifelines.',
       icon: '🌊',
@@ -658,16 +750,16 @@ const CONFIG = {
     { 
       id: 'gangtok',
       city: 'Gangtok',
-      x: 0.75, y: 0.34,
-      name: 'Dynamic Risk Engine',
-      desc: 'Our pilot deployment site. Connects live rainfall streams to Khasra-level limit-equilibrium risk analysis.',
+      x: 0.68, y: 0.30,
+      name: '3D Command Center',
+      desc: 'Pilot deployment. Connects live rainfall streams to Khasra-level limit-equilibrium risk analysis.',
       icon: '🏔️',
-      href: 'risk-engine.html'
+      href: 'command-center.html'
     },
     { 
       id: 'guwahati',
-      city: 'Guwahati',
-      x: 0.82, y: 0.32,
+      city: 'Haflong / Assam',
+      x: 0.78, y: 0.34,
       name: 'Admin & Governance',
       desc: 'Disaster governance workspace for authorizing evacuations and reconciling cadastral damage.',
       icon: '🏛️',
@@ -675,8 +767,8 @@ const CONFIG = {
     },
     { 
       id: 'mumbai',
-      city: 'Mumbai',
-      x: 0.22, y: 0.58,
+      city: 'Mahad / Raigad',
+      x: 0.30, y: 0.58,
       name: 'Edge AI Crack Sentinel',
       desc: 'Filters and logs citizen ground reports locally using quantized MobileNetV3 + offline PWA caching.',
       icon: '⚡',
@@ -684,8 +776,8 @@ const CONFIG = {
     },
     { 
       id: 'munnar',
-      city: 'Munnar',
-      x: 0.35, y: 0.82,
+      city: 'Wayanad / Kerala',
+      x: 0.32, y: 0.88,
       name: 'Resettlement Allocator',
       desc: 'Locates and scores safe government revenue lands for long-term rehabilitation planning.',
       icon: '🏠',
@@ -694,25 +786,18 @@ const CONFIG = {
   ]
 };
 
-/* ================================================================
-   UTILITIES
-   ================================================================ */
 const clamp01 = v => Math.max(0, Math.min(1, v));
 const normalize = (v, a, b) => clamp01((v - a) / (b - a));
 const lerp = (a, b, t) => a + (b - a) * t;
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const isHoverCapable = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
 
-/* ================================================================
-   SCROLL STAGE HEIGHT
-   ================================================================ */
 document.getElementById('scrollStage').style.height = CONFIG.scrollDurationVh + 'vh';
 
 /* ================================================================
-   GLOBE — Real Earth texture with atmosphere glow
+   THREE.JS REAL EARTH GLOBE
    ================================================================ */
-let globeGroup, camera, renderer, scene;
-let globeClouds = null;
+let globeGroup, camera, renderer, scene, globeClouds = null;
 
 function initGlobe() {
   const container = document.getElementById('globeLayer');
@@ -730,37 +815,25 @@ function initGlobe() {
   globeGroup = new THREE.Group();
   scene.add(globeGroup);
 
-  // ── Lighting ──
-  // Ambient light makes the dark side visible but subtle
   const ambient = new THREE.AmbientLight(0xffffff, 0.4);
   scene.add(ambient);
-  // Main sun light (toned down so it doesn't blow out the texture)
   const sun = new THREE.DirectionalLight(0xffffff, 1.8);
   sun.position.set(5, 3, 5);
   scene.add(sun);
-  // Subtle blue rim light for the dark edge
   const rim = new THREE.DirectionalLight(0x4466aa, 0.6);
   rim.position.set(-4, -1, -3);
   scene.add(rim);
 
-  // ── Earth sphere ──
   const loader = new THREE.TextureLoader();
   const earthGeo = new THREE.SphereGeometry(1, 64, 64);
-
-  // Color MUST be white (0xffffff) otherwise it tints the real texture blue!
   const earthMat = new THREE.MeshPhongMaterial({ color: 0xffffff, shininess: 8 });
 
-  // Load textures with automatic CDN fallback
   const localBASE = 'assets/textures/';
   const cdnBASE = 'https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/';
 
   const loadTex = (fileName, onSuccess) => {
-    loader.load(localBASE + fileName, tex => {
-      onSuccess(tex);
-    }, undefined, () => {
-      loader.load(cdnBASE + fileName, tex => {
-        onSuccess(tex);
-      });
+    loader.load(localBASE + fileName, tex => onSuccess(tex), undefined, () => {
+      loader.load(cdnBASE + fileName, tex => onSuccess(tex));
     });
   };
 
@@ -768,19 +841,15 @@ function initGlobe() {
   loadTex('earth_specular_2048.jpg', tex => { earthMat.specularMap = tex; earthMat.needsUpdate = true; });
   loadTex('earth_normal_2048.jpg', tex => { earthMat.normalMap = tex; earthMat.normalScale = new THREE.Vector2(0.5, 0.5); earthMat.needsUpdate = true; });
   
-  // Subtle specular reflection for the oceans
   earthMat.specular = new THREE.Color(0x222222);
-
   const earth = new THREE.Mesh(earthGeo, earthMat);
   globeGroup.add(earth);
 
-  // ── Cloud layer ──
   const cloudMat = new THREE.MeshPhongMaterial({ color: 0xffffff, transparent: true, opacity: 0.38, depthWrite: false });
   loadTex('earth_clouds_1024.png', tex => { cloudMat.map = tex; cloudMat.needsUpdate = true; });
   globeClouds = new THREE.Mesh(new THREE.SphereGeometry(1.006, 48, 48), cloudMat);
   globeGroup.add(globeClouds);
 
-  // ── Atmospheric Fresnel glow ──
   const atmMat = new THREE.ShaderMaterial({
     vertexShader: `varying vec3 vNormal; void main(){ vNormal=normalize(normalMatrix*normal); gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0); }`,
     fragmentShader: `varying vec3 vNormal; void main(){ float i=pow(0.72-dot(vNormal,vec3(0,0,1)),3.5); gl_FragColor=vec4(0.25,0.55,1.0,1.0)*i*1.6; }`,
@@ -792,8 +861,6 @@ function initGlobe() {
   window.addEventListener('resize', onResize);
   animate();
 }
-
-
 
 function onResize() {
   const w = window.innerWidth, h = window.innerHeight;
@@ -809,7 +876,6 @@ function animate() {
   requestAnimationFrame(animate);
   if (!prefersReducedMotion) {
     idleAngle += CONFIG.idleRotationSpeed;
-    // Clouds drift slightly faster for realism
     if (globeClouds) globeClouds.rotation.y += 0.00022;
   }
   if (globeGroup) {
@@ -827,110 +893,113 @@ function updateGlobe(growthProgress) {
 }
 
 /* ================================================================
-   INDIA MAP
+   INTERACTIVE INDIA ADMINISTRATIVE MAP WITH LABELED STATES
    ================================================================ */
-const VB_W = 400, VB_H = 450;
+function initIndiaInteractiveMap() {
+  const polygons = document.querySelectorAll('.state-polygon');
+  const tooltip = document.getElementById('mapTooltip');
+  const tooltipTitle = document.getElementById('tooltipTitle');
+  const tooltipSub = document.getElementById('tooltipSub');
+  const stage = document.querySelector('.india-stage');
 
-function pointInPolygon(x, y, poly) {
-  let inside = false;
-  for(let i=0, j=poly.length-1; i<poly.length; j=i++) {
-    const xi = poly[i][0], yi = poly[i][1];
-    const xj = poly[j][0], yj = poly[j][1];
-    const intersect = ((yi > y) !== (yj > y)) &&
-      (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
-    if(intersect) inside = !inside;
-  }
-  return inside;
-}
+  polygons.forEach(poly => {
+    const regId = poly.getAttribute('data-id');
+    const reg = window.getRegionById ? window.getRegionById(regId) : null;
 
-function buildIndiaMap() {
-  const pxPoints = CONFIG.indiaOutline.map(([x,y]) => `${x*VB_W},${y*VB_H}`).join(' ');
-  document.getElementById('indiaOutline').setAttribute('points', pxPoints);
-
-  // dot-matrix fill
-  const dotsGroup = document.getElementById('indiaDots');
-  const step = 9; // Slightly denser dot density for higher-fidelity fill
-  let svg = '';
-  for(let gx = 0; gx <= VB_W; gx += step) {
-    for(let gy = 0; gy <= VB_H; gy += step) {
-      const nx = gx / VB_W, ny = gy / VB_H;
-      if(pointInPolygon(nx, ny, CONFIG.indiaOutline)) {
-        const jitterR = 0.6 + Math.random() * 0.4;
-        const op = (0.2 + Math.random() * 0.3).toFixed(2);
-        svg += `<circle class="india-dot" cx="${gx}" cy="${gy}" r="${jitterR}" opacity="${op}"></circle>`;
-      }
-    }
-  }
-  dotsGroup.innerHTML = svg;
-
-  // feature markers
-  const layer = document.getElementById('markerLayer');
-  CONFIG.features.forEach((f, i) => {
-    const marker = document.createElement('div');
-    marker.className = 'marker';
-    marker.style.left = (f.x * 100) + '%';
-    marker.style.top = (f.y * 100) + '%';
-    marker.innerHTML = `
-      <div class="ring"></div>
-      <div class="core"></div>
-      <div class="label">${f.city}</div>
-    `;
-    layer.appendChild(marker);
-
-    const card = buildCard(f, i);
-    layer.appendChild(card);
-    positionCard(card, f);
-
-    let hoverTimeout;
-    const open = () => { 
-      clearTimeout(hoverTimeout);
-      closeAllCards(); 
-      marker.classList.add('is-active'); 
-      card.classList.add('is-visible'); 
-    };
-    const close = () => { 
-      hoverTimeout = setTimeout(() => {
-        marker.classList.remove('is-active'); 
-        card.classList.remove('is-visible'); 
-      }, 150);
-    };
-
-    // Make the entire card clickable
-    card.style.cursor = 'pointer';
-    card.addEventListener('click', (e) => {
-      e.stopPropagation();
-      if (window.navigateTo) window.navigateTo(f.href);
-      else window.location.href = f.href;
+    poly.addEventListener('mouseenter', (e) => {
+      if (!reg) return;
+      tooltipTitle.textContent = `${reg.name} (${reg.type})`;
+      tooltipSub.textContent = `${reg.cadastreTerm || reg.landTerm} • Rain Threshold: >${reg.rainTriggerLimit}mm/hr`;
+      tooltip.classList.add('is-visible');
     });
 
-    if(isHoverCapable) {
-      marker.style.cursor = 'pointer';
+    poly.addEventListener('mousemove', (e) => {
+      const rect = stage.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      tooltip.style.left = `${x}px`;
+      tooltip.style.top = `${y}px`;
+    });
+
+    poly.addEventListener('mouseleave', () => {
+      tooltip.classList.remove('is-visible');
+    });
+
+    poly.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (reg) {
+        highlightStatePolygon(reg.id);
+        updateActiveRegionDisplay(reg.id);
+        if (window.GEO_API && window.GEO_API.showToast) {
+          window.GEO_API.showToast(`Selected State: ${reg.name} (${reg.cadastreTerm})`);
+        }
+      }
+    });
+  });
+
+  // Feature markers
+  const layer = document.getElementById('markerLayer');
+  if (layer) {
+    CONFIG.features.forEach((f, i) => {
+      const marker = document.createElement('div');
+      marker.className = 'marker';
+      marker.style.left = (f.x * 100) + '%';
+      marker.style.top = (f.y * 100) + '%';
+      marker.innerHTML = `
+        <div class="ring"></div>
+        <div class="core"></div>
+        <div class="label">${f.city}</div>
+      `;
+      layer.appendChild(marker);
+
+      const card = buildCard(f, i);
+      layer.appendChild(card);
+      positionCard(card, f);
+
+      let hoverTimeout;
+      const open = () => { 
+        clearTimeout(hoverTimeout);
+        closeAllCards(); 
+        marker.classList.add('is-active'); 
+        card.classList.add('is-visible'); 
+      };
+      const close = () => { 
+        hoverTimeout = setTimeout(() => {
+          marker.classList.remove('is-active'); 
+          card.classList.remove('is-visible'); 
+        }, 150);
+      };
+
+      card.style.cursor = 'pointer';
+      card.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (window.navigateTo) window.navigateTo(f.href);
+        else window.location.href = f.href;
+      });
+
       marker.addEventListener('mouseenter', open);
       marker.addEventListener('mouseleave', close);
       card.addEventListener('mouseenter', open);
       card.addEventListener('mouseleave', close);
-      // On desktop, clicking the marker directly navigates
       marker.addEventListener('click', (e) => {
         e.stopPropagation();
         if (window.navigateTo) window.navigateTo(f.href);
         else window.location.href = f.href;
       });
-    } else {
-      // On mobile, first tap opens the card, second tap navigates
-      marker.addEventListener('click', (e) => {
-        e.stopPropagation();
-        if(!marker.classList.contains('is-active')) {
-          closeAllCards();
-          open();
-        } else {
-          if (window.navigateTo) window.navigateTo(f.href);
-          else window.location.href = f.href;
-        }
-      });
-    }
-  });
+    });
+  }
 
-  document.addEventListener('click', closeAllCards);
+  // Highlight default region on load
+  const def = window.getDefaultRegion ? window.getDefaultRegion() : { id: 'sikkim' };
+  highlightStatePolygon(def.id);
+}
+
+function highlightStatePolygon(regionId) {
+  document.querySelectorAll('.state-polygon').forEach(p => p.classList.remove('is-active'));
+  const poly = document.getElementById(`poly-${regionId}`);
+  if (poly) {
+    poly.classList.add('is-active');
+  }
 }
 
 function closeAllCards() {
@@ -947,24 +1016,21 @@ function buildCard(f, i) {
     <h3>${f.name}</h3>
     <p>${f.desc}</p>
     <a class="explore" href="${f.href}" onclick="event.stopPropagation()">
-      Launch Module
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      Launch Module →
     </a>
   `;
   return card;
 }
 
 function positionCard(card, f) {
-  const flip = f.x > 0.62;
-  const nearTop = f.y < 0.16;
-  card.style.left = flip ? 'auto' : '22px';
-  card.style.right = flip ? '22px' : 'auto';
-  card.style.top = nearTop ? '20px' : '-14px';
-  card.style.transformOrigin = flip ? 'right top' : 'left top';
+  const flip = f.x > 0.60;
+  card.style.left = flip ? 'auto' : `${(f.x * 100) + 3}%`;
+  card.style.right = flip ? `${((1 - f.x) * 100) + 3}%` : 'auto';
+  card.style.top = `${(f.y * 100) - 2}%`;
 }
 
 /* ================================================================
-   SCROLL-DRIVEN TIMELINE (GSAP ScrollTrigger)
+   SCROLL TIMELINE
    ================================================================ */
 function initScrollTimeline() {
   gsap.registerPlugin(ScrollTrigger);
@@ -982,7 +1048,6 @@ function initScrollTimeline() {
     scrub: prefersReducedMotion ? true : 0.6,
     onUpdate(self) {
       const p = self.progress;
-
       if(railDot) railDot.style.top = (p * 120) + 'px';
 
       const introP = normalize(p, 0, 0.14);
@@ -1030,7 +1095,13 @@ function updateActiveRegionDisplay(regionId) {
   const reg = window.getRegionById(regionId);
   if (!reg) return;
 
+  localStorage.setItem('active_region_id', reg.id);
+  localStorage.setItem('geo360_selected_region', reg.id);
+  localStorage.setItem('active_region', reg.id);
+  localStorage.setItem('geo360_selected_region_name', reg.name);
+
   if (window.setSelectedRegion) window.setSelectedRegion(reg.id);
+  highlightStatePolygon(reg.id);
 
   const pill = document.getElementById('regTypePill');
   const nameEl = document.getElementById('regName');
@@ -1043,58 +1114,52 @@ function updateActiveRegionDisplay(regionId) {
   const dropEl = document.getElementById('regionDropdown');
 
   if (pill) pill.textContent = reg.type ? reg.type.toUpperCase() : 'STATE';
-  if (nameEl) nameEl.textContent = reg.name;
+  if (nameEl) nameEl.textContent = `${reg.name} ${reg.sector ? '(' + reg.sector + ')' : ''}`;
   if (coordsEl) coordsEl.textContent = `${reg.lat}° N, ${reg.lng}° E`;
-  if (riskEl) riskEl.textContent = reg.primaryRisk || reg.hazard;
-  if (termsEl) termsEl.textContent = reg.cadastreTerm || reg.landTerm;
-  if (langEl) langEl.textContent = reg.languages ? reg.languages.join(', ') : 'Hindi, Regional Dialect';
-  if (rainEl) rainEl.textContent = `> ${reg.rainTriggerLimit || 60}.0 mm/hr (Warning Level)`;
+  if (riskEl) riskEl.textContent = reg.primaryRisk || reg.hazard || 'Landslide Shear Scarp';
+  if (termsEl) termsEl.textContent = reg.cadastreTerm || reg.landTerm || 'Dag / Khasra RoR';
+  if (langEl) langEl.textContent = reg.languages ? reg.languages.join(', ') : 'English, Hindi';
+  if (rainEl) rainEl.textContent = `> ${reg.rainThreshold || reg.rainTriggerLimit || 55}.0 mm/hr (Warning Threshold)`;
   if (bboxEl) bboxEl.textContent = reg.bbox ? `[${reg.bbox.join(', ')}]` : `[${(reg.lng-0.4).toFixed(2)}, ${(reg.lat-0.4).toFixed(2)}, ${(reg.lng+0.4).toFixed(2)}, ${(reg.lat+0.4).toFixed(2)}]`;
   if (dropEl) dropEl.value = reg.id;
 
-  // Populate Districts
+  // Populate Districts & Parcels
   const distSelect = document.getElementById('hierarchyDistrictSelect');
   if (distSelect && window.getDistrictsForRegion) {
     const districts = window.getDistrictsForRegion(reg.id);
     distSelect.innerHTML = districts.map(d => `<option value="${d.id}">${d.name}</option>`).join('');
-    if (districts.length > 0) onDistrictSelected(districts[0].id);
+    if (districts.length > 0) onDistrictSelected(districts[0].id, reg);
   }
 }
 
-function onDistrictSelected(districtId) {
+function onDistrictSelected(districtId, currentReg) {
   const laSelect = document.getElementById('hierarchyLocalAreaSelect');
   if (laSelect && window.getLocalAreasForDistrict) {
     const localAreas = window.getLocalAreasForDistrict(districtId);
     laSelect.innerHTML = localAreas.length > 0
       ? localAreas.map(la => `<option value="${la.id}">${la.name}</option>`).join('')
       : '<option value="LA-DEFAULT">Sub-Division Sector 01</option>';
-    if (localAreas.length > 0) onLocalAreaSelected(localAreas[0].id);
+    onLocalAreaSelected(districtId, currentReg);
   }
 }
 
-function onLocalAreaSelected(localAreaId) {
+function onLocalAreaSelected(localAreaId, currentReg) {
   const parcelSelect = document.getElementById('hierarchyParcelSelect');
-  if (parcelSelect) {
-    parcelSelect.innerHTML = `
-      <option value="104A">Khasra #104/A (Upper Ridge Sector)</option>
-      <option value="104B">Khasra #104/B (Upper Ridge Slope)</option>
-      <option value="104C">Khasra #104/C (Valley Terrace)</option>
-    `;
+  const reg = currentReg || (window.getDefaultRegion ? window.getDefaultRegion() : null);
+  if (parcelSelect && reg && reg.sampleParcels) {
+    parcelSelect.innerHTML = reg.sampleParcels.map(p => 
+      `<option value="${p.id}">${p.name || p.id} (${p.owner} - slope ${p.slope}°)</option>`
+    ).join('');
   }
 }
 
 function launchHierarchyCommandCenter() {
-  const dist = document.getElementById('hierarchyDistrictSelect')?.value;
-  const la = document.getElementById('hierarchyLocalAreaSelect')?.value;
-  const khasra = document.getElementById('hierarchyParcelSelect')?.value || '104A';
-  
-  if (window.GEO_API) {
-    window.GEO_API.showToast(`Navigating to Command Center: Parcel ${khasra}`);
+  const reg = window.getDefaultRegion ? window.getDefaultRegion() : { name: 'Sikkim' };
+  if (window.GEO_AUTH && window.GEO_AUTH.isAuthenticated()) {
+    window.location.href = 'command-center.html';
+  } else {
+    if (window.GEO_AUTH) window.GEO_AUTH.showLoginModal('gis_engineer');
   }
-  setTimeout(() => {
-    if (window.navigateTo) window.navigateTo('command-center.html');
-    else window.location.href = 'command-center.html';
-  }, 300);
 }
 
 function selectRegionFromDropdown(regionId) {
@@ -1113,7 +1178,8 @@ function filterRegionSearch(query) {
   const matches = window.GEO_REGIONS.filter(r =>
     r.name.toLowerCase().includes(q) ||
     r.hazard.toLowerCase().includes(q) ||
-    r.landTerm.toLowerCase().includes(q)
+    r.landTerm.toLowerCase().includes(q) ||
+    (r.sector && r.sector.toLowerCase().includes(q))
   );
 
   if (matches.length === 0) {
@@ -1124,7 +1190,7 @@ function filterRegionSearch(query) {
 
   list.innerHTML = matches.slice(0, 8).map(r => `
     <div class="autocomplete-item" onclick="selectRegionSearchResult('${r.id}')">
-      <span><strong>${r.name}</strong> <small style="color:#a1a1aa;">(${r.type})</small></span>
+      <span><strong>${r.name}</strong> <small style="color:#a1a1aa;">(${r.type}${r.sector ? ' • ' + r.sector : ''})</small></span>
       <span class="autocomplete-hazard">${r.landTerm}</span>
     </div>
   `).join('');
@@ -1148,7 +1214,6 @@ function openWorkspaceLogin() {
   }
 }
 
-// Close search dropdown on outside click
 document.addEventListener('click', (e) => {
   if (!e.target.closest('.search-box') && !e.target.closest('.region-search-box')) {
     const list = document.getElementById('searchResultsList');
@@ -1161,26 +1226,16 @@ document.addEventListener('click', (e) => {
    ================================================================ */
 window.addEventListener('DOMContentLoaded', () => {
   initGlobe();
-  buildIndiaMap();
+  initIndiaInteractiveMap();
   initScrollTimeline();
   initNationalRegionSelector();
 
-  /* ── Hero word stagger ── */
   const title = document.getElementById('heroTitle');
   if (title) {
     const words = title.textContent.trim().split(' ');
     title.innerHTML = words.map((w, i) =>
       `<span class="word-char" style="animation-delay:${0.18 + i * 0.1}s">${w}</span>`
     ).join(' ');
-  }
-
-  /* ── Closing section observer ── */
-  const closing = document.querySelector('.closing');
-  if (closing) {
-    const obs = new IntersectionObserver(entries => {
-      if (entries[0].isIntersecting) { closing.classList.add('is-visible'); obs.disconnect(); }
-    }, { threshold: 0.15 });
-    obs.observe(closing);
   }
 });
 </script>

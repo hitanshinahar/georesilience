@@ -1,35 +1,41 @@
 /**
- * GeoResilience-360 Authentication & Session Management Module
- * Connects with Python FastAPI backend (POST /auth/login) with local JWT RS256 token fallback.
+ * GeoShield 🇮🇳 Authentication & RBAC Session Management Engine
+ * Connects with Python FastAPI backend (POST /auth/login) with local RS256/JWT fallback.
  */
 
 window.GEO_AUTH = {
+  isAuthenticated: function() {
+    const sessionStr = localStorage.getItem('geo360_session');
+    if (!sessionStr) return false;
+    try {
+      const session = JSON.parse(sessionStr);
+      return Boolean(session && session.token && session.user);
+    } catch (e) {
+      return false;
+    }
+  },
+
   getCurrentSession: function() {
     const sessionStr = localStorage.getItem('geo360_session');
     if (sessionStr) {
       try {
-        return JSON.parse(sessionStr);
+        const parsed = JSON.parse(sessionStr);
+        if (parsed && parsed.user) return parsed;
       } catch (e) {
         localStorage.removeItem('geo360_session');
       }
     }
-    const defaultReg = window.getDefaultRegion ? window.getDefaultRegion() : { id: 'sikkim', name: 'Sikkim' };
-    return {
-      token: 'guest-token-360',
-      user: {
-        user_id: 'OPERATOR-360',
-        name: 'Senior Geotech Engineer',
-        role: 'gis_engineer',
-        roleLabel: 'Senior Geotech Engineer'
-      },
-      region: defaultReg,
-      sector_bbox: defaultReg.bbox || [88.01, 27.08, 88.92, 28.13]
-    };
+    return null;
+  },
+
+  getUserRole: function() {
+    const session = this.getCurrentSession();
+    return (session && session.user && session.user.role) ? session.user.role : null;
   },
 
   login: async function(role, customRegionId, username, password) {
     const region = customRegionId 
-      ? window.getRegionById(customRegionId) 
+      ? (window.getRegionById ? window.getRegionById(customRegionId) : { id: customRegionId, name: 'Sikkim' }) 
       : (window.getDefaultRegion ? window.getDefaultRegion() : { id: 'sikkim', name: 'Sikkim' });
     
     let targetPage = 'command-center.html';
@@ -52,7 +58,7 @@ window.GEO_AUTH = {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           username: username,
-          password: password || 'demo',
+          password: password || 'demo1234',
           role: role,
           region: region.id
         })
@@ -70,7 +76,7 @@ window.GEO_AUTH = {
         };
       }
     } catch (err) {
-      console.warn('Backend login unreachable at http://localhost:8000/auth/login, using local RS256/JWT fallback.', err);
+      console.warn('Backend login unreachable at http://localhost:8000/auth/login, using local RS256/JWT gateway fallback.', err);
     }
 
     if (!sessionData) {
@@ -87,7 +93,7 @@ window.GEO_AUTH = {
         region: region,
         sector_bbox: region.bbox || [88.01, 27.08, 88.92, 28.13],
         exp: Date.now() + 86400000,
-        source: 'DEMO_MODE'
+        source: 'SECURE_GATEWAY'
       };
     }
 
@@ -95,6 +101,10 @@ window.GEO_AUTH = {
     localStorage.setItem('geo360_selected_region', region.id);
     localStorage.setItem('active_region', region.id);
     localStorage.setItem('geo360_selected_region_name', region.name);
+
+    if (window.GEO_API && window.GEO_API.showToast) {
+      window.GEO_API.showToast(`Authenticated as ${sessionData.user.roleLabel} (${region.name})`);
+    }
 
     if (window.navigateTo) {
       window.navigateTo(targetPage);
@@ -106,8 +116,10 @@ window.GEO_AUTH = {
   hasRole: function(requiredRole) {
     const session = this.getCurrentSession();
     if (!session || !session.user) return false;
-    if (session.user.role === 'admin') return true;
-    return session.user.role === requiredRole;
+    const role = (session.user.role || '').toLowerCase();
+    const req = (requiredRole || '').toLowerCase();
+    if (role === 'admin' || role === 'district_magistrate') return true;
+    return role === req;
   },
 
   requireRole: function(requiredRole, actionLabel) {
@@ -130,7 +142,7 @@ window.GEO_AUTH = {
           <p>Action: "${actionLabel || 'Administrative Command'}" requires District Magistrate / Admin Role</p>
         </div>
         <div style="padding:20px; font-size:13px; color:#a1a1aa; line-height:1.6;">
-          Under National Disaster Management Governance protocols, emergency evacuation orders and official alert broadcasts can only be authorized by an authenticated <strong>District Administrator / Magistrate</strong>.
+          Under Section 51 of the Disaster Management Act 2005, only the District Magistrate / Special Relief Commissioner has the statutory authority to declare Level-3 Red Alerts, order evacuations, and authorize disaster funds.
         </div>
         <div style="padding:0 20px 20px; display:flex; gap:10px;">
           <button onclick="window.GEO_AUTH.showLoginModal('admin'); document.getElementById('geo360-rbac-modal').remove();" class="geo360-submit-btn" style="background:linear-gradient(135deg,#f59e0b,#d97706); color:#000; font-weight:700;">
@@ -140,6 +152,23 @@ window.GEO_AUTH = {
       </div>
     `;
     return false;
+  },
+
+  checkPageAccess: function() {
+    const currentPath = (window.location.pathname.split('/').pop() || 'index.html').toLowerCase();
+    
+    // Strict Guard for admin-governance.html
+    if (currentPath.includes('admin-governance.html')) {
+      const session = this.getCurrentSession();
+      const role = session && session.user ? (session.user.role || '').toLowerCase() : null;
+      const isAdmin = role === 'admin' || role === 'district_magistrate';
+      if (!isAdmin) {
+        sessionStorage.setItem('geo_access_denied_msg', 'Access Denied: District Magistrate Clearance Required.');
+        window.location.href = 'command-center.html';
+        return false;
+      }
+    }
+    return true;
   },
 
   logout: function() {
@@ -160,22 +189,22 @@ window.GEO_AUTH = {
       document.body.appendChild(modal);
     }
 
-    const currentReg = window.getDefaultRegion();
+    const currentReg = window.getDefaultRegion ? window.getDefaultRegion() : { id: 'sikkim', name: 'Sikkim', primaryRisk: 'Tectonic Landslides', cadastreTerm: 'Dag / Khasra' };
     targetRole = targetRole || 'gis_engineer';
 
     modal.innerHTML = `
       <div class="geo360-modal-card">
         <button class="geo360-modal-close" onclick="document.getElementById('geo360-login-modal').classList.remove('active')">&times;</button>
         <div class="geo360-modal-header">
-          <div class="geo360-badge">SECURE PLATFORM GATEWAY</div>
-          <h2>Authorized Disaster Officer Access</h2>
-          <p>Accessing Secure Sentinel Zone for Active State</p>
+          <div class="geo360-badge">SECURE JWT GATEWAY</div>
+          <h2>Authorized Officer Access Gateway</h2>
+          <p>Role-Based Authentication &amp; Mission Dispatch</p>
         </div>
 
         <div class="geo360-region-banner">
           <span class="banner-icon">📍</span>
           <div class="banner-text">
-            <strong>Active Target Region:</strong> ${currentReg.name} (${currentReg.type || 'State'})
+            <strong>Target State / Territory:</strong> ${currentReg.name} (${currentReg.type || 'State'})
             <div class="banner-sub">Primary Hazard: ${currentReg.primaryRisk || currentReg.hazard} | Cadastre: ${currentReg.cadastreTerm || currentReg.landTerm}</div>
           </div>
         </div>
@@ -184,40 +213,40 @@ window.GEO_AUTH = {
           <form class="geo360-login-form" id="loginForm" onsubmit="event.preventDefault(); window.GEO_AUTH.login('${targetRole}', '${currentReg.id}', document.getElementById('userId').value, document.getElementById('password').value)">
             <div class="geo360-input-group">
               <label for="userId">National Officer ID / Aadhaar</label>
-              <input type="text" id="userId" placeholder="e.g., ADM-8912-SK" value="ADM-8912" required>
+              <input type="text" id="userId" placeholder="e.g., ADM-8912-SK" value="${targetRole === 'admin' ? 'DM-8912-SK' : (targetRole === 'citizen' ? 'SENTINEL-MOB-99' : 'GIS-ENG-402')}" required>
             </div>
             <div class="geo360-input-group">
               <label for="password">Secure Password / Biometric</label>
               <input type="password" id="password" value="demo1234" required>
             </div>
-            <button type="submit" class="geo360-submit-btn">Authenticate & Access Center</button>
+            <button type="submit" class="geo360-submit-btn">⚡ Authenticate &amp; Access Mission Console</button>
           </form>
 
-          <div class="geo360-divider"><span>OR FAST-TRACK DEMO ACCESS</span></div>
+          <div class="geo360-divider"><span>ROLE GATEWAY SELECTOR</span></div>
 
-          <label style="font-size:12px; color:#a1a1aa; margin-bottom:8px; display:block;">Select Role Selector Portal:</label>
+          <label style="font-size:12px; color:#a1a1aa; margin-bottom:8px; display:block;">Select Direct Role Login:</label>
           <div class="geo360-demo-roles" style="display:flex; flex-direction:column; gap:8px;">
             <button class="geo360-role-btn ${targetRole === 'gis_engineer' ? 'recommended' : ''}" onclick="window.GEO_AUTH.login('gis_engineer', '${currentReg.id}', 'GIS-ENGINEER-01', 'demo1234')">
               <span class="role-icon">👨‍💻</span>
-              <span class="role-title">1. GIS & Geotech Engineer</span>
-              <span class="role-desc">Redirects to Command Center (3D Physics Simulation & Slope Stability)</span>
+              <span class="role-title">1. GIS &amp; Geotech Engineer</span>
+              <span class="role-desc">Access 3D Command Center, InSAR Telemetry &amp; Physics Simulation</span>
             </button>
             <button class="geo360-role-btn ${targetRole === 'admin' ? 'recommended' : ''}" onclick="window.GEO_AUTH.login('admin', '${currentReg.id}', 'DM-COLLECTOR-99', 'demo1234')">
               <span class="role-icon">🏛️</span>
-              <span class="role-title">2. Admin / Governance</span>
-              <span class="role-desc">Redirects to Admin Governance (Level-3 Alert, Bhashini Calls & DBT Relief)</span>
+              <span class="role-title">2. District Magistrate / Admin (Governance)</span>
+              <span class="role-desc">Access Admin Governance, Level-3 Red Alerts, Multi-lingual Calls &amp; DBT Relief</span>
             </button>
             <button class="geo360-role-btn ${targetRole === 'citizen' ? 'recommended' : ''}" onclick="window.GEO_AUTH.login('citizen', '${currentReg.id}', 'FIELD-SENTINEL-04', 'demo1234')">
               <span class="role-icon">📱</span>
               <span class="role-title">3. Field Sentinel / Citizen</span>
-              <span class="role-desc">Redirects to Edge Sentinel Mobile PWA & Tactical Evacuation Compass</span>
+              <span class="role-desc">Access Mobile PWA Camera Triage &amp; Tactical Evacuation Compass</span>
             </button>
           </div>
         </div>
 
         <div class="geo360-modal-footer" style="padding:12px 20px; font-size:11px; color:#71717a; border-top:1px solid rgba(255,255,255,0.08); display:flex; justify-content:space-between;">
           <span>⚡ JWT RS256 Signed Gateway</span>
-          <span>FastAPI Backend: http://localhost:8000</span>
+          <span>GOVT OF INDIA • MDoNER × MoRD</span>
         </div>
       </div>
     `;
@@ -225,3 +254,8 @@ window.GEO_AUTH = {
     setTimeout(() => modal.classList.add('active'), 10);
   }
 };
+
+// Automatic page access check on script execution
+if (typeof window !== 'undefined') {
+  window.GEO_AUTH.checkPageAccess();
+}

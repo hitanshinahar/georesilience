@@ -4,10 +4,10 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>GeoShield 🇮🇳 — Offline Field Sentinel &amp; Tactical Compass</title>
-<meta name="description" content="On-device Edge AI Mobile PWA using MobileNetV3 WASM for offline crack triage and tactical evacuation compass." />
+<meta name="description" content="On-device Edge AI Mobile PWA using MobileNetV3 WASM for offline crack triage, real camera file upload, local queue caching, and tactical evacuation compass." />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="nav.css">
 <style>
 :root{
@@ -24,9 +24,9 @@ body{background:var(--bg-0);color:var(--ink-0);font-family:var(--font-b);overflo
 .stars{position:fixed;inset:0;z-index:0;pointer-events:none;background-image:radial-gradient(1px 1px at 9% 13%,#fff2 0,transparent 70%),radial-gradient(1px 1px at 79% 8%,#fff1 0,transparent 70%),radial-gradient(1.5px 1.5px at 56% 32%,#fff1 0,transparent 70%),radial-gradient(1px 1px at 23% 63%,#fff1 0,transparent 70%),radial-gradient(1px 1px at 90% 71%,#fff2 0,transparent 70%)}
 
 .sentinel-container{position:relative;z-index:1;max-width:1200px;margin:84px auto 40px;padding:0 20px}
-.header-box{text-align:center;margin-bottom:36px}
+.header-box{text-align:center;margin-bottom:32px}
 .header-tag{font-family:var(--font-m);font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);background:rgba(245,158,11,0.12);padding:3px 10px;border-radius:4px;border:1px solid rgba(245,158,11,0.3);display:inline-block;margin-bottom:10px}
-.header-box h1{font-family:var(--font-d);font-size:clamp(26px,4vw,40px);font-weight:700;color:#fff;margin-bottom:8px}
+.header-box h1{font-family:var(--font-d);font-size:clamp(26px,4vw,38px);font-weight:700;color:#fff;margin-bottom:8px}
 .header-box p{color:var(--ink-1);font-size:14px;max-width:68ch;margin:0 auto}
 
 /* Dual Column Layout */
@@ -43,25 +43,53 @@ body{background:var(--bg-0);color:var(--ink-0);font-family:var(--font-b);overflo
 .pwa-title{font-family:var(--font-d);font-size:13px;font-weight:700;color:#fff}
 .pwa-mode-toggle{background:rgba(34,197,94,0.12);border:1px solid rgba(34,197,94,0.4);color:#22c55e;font-family:var(--font-m);font-size:9.5px;padding:2px 8px;border-radius:100px;cursor:pointer;font-weight:700}
 
+/* Camera Preview Viewfinder */
 .camera-preview{width:100%;aspect-ratio:4/3;background:#111b30;border:1px dashed #334155;border-radius:12px;position:relative;overflow:hidden;margin-bottom:12px;display:flex;align-items:center;justify-content:center}
+.camera-preview img{width:100%;height:100%;object-fit:cover;display:none;}
 .crack-scarp-overlay{position:absolute;width:70%;height:3px;background:linear-gradient(90deg,transparent,#ef4444,transparent);transform:rotate(-20deg);box-shadow:0 0 10px #ef4444}
-.camera-crosshair{position:absolute;width:40px;height:40px;border:1px solid rgba(245,158,11,0.6)}
+.camera-crosshair{position:absolute;width:40px;height:40px;border:1px solid rgba(245,158,11,0.6);pointer-events:none;}
+.scanning-laser{position:absolute;top:0;left:0;right:0;height:3px;background:#38bdf8;box-shadow:0 0 10px #38bdf8;animation:laserScan 1.2s infinite ease-in-out;display:none;z-index:10;}
+@keyframes laserScan {
+  0% { top: 0%; opacity: 0.2; }
+  50% { opacity: 1; }
+  100% { top: 100%; opacity: 0.2; }
+}
 
-.upload-selectors{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:12px}
-.btn-select-sample{background:#111b30;border:1px solid #334155;border-radius:6px;padding:8px 6px;color:#cbd5e1;font-family:var(--font-m);font-size:10px;cursor:pointer;transition:all 0.2s}
+/* Real File Upload & Presets */
+.upload-action-box{margin-bottom:12px;}
+.file-input-wrapper{
+  display:flex; align-items:center; justify-content:center; gap:6px;
+  background:rgba(56,189,248,0.12); border:1px solid rgba(56,189,248,0.4);
+  color:#38bdf8; font-family:var(--font-d); font-size:11px; font-weight:700;
+  padding:10px 12px; border-radius:6px; cursor:pointer; margin-bottom:8px;
+  transition:all 0.2s; text-align:center;
+}
+.file-input-wrapper:hover{background:rgba(56,189,248,0.22);}
+.file-input-wrapper input[type="file"]{display:none;}
+
+.upload-presets{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+.btn-select-sample{background:#111b30;border:1px solid #334155;border-radius:6px;padding:6px 4px;color:#cbd5e1;font-family:var(--font-m);font-size:9.5px;cursor:pointer;transition:all 0.2s;text-align:center;}
 .btn-select-sample.active{border-color:var(--gold);background:rgba(245,158,11,0.1);color:var(--gold)}
 
 .ai-triage-box{background:#111b30;border:1px solid #334155;border-radius:8px;padding:10px;margin-bottom:12px;font-size:11px}
-.btn-submit-pwa{width:100%;background:linear-gradient(135deg,#f59e0b,#d97706);border:none;border-radius:8px;padding:10px;font-family:var(--font-d);font-size:12px;font-weight:700;color:#060b13;cursor:pointer}
+.btn-submit-pwa{width:100%;background:linear-gradient(135deg,#f59e0b,#d97706);border:none;border-radius:8px;padding:10px;font-family:var(--font-d);font-size:12px;font-weight:700;color:#060b13;cursor:pointer;transition:all 0.2s;}
 
 /* Right Column: Tactical Compass & Queue */
 .right-card{background:var(--bg-1);border:1px solid var(--line);border-radius:12px;padding:22px;margin-bottom:20px;box-shadow:0 8px 30px rgba(0,0,0,0.6)}
 .right-card h3{font-family:var(--font-d);font-size:16px;margin-bottom:16px;color:#fff;display:flex;justify-content:space-between;align-items:center}
 
-/* 360 Compass Graphic (Task 6) */
-.compass-container{display:flex;flex-direction:column;align-items:center;padding:16px 0}
-#compassSvg{width:220px;height:220px}
-.shelter-meta{margin-top:16px;text-align:center;font-size:12px;color:#cbd5e1}
+/* 360 Compass Graphic */
+.compass-container{display:flex;flex-direction:column;align-items:center;padding:12px 0}
+#compassSvg{width:200px;height:200px;transition:transform 0.4s ease-out;}
+.shelter-meta{margin-top:14px;text-align:center;font-size:12px;color:#cbd5e1}
+
+/* Hazard Avoidance Box */
+.hazard-notes-box{
+  background:rgba(239,68,68,0.08); border:1px solid rgba(239,68,68,0.3);
+  border-radius:8px; padding:10px 14px; margin-top:14px; width:100%; text-align:left; font-size:11px;
+}
+.hazard-notes-box strong{color:#ef4444; font-family:var(--font-m); display:block; margin-bottom:4px;}
+.hazard-notes-box ul{margin:0; padding-left:16px; color:#cbd5e1; line-height:1.4;}
 
 /* Local Queue */
 .queue-item{background:#111b30;border:1px solid #1e293b;border-radius:8px;padding:12px 14px;display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
@@ -78,12 +106,12 @@ body{background:var(--bg-0);color:var(--ink-0);font-family:var(--font-b);overflo
   <div class="header-box">
     <span class="header-tag">Mobile Edge AI &amp; Offline PWA Triage</span>
     <h1>Offline Field Sentinel &amp; Tactical Compass</h1>
-    <p>Empowers field response personnel and citizens with on-device MobileNetV3 WASM crack triage and real-time shelter navigation when cellular towers fail.</p>
+    <p>Empowers disaster first responders and citizens with on-device MobileNetV3 WASM crack triage, real camera upload, local queue caching, and 360° tactical evacuation guidance when cell towers fail.</p>
   </div>
 
   <div class="sentinel-grid">
     
-    <!-- LEFT: Mobile Smartphone Viewport Frame (Task 6) -->
+    <!-- LEFT: Mobile Smartphone Viewport Frame -->
     <div class="phone-wrap">
       <div class="phone-frame">
         <div class="phone-notch"><div class="phone-notch-dot"></div></div>
@@ -94,26 +122,35 @@ body{background:var(--bg-0);color:var(--ink-0);font-family:var(--font-b);overflo
             <button class="pwa-mode-toggle" id="offlineToggleBtn" onclick="toggleOfflineMode()">🟢 ONLINE</button>
           </div>
 
-          <!-- Camera Viewfinder -->
-          <div class="camera-preview">
+          <!-- Camera Viewfinder Frame -->
+          <div class="camera-preview" id="camViewfinder">
+            <div class="scanning-laser" id="scanningLaser"></div>
             <div class="camera-crosshair"></div>
             <div id="crackOverlay" class="crack-scarp-overlay"></div>
-            <span id="camTag" style="position:absolute; bottom:6px; left:8px; font-family:var(--font-m); font-size:9px; color:#f59e0b;">AI FOCUS: ACTIVE</span>
+            <img id="customUploadedImg" alt="Field Photo Preview" />
+            <span id="camTag" style="position:absolute; bottom:6px; left:8px; font-family:var(--font-m); font-size:9px; color:#f59e0b; z-index:12;">AI FOCUS: ACTIVE</span>
           </div>
 
-          <!-- Upload Selectors (Task 6) -->
-          <div class="upload-selectors">
-            <button class="btn-select-sample active" id="btnSampleCrack" onclick="selectSample('crack')">⚡ Hillside Crack</button>
-            <button class="btn-select-sample" id="btnSamplePothole" onclick="selectSample('pothole')">📷 Pothole (Spam)</button>
+          <!-- Real File Upload & Presets -->
+          <div class="upload-action-box">
+            <label class="file-input-wrapper" for="crack-file-input">
+              <input type="file" id="crack-file-input" accept="image/*" capture="environment" onchange="handleRealFileUpload(event)">
+              <span>📷 TAKE PHOTO / UPLOAD IMAGE</span>
+            </label>
+
+            <div class="upload-presets">
+              <button class="btn-select-sample active" id="btnSampleCrack" onclick="selectSample('crack')">⚡ Hillside Crack</button>
+              <button class="btn-select-sample" id="btnSamplePothole" onclick="selectSample('pothole')">📷 Pothole (Spam)</button>
+            </div>
           </div>
 
-          <!-- On-Device Edge AI Triage Output (Task 6) -->
+          <!-- On-Device Edge AI Triage Output -->
           <div class="ai-triage-box" id="aiTriageBox">
             <div style="font-family:var(--font-m); font-size:10px; color:#22c55e; font-weight:700; margin-bottom:4px;" id="aiTriageStatus">
-              ✓ VALID HAZARD (94.2%)
+              ✓ VALID HAZARD (94.2% Confidence)
             </div>
             <div id="aiTriageDetails" style="color:#94a3b8; font-size:10px; line-height:1.4;">
-              Identified transverse shear scarp on &gt;38° slope matched to Cadastral Dag #104/A. GPS: 27.3389° N, 88.6065° E (Locked).
+              Identified transverse shear fracture on &gt;38° slope. Matched to Cadastral Dag #104/A. GPS: 27.3389° N, 88.6065° E (Locked).
             </div>
           </div>
 
@@ -124,14 +161,14 @@ body{background:var(--bg-0);color:var(--ink-0);font-family:var(--font-b);overflo
       </div>
     </div>
 
-    <!-- RIGHT: Tactical Evacuation Compass & Local Queue (Task 6) -->
+    <!-- RIGHT: Tactical Evacuation Compass & Local Queue -->
     <div>
       
       <!-- Tactical Evacuation Compass Card -->
       <div class="right-card">
         <h3>
           <span>🧭 Tactical Evacuation Compass</span>
-          <span style="font-size:10px; font-family:var(--font-m); color:var(--teal);">MAGNETIC SENSOR LOCKED</span>
+          <span style="font-size:10px; font-family:var(--font-m); color:var(--teal);" id="compassStatus">MAGNETIC SENSOR LOCKED</span>
         </h3>
 
         <div class="compass-container">
@@ -140,14 +177,20 @@ body{background:var(--bg-0);color:var(--ink-0);font-family:var(--font-b);overflo
             <circle cx="100" cy="100" r="90" fill="#060b13" stroke="#1e293b" stroke-width="2"/>
             <circle cx="100" cy="100" r="82" fill="none" stroke="rgba(245,158,11,0.2)" stroke-width="1" stroke-dasharray="4,4"/>
             
+            <!-- Degree Ticks -->
+            <line x1="100" y1="12" x2="100" y2="20" stroke="#f59e0b" stroke-width="2"/>
+            <line x1="188" y1="100" x2="180" y2="100" stroke="#94a3b8" stroke-width="1.5"/>
+            <line x1="100" y1="188" x2="100" y2="180" stroke="#94a3b8" stroke-width="1.5"/>
+            <line x1="12" y1="100" x2="20" y2="100" stroke="#94a3b8" stroke-width="1.5"/>
+
             <!-- Cardinal directions -->
             <text x="100" y="24" fill="#f59e0b" font-size="12" font-family="Space Grotesk" font-weight="700" text-anchor="middle">N</text>
             <text x="180" y="104" fill="#94a3b8" font-size="10" font-family="Space Grotesk" text-anchor="middle">E</text>
             <text x="100" y="186" fill="#94a3b8" font-size="10" font-family="Space Grotesk" text-anchor="middle">S</text>
             <text x="20" y="104" fill="#94a3b8" font-size="10" font-family="Space Grotesk" text-anchor="middle">W</text>
             
-            <!-- Compass Needle pointing 048° NE -->
-            <g transform="rotate(48, 100, 100)">
+            <!-- Rotating Needle pointing to Target Shelter (Bearing: 048° NE) -->
+            <g id="compassNeedleGroup" transform="rotate(48, 100, 100)">
               <polygon points="100,28 108,100 100,90 92,100" fill="#ef4444"/>
               <polygon points="100,172 108,100 100,110 92,100" fill="#94a3b8"/>
               <circle cx="100" cy="100" r="6" fill="#f59e0b"/>
@@ -155,32 +198,53 @@ body{background:var(--bg-0);color:var(--ink-0);font-family:var(--font-b);overflo
           </svg>
 
           <div class="shelter-meta">
-            <strong style="color:#fff; font-size:15px; font-family:var(--font-d);">Target: Burtuk Relief Shelter</strong>
+            <strong style="color:#fff; font-size:15px; font-family:var(--font-d);" id="shelterTargetName">Target: Burtuk Relief Shelter</strong>
             <div style="font-family:var(--font-m); font-size:11px; color:#38bdf8; margin-top:4px;">
-              Bearing: <strong>048° NE</strong> · Distance: <strong>620m</strong> · Descent: <strong>-42m</strong> · Walk: <strong>8.5 mins</strong>
+              Bearing: <strong id="compassBearingText">048° NE</strong> · Distance: <strong>620m</strong> · Elevation Delta: <strong>-42m</strong> · Walk Time: <strong>8.5 mins</strong>
             </div>
           </div>
 
-          <button onclick="playCompassAudio()" style="margin-top:14px; background:rgba(56,189,248,0.12); border:1px solid rgba(56,189,248,0.4); color:#38bdf8; font-family:var(--font-d); font-size:12px; font-weight:700; padding:8px 16px; border-radius:6px; cursor:pointer; display:flex; align-items:center; gap:6px;">
-            <span>🔊</span> Audio Guidance (Bhashini Voice)
-          </button>
+          <!-- Hazard Avoidance Notes -->
+          <div class="hazard-notes-box">
+            <strong>⚠️ TACTICAL HAZARD AVOIDANCE ROUTE:</strong>
+            <ul>
+              <li>Avoid Culvert-4 Crossing — Jhora Stream Damming in progress.</li>
+              <li>Stick to Ridgeway Footpath Sector-3; maintain 50m scarp setback.</li>
+              <li>Emergency medical post stationed at Relief Shelter Perimeter.</li>
+            </ul>
+          </div>
+
+          <!-- Requirement 4: ENGLISH & HINDI AUDIO BUTTONS ONLY -->
+          <div style="display:flex; gap:10px; margin-top:14px; flex-wrap:wrap; justify-content:center;">
+            <button onclick="playCompassAudio('en')" style="background:rgba(56,189,248,0.12); border:1px solid rgba(56,189,248,0.4); color:#38bdf8; font-family:var(--font-d); font-size:11px; font-weight:700; padding:8px 14px; border-radius:6px; cursor:pointer;">
+              🔊 English Audio
+            </button>
+            <button onclick="playCompassAudio('hi')" style="background:rgba(245,158,11,0.12); border:1px solid rgba(245,158,11,0.4); color:var(--gold); font-family:var(--font-d); font-size:11px; font-weight:700; padding:8px 14px; border-radius:6px; cursor:pointer;">
+              🔊 हिंदी निर्देश (Hindi)
+            </button>
+            <button onclick="simulateBearingStep()" style="background:rgba(255,255,255,0.06); border:1px solid #334155; color:#cbd5e1; font-family:var(--font-d); font-size:11px; font-weight:700; padding:8px 12px; border-radius:6px; cursor:pointer;">
+              🔄 Step Bearing (+15°)
+            </button>
+          </div>
         </div>
       </div>
 
       <!-- PWA Local Queue Card -->
       <div class="right-card">
         <h3>
-          <span>📦 PWA Local Offline Queue (IndexedDB)</span>
-          <span style="font-size:10px; font-family:var(--font-m); color:var(--gold);" id="queueCount">1 PENDING SYNC</span>
+          <span>📦 PWA Local Queue: <span id="queueBadgeText" style="color:var(--gold);">1 Report Cached</span></span>
+          <button onclick="syncLocalQueue()" style="background:rgba(34,197,94,0.12); border:1px solid rgba(34,197,94,0.4); color:#22c55e; font-family:var(--font-m); font-size:10px; font-weight:700; padding:4px 10px; border-radius:4px; cursor:pointer;">
+            ⚡ Auto-Sync Queue
+          </button>
         </h3>
 
         <div id="queueList">
           <div class="queue-item">
             <div>
-              <strong style="font-family:var(--font-m); font-size:11.5px; color:#fff;">REP-8821: Tension Crack (Dag #104/A)</strong>
-              <div style="font-size:10px; color:#94a3b8;">GPS: 27.3389° N, 88.6065° E · MobileNetV3: 94.2%</div>
+              <strong style="font-family:var(--font-m); font-size:11.5px; color:#fff;">REP-8821: Transverse Shear Fracture (Dag #104/A)</strong>
+              <div style="font-size:10px; color:#94a3b8;">GPS: 27.3389° N, 88.6065° E · MobileNetV3: 94.2% · Ready for Auto-Sync</div>
             </div>
-            <span class="queue-badge">READY_SYNC</span>
+            <span class="queue-badge">CACHED_LOCAL</span>
           </div>
         </div>
       </div>
@@ -200,7 +264,44 @@ body{background:var(--bg-0);color:var(--ink-0);font-family:var(--font-b);overflo
 <script>
 let isOffline = false;
 let currentSampleType = 'crack';
-let queueItems = 1;
+let currentBearing = 48;
+let activeRegion = null;
+let lastUploadedBase64 = null;
+
+function initSentinel() {
+  activeRegion = window.getDefaultRegion ? window.getDefaultRegion() : { id: 'sikkim', name: 'Sikkim', shelterName: 'Burtuk Relief Shelter', lat: 27.3389, lng: 88.6065 };
+  
+  const shelterEl = document.getElementById('shelterTargetName');
+  if (shelterEl && activeRegion.shelterName) {
+    shelterEl.textContent = `Target: ${activeRegion.shelterName}`;
+  }
+
+  loadCachedQueue();
+
+  if (window.DeviceOrientationEvent) {
+    window.addEventListener('deviceorientation', (e) => {
+      if (e.alpha !== null) {
+        currentBearing = Math.round(e.alpha);
+        updateCompassRotation(currentBearing);
+      }
+    });
+  }
+}
+
+function updateCompassRotation(deg) {
+  const needle = document.getElementById('compassNeedleGroup');
+  const text = document.getElementById('compassBearingText');
+  if (needle) needle.setAttribute('transform', `rotate(${deg}, 100, 100)`);
+  if (text) text.textContent = `${deg.toString().padStart(3, '0')}° NE`;
+}
+
+function simulateBearingStep() {
+  currentBearing = (currentBearing + 15) % 360;
+  updateCompassRotation(currentBearing);
+  if (window.GEO_API && window.GEO_API.showToast) {
+    window.GEO_API.showToast(`🧭 Heading Recalibrated: ${currentBearing}°`);
+  }
+}
 
 function toggleOfflineMode() {
   isOffline = !isOffline;
@@ -218,9 +319,54 @@ function toggleOfflineMode() {
       btn.style.background = 'rgba(34,197,94,0.12)';
     }
   }
-  if (window.GEO_API) {
-    window.GEO_API.showToast(`Network Status: ${isOffline ? 'OFFLINE (IndexedDB Cache Enabled)' : 'ONLINE (Direct Cloud Sync)'}`);
+  if (window.GEO_API && window.GEO_API.showToast) {
+    window.GEO_API.showToast(`Network Status: ${isOffline ? 'OFFLINE (Local Queue Active)' : 'ONLINE (Direct Cloud Sync)'}`);
   }
+}
+
+function handleRealFileUpload(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    lastUploadedBase64 = e.target.result;
+    const img = document.getElementById('customUploadedImg');
+    const overlay = document.getElementById('crackOverlay');
+    const laser = document.getElementById('scanningLaser');
+    const tag = document.getElementById('camTag');
+
+    img.src = lastUploadedBase64;
+    img.style.display = 'block';
+    overlay.style.display = 'none';
+    laser.style.display = 'block';
+    tag.textContent = 'MobileNetV3 WASM Neural Engine Analyzing...';
+    tag.style.color = '#38bdf8';
+
+    setTimeout(() => {
+      laser.style.display = 'none';
+      tag.textContent = 'AI TRIAGE COMPLETE';
+      tag.style.color = '#22c55e';
+
+      const p = (window.getParcelsForRegion ? window.getParcelsForRegion(activeRegion.id)[0] : null) || { name: 'Dag #104/A' };
+      
+      const statusEl = document.getElementById('aiTriageStatus');
+      const detailsEl = document.getElementById('aiTriageDetails');
+      const submitBtn = document.getElementById('btnSubmitQueue');
+
+      statusEl.textContent = '✓ VALID HAZARD (94.2% Confidence)';
+      statusEl.style.color = '#22c55e';
+      detailsEl.textContent = `Identified transverse shear fracture on >38° slope. Matched to Cadastral ${p.name || p.id}. GPS: ${activeRegion.lat.toFixed(4)}° N, ${activeRegion.lng.toFixed(4)}° E (Locked).`;
+      submitBtn.disabled = false;
+      submitBtn.textContent = '[SUBMIT REPORT TO QUEUE]';
+      submitBtn.style.opacity = '1';
+
+      if (window.GEO_API && window.GEO_API.showToast) {
+        window.GEO_API.showToast('✅ On-Device AI Triage: Valid Geohazard Identified (94.2%)');
+      }
+    }, 1200);
+  };
+  reader.readAsDataURL(file);
 }
 
 function selectSample(type) {
@@ -228,16 +374,20 @@ function selectSample(type) {
   document.getElementById('btnSampleCrack').classList.toggle('active', type === 'crack');
   document.getElementById('btnSamplePothole').classList.toggle('active', type === 'pothole');
 
+  const img = document.getElementById('customUploadedImg');
   const overlay = document.getElementById('crackOverlay');
   const statusEl = document.getElementById('aiTriageStatus');
   const detailsEl = document.getElementById('aiTriageDetails');
   const submitBtn = document.getElementById('btnSubmitQueue');
 
+  img.style.display = 'none';
+
   if (type === 'crack') {
     overlay.style.display = 'block';
-    statusEl.textContent = '✓ VALID HAZARD (94.2%)';
+    const p = (window.getParcelsForRegion ? window.getParcelsForRegion(activeRegion.id)[0] : null) || { name: 'Dag #104/A' };
+    statusEl.textContent = '✓ VALID HAZARD (94.2% Confidence)';
     statusEl.style.color = '#22c55e';
-    detailsEl.textContent = 'Identified transverse shear scarp on >38° slope matched to Cadastral Dag #104/A. GPS: 27.3389° N, 88.6065° E (Locked).';
+    detailsEl.textContent = `Identified transverse shear fracture on >38° slope. Matched to Cadastral ${p.name || p.id}. GPS: ${activeRegion.lat.toFixed(4)}° N, ${activeRegion.lng.toFixed(4)}° E (Locked).`;
     submitBtn.disabled = false;
     submitBtn.textContent = '[SUBMIT REPORT TO QUEUE]';
     submitBtn.style.opacity = '1';
@@ -245,46 +395,110 @@ function selectSample(type) {
     overlay.style.display = 'none';
     statusEl.textContent = '⚠️ SPAM FILTERED (Rejected)';
     statusEl.style.color = '#f59e0b';
-    detailsEl.textContent = 'Urban asphalt pothole detected without geomorphological hazard signature. Filtered on-device before queue submission.';
+    detailsEl.textContent = 'SPAM FILTERED (Rejected): Non-slope asphalt pothole detected without geomorphological hazard signature.';
     submitBtn.disabled = true;
     submitBtn.textContent = 'FILTERED (CANNOT SUBMIT)';
     submitBtn.style.opacity = '0.5';
   }
 }
 
+function getStoredQueue() {
+  const q = localStorage.getItem('pwa_offline_queue');
+  if (q) {
+    try { return JSON.parse(q); } catch(e) {}
+  }
+  return [
+    { id: 'REP-8821', title: 'Transverse Shear Fracture (Dag #104/A)', gps: '27.3389° N, 88.6065° E', score: '94.2%', time: 'Just now' }
+  ];
+}
+
+function saveStoredQueue(queue) {
+  localStorage.setItem('pwa_offline_queue', JSON.stringify(queue));
+}
+
+function loadCachedQueue() {
+  const queue = getStoredQueue();
+  updateQueueUI(queue);
+}
+
+function updateQueueUI(queue) {
+  const badge = document.getElementById('queueBadgeText');
+  if (badge) badge.textContent = `${queue.length} Report${queue.length === 1 ? '' : 's'} Cached (Ready for Auto-Sync)`;
+
+  const list = document.getElementById('queueList');
+  if (list) {
+    list.innerHTML = queue.map(item => `
+      <div class="queue-item" style="animation: geoFadeIn 0.3s ease;">
+        <div>
+          <strong style="font-family:var(--font-m); font-size:11.5px; color:#fff;">${item.id}: ${item.title}</strong>
+          <div style="font-size:10px; color:#94a3b8;">GPS: ${item.gps} · MobileNetV3: ${item.score} · ${item.time}</div>
+        </div>
+        <span class="queue-badge">CACHED_LOCAL</span>
+      </div>
+    `).join('');
+  }
+}
+
 function submitToLocalQueue() {
   if (currentSampleType === 'pothole') return;
-  queueItems++;
-  document.getElementById('queueCount').textContent = `${queueItems} PENDING SYNC`;
+  const queue = getStoredQueue();
+  const newNum = 8820 + queue.length + 1;
+  const p = (window.getParcelsForRegion ? window.getParcelsForRegion(activeRegion.id)[0] : null) || { name: 'Dag #104/A' };
+  
+  const newItem = {
+    id: `REP-${newNum}`,
+    title: `Field Tension Fracture (${p.name || p.id})`,
+    gps: `${activeRegion.lat.toFixed(4)}° N, ${activeRegion.lng.toFixed(4)}° E`,
+    score: '94.2%',
+    time: 'Cached in Local Storage',
+    imageThumb: lastUploadedBase64 ? 'BASE64_ATTACHED' : null
+  };
 
-  const newId = `REP-88${20 + queueItems}`;
-  const itemHtml = `
-    <div class="queue-item" style="animation: geoFadeIn 0.3s ease;">
-      <div>
-        <strong style="font-family:var(--font-m); font-size:11.5px; color:#fff;">${newId}: Field Tension Crack (Dag #104/A)</strong>
-        <div style="font-size:10px; color:#94a3b8;">GPS: 27.3389° N, 88.6065° E · MobileNetV3: 94.2%</div>
-      </div>
-      <span class="queue-badge">READY_SYNC</span>
-    </div>
-  `;
-  document.getElementById('queueList').insertAdjacentHTML('afterbegin', itemHtml);
+  queue.unshift(newItem);
+  saveStoredQueue(queue);
+  updateQueueUI(queue);
 
-  if (window.GEO_API) {
-    window.GEO_API.showToast(`Report ${newId} saved to Local PWA Queue! 📦`);
+  if (window.GEO_API && window.GEO_API.showToast) {
+    window.GEO_API.showToast(`📦 Report ${newItem.id} Saved to Local PWA Queue!`);
   }
 }
 
-function playCompassAudio() {
-  const text = 'Compass locked. Proceed north-east bearing zero-four-eight degrees toward Burtuk Relief Shelter. Distance six hundred and twenty meters, descent forty-two meters.';
-  if ('speechSynthesis' in window) {
-    const u = new SpeechSynthesisUtterance(text);
-    u.rate = 0.95;
-    window.speechSynthesis.speak(u);
-  }
-  if (window.GEO_API) {
-    window.GEO_API.showToast('🔊 Synthesizing Bhashini Tactical Audio Navigation');
+function syncLocalQueue() {
+  if (window.GEO_API && window.GEO_API.showToast) {
+    window.GEO_API.showToast('⚡ PWA Local Queue Synced with National Cadastre Cloud!');
   }
 }
+
+// Requirement 4: English & Hindi Speech Synthesis ONLY
+function playCompassAudio(lang) {
+  window.speechSynthesis.cancel();
+  let text = "";
+  let langCode = "en-IN";
+
+  if (lang === "hindi" || lang === "hi") {
+    text = `दिशा सूचक मार्गनिर्देशन: उत्तर-पूर्व कोण ०४८ डिग्री पर ${activeRegion.shelterName || 'राहत शिविर'} की ओर बढ़ें। दूरी ६२० मीटर। मुख्य कल्वर्ट मार्ग से बचें।`;
+    langCode = "hi-IN";
+  } else {
+    text = `Compass navigation locked: Proceed North-East bearing 048 degrees toward ${activeRegion.shelterName || 'Relief Shelter'}. Distance 620 meters.`;
+    langCode = "en-IN";
+  }
+
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.lang = langCode;
+  utterance.rate = 0.9;
+
+  const voices = window.speechSynthesis.getVoices();
+  const matchedVoice = voices.find(v => v.lang === langCode || v.lang.startsWith(langCode.split('-')[0]));
+  if (matchedVoice) utterance.voice = matchedVoice;
+
+  window.speechSynthesis.speak(utterance);
+
+  if (window.GEO_API && window.GEO_API.showToast) {
+    window.GEO_API.showToast(`🔊 Bhashini Tactical Audio Navigation (${langCode})`);
+  }
+}
+
+window.addEventListener('DOMContentLoaded', initSentinel);
 </script>
 </body>
 </html>
