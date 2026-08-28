@@ -36,7 +36,7 @@
   function buildNav() {
     const activeReg = getActiveRegion();
     const currentFile = (window.location.pathname.split('/').pop() || 'index.html').toLowerCase();
-    const isLandingPage = (currentFile === '' || currentFile === 'index.html');
+    const isLandingPage = (currentFile === '' || currentFile === 'index.html' || window.location.pathname === '/');
     const authenticated = isLoggedIn();
     const session = getSession();
     const userRole = session && session.user ? (session.user.role || '').toLowerCase() : null;
@@ -44,6 +44,7 @@
 
     // Requirement 1: On index.html prior to login:
     // ONLY show Left Brand + Right [🔒 ACCESS GATEWAY / LOGIN] button.
+    // HIDE ALL tabs, role badges, state pills, 15-layer spec, mobile app button.
     if (isLandingPage && !authenticated) {
       return `
 <header class="gnav-root" role="banner">
@@ -77,7 +78,7 @@
       return false;
     });
 
-    // Authenticated or Module Pages Header
+    // Authenticated or Inner Pages Header
     return `
 <header class="gnav-root" role="banner">
   <div class="gnav-bar">
@@ -116,8 +117,8 @@
         <span>⚙️ 15-Layer Spec</span>
       </button>
 
-      <!-- Open Mobile App on Phone Helper -->
-      <button class="gnav-btn-mobile" onclick="window.GEO_NAV.showMobileModal()" title="Open Mobile PWA on Physical Smartphone via Dynamic QR Code">
+      <!-- Open Mobile App & In-App Simulator Trigger -->
+      <button class="gnav-btn-mobile" onclick="window.GEO_NAV.showMobileModal()" title="Open Mobile PWA Simulator & Dynamic QR Code">
         <span>📱 Mobile App</span>
       </button>
 
@@ -184,30 +185,41 @@
   </div>
 </div>
 
-<!-- Mobile App Dynamic LAN QR Code Modal Mount -->
+<!-- Requirement 6: Mobile App & In-App Simulator + Universal QR Modal Mount -->
 <div id="geoMobileModal" class="geo-arch-modal-overlay">
-  <div class="geo-arch-modal-card" style="max-width:500px; text-align:center;">
-    <div class="geo-arch-modal-header" style="justify-content:center; position:relative;">
+  <div class="geo-arch-modal-card" style="max-width:920px; width:92%;">
+    <div class="geo-arch-modal-header">
       <div>
-        <div class="geo360-badge">📱 FIELD SENTINEL MOBILE PWA</div>
-        <h2>Test on Physical Smartphone</h2>
-        <p>Connect your phone on the same Wi-Fi network</p>
+        <div class="geo360-badge">📱 FIELD SENTINEL MOBILE PWA &amp; IN-APP SIMULATOR</div>
+        <h2>Live Phone Simulator &amp; Universal QR Code</h2>
+        <p>Test MobileNetV3 Edge AI Triage, Camera Photo Upload, and 360° Compass directly in-app or scan on physical phone</p>
       </div>
       <button class="geo360-modal-close" onclick="window.GEO_NAV.closeMobileModal()">&times;</button>
     </div>
-    <div class="geo-arch-modal-body" style="display:flex; flex-direction:column; align-items:center; padding:24px;">
-      <div id="mobileQrContainer" style="background:#fff; padding:12px; border-radius:12px; box-shadow:0 8px 24px rgba(0,0,0,0.6); margin-bottom:16px;">
-        <canvas id="qrCanvas" width="180" height="180" style="display:block;"></canvas>
+    <div class="geo-arch-modal-body" style="padding:20px; display:grid; grid-template-columns:360px 1fr; gap:24px; align-items:center;">
+      
+      <!-- Left Column: Embedded Mobile Phone Viewport Frame -->
+      <div style="background:#0d1524; border:2px solid #334155; border-radius:32px; padding:12px; box-shadow:0 12px 40px rgba(0,0,0,0.8); text-align:center;">
+        <div style="height:18px; background:#060b13; border-radius:10px; margin:0 auto 10px; width:100px;"></div>
+        <iframe id="mobileSimulatorIframe" src="edge-sentinel.html" style="width:100%; height:500px; border:none; border-radius:18px; background:#060b13;"></iframe>
       </div>
-      <div style="font-family:'JetBrains Mono',monospace; font-size:12px; color:#38bdf8; background:#0d1524; padding:8px 14px; border-radius:6px; border:1px solid #1e293b; margin-bottom:10px; word-break:break-all;" id="mobileUrlDisplay">
-        Calculating Local Network URL...
+
+      <!-- Right Column: Universal QR Code & LAN URL Info -->
+      <div style="display:flex; flex-direction:column; align-items:center; text-align:center;">
+        <div id="mobileQrContainer" style="background:#fff; padding:14px; border-radius:14px; box-shadow:0 8px 24px rgba(0,0,0,0.6); margin-bottom:16px;">
+          <canvas id="qrCanvas" width="180" height="180" style="display:block;"></canvas>
+        </div>
+        <div style="font-family:'JetBrains Mono',monospace; font-size:12px; color:#38bdf8; background:#0d1524; padding:8px 14px; border-radius:6px; border:1px solid #1e293b; margin-bottom:12px; word-break:break-all;" id="mobileUrlDisplay">
+          Calculating Local Network URL...
+        </div>
+        <div style="font-size:11px; color:#f59e0b; background:rgba(245,158,11,0.08); border:1px solid rgba(245,158,11,0.25); border-radius:6px; padding:10px 14px; margin-bottom:16px; text-align:left; line-height:1.45;">
+          💡 <strong>Judges / Cross-Device Testing:</strong> Use the interactive phone simulator on the left to test live camera uploads and MobileNetV3 AI triage directly, or scan the universal QR code on a mobile device connected on the same Wi-Fi.
+        </div>
+        <a id="mobileDirectLink" href="edge-sentinel.html" target="_blank" class="gnav-cta-btn" style="text-decoration:none; padding:10px 22px; font-size:12.5px;">
+          🚀 Open Sentinel in Full Window
+        </a>
       </div>
-      <div style="font-size:11px; color:#f59e0b; background:rgba(245,158,11,0.08); border:1px solid rgba(245,158,11,0.25); border-radius:6px; padding:8px 12px; margin-bottom:14px; text-align:left; line-height:1.4;">
-        💡 <strong>Wi-Fi Testing Note:</strong> To test on a physical smartphone, ensure your phone is connected to the same Wi-Fi network.
-      </div>
-      <a id="mobileDirectLink" href="edge-sentinel.html" class="gnav-cta-btn" style="text-decoration:none; padding:10px 20px; font-size:12px;">
-        🚀 Launch Field Sentinel
-      </a>
+
     </div>
   </div>
 </div>
@@ -301,7 +313,7 @@
       if (m) m.classList.remove('active');
     },
 
-    // Requirement 5: Dynamic Host URL Resolution
+    // Requirement 6: Dynamic Host Resolution & Live Simulator
     showMobileModal: function() {
       const m = document.getElementById('geoMobileModal');
       if (m) {
@@ -309,8 +321,8 @@
         
         const loc = window.location;
         const hostName = loc.hostname || 'localhost';
-        const port = loc.port ? `:${loc.port}` : ':5500';
-        const targetUrl = `${loc.protocol}//${hostName}${port}/edge-sentinel.html`;
+        const port = loc.port ? `:${loc.port}` : '5500';
+        const targetUrl = `${loc.protocol}//${hostName}:${port}/edge-sentinel.html`;
         
         const disp = document.getElementById('mobileUrlDisplay');
         if (disp) disp.textContent = targetUrl;
@@ -320,6 +332,11 @@
         
         const canvas = document.getElementById('qrCanvas');
         if (canvas) renderQrCode(canvas, targetUrl);
+
+        const simIframe = document.getElementById('mobileSimulatorIframe');
+        if (simIframe && (!simIframe.src || simIframe.src === 'about:blank')) {
+          simIframe.src = 'edge-sentinel.html';
+        }
       }
     },
 

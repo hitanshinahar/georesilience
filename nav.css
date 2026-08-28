@@ -6,26 +6,29 @@
 /* ── Root Header ── */
 .gnav-root {
   position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+  width: 100%; box-sizing: border-box; overflow: hidden;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  clip-path: none; -webkit-clip-path: none;
 }
 
 .gnav-bar {
-  height: 64px;
+  height: 64px; width: 100%; box-sizing: border-box;
   display: flex; align-items: center; justify-content: space-between;
   padding: 0 24px;
-  background: rgba(6, 11, 19, 0.92);
+  background: rgba(6, 11, 19, 0.95);
   backdrop-filter: blur(20px) saturate(180%);
   -webkit-backdrop-filter: blur(20px) saturate(180%);
   border-bottom: 1px solid rgba(245, 158, 11, 0.25);
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.7);
   position: relative; z-index: 10;
+  clip-path: none; -webkit-clip-path: none;
 }
 
 .gnav-bar.gnav-clean-landing,
 .gnav-bar.gnav-landing-only {
   justify-content: space-between;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(6, 11, 19, 0.85);
+  background: rgba(6, 11, 19, 0.90);
 }
 
 /* Brand */

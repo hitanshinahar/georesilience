@@ -98,7 +98,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;heigh
     <!-- Active State Header Banner -->
     <div style="background:rgba(56,189,248,0.08); border:1px solid rgba(56,189,248,0.3); border-radius:8px; padding:10px; margin-bottom:14px;">
       <span style="font-family:var(--font-m); font-size:9.5px; color:var(--teal); font-weight:700; letter-spacing:1px; text-transform:uppercase; display:block; margin-bottom:2px;">ACTIVE STATE COMMAND</span>
-      <h3 style="font-family:var(--font-d); font-size:15px; color:#fff; margin:0;" id="leftActiveStateTitle">Sikkim</h3>
+      <h3 style="font-family:var(--font-d); font-size:15.5px; color:#fff; margin:0;" id="leftActiveStateTitle">Sikkim</h3>
       <div style="font-size:10px; color:#94a3b8; margin-top:2px;" id="leftActiveStateSub">Sector-04 · 5 Cadastral Blocks</div>
     </div>
 
@@ -167,14 +167,14 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;heigh
 
   </div>
 
-  <!-- CENTER CANVAS: 3D Cadastral Digital Twin (Renders 4 to 5 Blocks per State) -->
+  <!-- CENTER CANVAS: 3D Cadastral Digital Twin (Renders 5 Blocks per State) -->
   <div class="cc-map">
     <canvas id="mapCanvas"></canvas>
     
     <div class="highway-banner-container">
       <div class="highway-banner" id="highwayBanner">
         <span id="highwayDot" style="width:8px;height:8px;border-radius:50%;background:#22c55e;box-shadow:0 0 8px #22c55e;"></span>
-        <span id="highwayStatusText">🛣️ HIGHWAY CORRIDOR: CLEAR</span>
+        <span id="highwayStatusText">Road Corridor Active</span>
       </div>
       <div class="detour-banner" id="detourBanner">
         🟢 SAFE DETOUR BYPASS: CLEAR (ALL-WEATHER ACCESS ACTIVATED)
@@ -239,7 +239,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;heigh
       <strong>🧭 SAFE EVACUATION TELEMETRY:</strong>
       <div style="color:#cbd5e1; line-height:1.45;">
         Target: <strong style="color:#fff;" id="telShelterName">Burtuk Relief Shelter</strong><br>
-        Bearing: <strong>048° NE</strong> · Distance: <strong>620m</strong> · Elevation Descent: <strong>-42m</strong><br>
+        <span id="telShelterMeta">Bearing: 048° NE · Distance: 620m</span><br>
         Walk Time: <strong>8.5 mins</strong> · Clearance: <strong>Heavy Ambulance &amp; NDRF Vehicles</strong>
       </div>
     </div>
@@ -299,7 +299,7 @@ if ('speechSynthesis' in window) {
 }
 
 function initCommandCenter() {
-  activeRegion = window.getDefaultRegion ? window.getDefaultRegion() : { id: 'sikkim', name: 'Sikkim', lat: 27.3389, lng: 88.6065, cadastreTerm: 'Dag / Khasra / Jamabandi RoR', shelterName: 'Burtuk Relief Shelter', highway: 'NH-10 Highway Corridor', detour: 'Ranipool Bypass Detour' };
+  activeRegion = window.getDefaultRegion ? window.getDefaultRegion() : { id: 'sikkim', name: 'Sikkim', lat: 27.3389, lng: 88.6065, cadastreTerm: 'Dag / Khasra / Jamabandi RoR', shelterName: 'Burtuk Relief Shelter', highway: 'NH-10 Sevoke-Gangtok Corridor (Blocked at Km-42)', detour: 'Ranipool-Rangpo Bypass (Open)' };
   currentParcels = window.getParcelsForRegion ? window.getParcelsForRegion(activeRegion.id) : [];
 
   const leftTitle = document.getElementById('leftActiveStateTitle');
@@ -347,6 +347,7 @@ function syncParcelInspector() {
   const slope = document.getElementById('plotSlope');
   const struct = document.getElementById('plotStructure');
   const telShelter = document.getElementById('telShelterName');
+  const telMeta = document.getElementById('telShelterMeta');
 
   if (header) header.textContent = `${p.name || p.id} (${p.owner || p.ownerName})`;
   if (tenure) tenure.textContent = activeRegion.cadastreTerm || 'Dag / Khasra RoR';
@@ -354,6 +355,7 @@ function syncParcelInspector() {
   if (slope) slope.textContent = `${p.slope || 42.6}°`;
   if (struct) struct.textContent = p.structure || 'Hillside Dwelling';
   if (telShelter) telShelter.textContent = p.safeShelter;
+  if (telMeta) telMeta.textContent = activeRegion.shelterMeta || 'Bearing: 048° NE · Distance: 620m';
 }
 
 function switchLanguage(lang) {
@@ -383,7 +385,7 @@ function updateTranscript() {
   return text;
 }
 
-// Requirement 4: Spoken English & Hindi only
+// Requirement 5: Spoken English & Hindi with State's shelter name dynamically
 function playDynamicVoiceAlert(language, plotData) {
   window.speechSynthesis.cancel();
   const plotId = plotData?.name || plotData?.id || "Dag 104";
@@ -445,15 +447,15 @@ function updateHighwayStatusUI() {
 
   if (isSevered) {
     if (hwDot) { hwDot.style.background = '#ef4444'; hwDot.style.boxShadow = '0 0 12px #ef4444'; }
-    if (hwText) hwText.textContent = `🔴 ${highwayName}: SEVERED BY SLOPE FAILURE`;
+    if (hwText) hwText.textContent = `🔴 ${highwayName}`;
     if (hwBanner) hwBanner.style.borderColor = 'rgba(239,68,68,0.7)';
     if (detourBanner) {
-      detourBanner.textContent = `🟢 ${detourName}: CLEAR (ALL-WEATHER ACCESS ACTIVATED)`;
+      detourBanner.textContent = `🟢 ${detourName}`;
       detourBanner.style.display = 'block';
     }
   } else {
     if (hwDot) { hwDot.style.background = '#22c55e'; hwDot.style.boxShadow = '0 0 6px #22c55e'; }
-    if (hwText) hwText.textContent = `🛣️ ${highwayName}: CLEAR &amp; ACTIVE`;
+    if (hwText) hwText.textContent = `🛣️ ${highwayName}`;
     if (hwBanner) hwBanner.style.borderColor = '#334155';
     if (detourBanner) detourBanner.style.display = 'none';
   }
@@ -508,11 +510,11 @@ function onCanvasClick(e) {
 
   const count = currentParcels.length || 5;
   const itemW = Math.min(W * 0.16, 140);
-  const startX = W * 0.12;
+  const startX = W * 0.10;
 
   currentParcels.forEach((p, idx) => {
-    const posX = startX + idx * (itemW + 16);
-    const posY = H * (0.35 + (idx % 2 === 0 ? 0 : 0.08));
+    const posX = startX + idx * (itemW + 18);
+    const posY = H * (0.34 + (idx % 2 === 0 ? 0 : 0.08));
     const posH = H * 0.16;
 
     if (clickX >= posX && clickX <= posX + itemW && clickY >= posY && clickY <= posY + posH) {
@@ -524,7 +526,7 @@ function onCanvasClick(e) {
   });
 }
 
-// Requirement 3: Renders all 4 to 5 blocks per state dynamically
+// Requirement 4: Renders 5 Khasra vector boxes for that state dynamically
 function drawCadastreTwin() {
   const canvas = document.getElementById('mapCanvas');
   if (!canvas) return;
@@ -548,7 +550,7 @@ function drawCadastreTwin() {
     ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
   }
 
-  // Draw All 4 to 5 Cadastral Parcels
+  // Draw 5 Khasra vector boxes
   const count = currentParcels.length || 5;
   const itemW = Math.min(W * 0.16, 140);
   const startX = W * 0.10;
@@ -588,6 +590,15 @@ function drawCadastreTwin() {
     ctx.fill();
     ctx.stroke();
 
+    // Parcel Roofline Geometry Overlay
+    ctx.beginPath();
+    ctx.moveTo(posX, posY);
+    ctx.lineTo(posX + itemW / 2, posY - 10);
+    ctx.lineTo(posX + itemW, posY);
+    ctx.strokeStyle = isCrit ? 'rgba(239, 68, 68, 0.6)' : 'rgba(56, 189, 248, 0.5)';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+
     // Parcel Text Labels
     ctx.font = 'bold 10.5px JetBrains Mono';
     ctx.fillStyle = isCrit ? '#ef4444' : (isSafe ? '#22c55e' : '#f59e0b');
@@ -621,9 +632,9 @@ function drawCadastreTwin() {
   const hwTitle = activeRegion.highway || 'Arterial Highway Corridor';
   ctx.font = 'bold 12px Space Grotesk';
   ctx.fillStyle = isSevered ? '#ef4444' : '#38bdf8';
-  ctx.fillText(isSevered ? `🔴 ${hwTitle}: SEVERED BY SLOPE FAILURE` : `🛣️ ${hwTitle}: CLEAR`, W * 0.32, H * 0.82);
+  ctx.fillText(isSevered ? `🔴 ${hwTitle}` : `digital 🛣️ ${hwTitle}`, W * 0.28, H * 0.82);
 
-  // Requirement 6: State-Aware Safe Detour Line
+  // State's Safe Detour Line
   if (isSevered) {
     ctx.beginPath();
     ctx.moveTo(W * 0.06, H * 0.85);
@@ -637,10 +648,10 @@ function drawCadastreTwin() {
     const detourTitle = activeRegion.detour || 'Bypass Detour Corridor';
     ctx.font = 'bold 11px JetBrains Mono';
     ctx.fillStyle = '#22c55e';
-    ctx.fillText(`🟢 ${detourTitle} (CLEAR - ALL-WEATHER ACCESS)`, W * 0.30, H * 0.92);
+    ctx.fillText(`🟢 ${detourTitle}`, W * 0.28, H * 0.92);
   }
 
-  // Animated Green Evacuation Route to Shelter
+  // Animated Green Evacuation Route to State's Designated Shelter
   if (showShelterRoute) {
     const startX = W * 0.10;
     const posX = startX + selectedParcelIndex * (itemW + 18) + itemW / 2;
@@ -659,7 +670,7 @@ function drawCadastreTwin() {
 
     ctx.font = 'bold 12px Space Grotesk';
     ctx.fillStyle = '#22c55e';
-    ctx.fillText(`🏛️ ${activeRegion.shelterName || 'Safe Relief Shelter'}`, shelterX - 70, shelterY - 26);
+    ctx.fillText(`🏛️ ${activeRegion.shelterName || 'Safe Relief Shelter'}`, shelterX - 75, shelterY - 26);
 
     // Connecting Route Line
     ctx.beginPath();
@@ -684,7 +695,7 @@ function highlightSafeShelter() {
   drawCadastreTwin();
 
   if (window.GEO_API && window.GEO_API.showToast) {
-    window.GEO_API.showToast(`🧭 Safe Route to ${shelter} Highlighted (Bearing 048° NE, Distance 620m)`);
+    window.GEO_API.showToast(`🧭 Safe Route to ${shelter} Highlighted (${activeRegion.shelterMeta || 'Bearing 048° NE, 620m'})`);
   }
 }
 
