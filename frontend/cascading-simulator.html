@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>GeoShield 🇮🇳 — Cascading Multi-Hazard Simulator</title>
+<meta name="description" content="Simulate multi-hazard cascading chains: slope scarp → debris runout → flood inundation, along critical national lifelines." />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="nav.css">
+<style>
+:root {
+  --bg-0: #060b13;
+  --bg-1: #0d1524;
+  --bg-2: #111b30;
+  --gold: #f59e0b;
+  --gold-soft: rgba(245,158,11,0.2);
+  --teal: #38bdf8;
+  --orange: #f97316;
+  --red: #ef4444;
+  --green: #22c55e;
+  --ink-0: #ffffff;
+  --ink-1: #94a3b8;
+  --ink-2: #64748b;
+  --line: #1e293b;
+  --card: rgba(13,21,36,0.92);
+  --font-d: 'Space Grotesk', sans-serif;
+  --font-b: 'Inter', sans-serif;
+  --font-m: 'JetBrains Mono', monospace;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: var(--bg-0);
+  color: var(--ink-0);
+  font-family: var(--font-b);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+::selection { background: var(--gold-soft); color: var(--bg-0); }
+
+.stars {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background-image:
+    radial-gradient(1px 1px at 8% 12%, #ffffff2a 0, transparent 70%),
+    radial-gradient(1px 1px at 78% 7%, #ffffff1a 0, transparent 70%),
+    radial-gradient(1.5px 1.5px at 55% 29%, #ffffff1a 0, transparent 70%),
+    radial-gradient(1px 1px at 22% 62%, #ffffff12 0, transparent 70%),
+    radial-gradient(1px 1px at 91% 68%, #ffffff20 0, transparent 70%);
+}
+
+.sim-container {
+  position: relative; z-index: 1;
+  max-width: 1200px; margin: 84px auto 40px; padding: 0 20px;
+}
+
+/* Header */
+.sim-header {
+  text-align: center; margin-bottom: 36px;
+}
+.sim-tag {
+  font-family: var(--font-m); font-size: 10.5px; letter-spacing: .2em;
+  text-transform: uppercase; color: var(--gold); margin-bottom: 10px;
+  display: inline-block; background: rgba(245,158,11,0.12); padding: 3px 10px;
+  border-radius: 4px; border: 1px solid rgba(245,158,11,0.3);
+}
+.sim-header h1 {
+  font-family: var(--font-d); font-size: clamp(28px, 4vw, 44px);
+  font-weight: 700; color: #fff; margin-bottom: 10px;
+}
+.sim-header p {
+  color: var(--ink-1); font-size: 14px; max-width: 68ch; margin: 0 auto;
+}
+
+/* Grid */
+.sim-main-grid {
+  display: grid; grid-template-columns: 340px 1fr; gap: 24px;
+}
+@media (max-width: 960px) { .sim-main-grid { grid-template-columns: 1fr; } }
+
+/* Controls */
+.sim-card {
+  background: var(--bg-1); border: 1px solid var(--line);
+  border-radius: 12px; padding: 22px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.6);
+}
+.sim-card h3 {
+  font-family: var(--font-d); font-size: 16px; margin-bottom: 18px; color: #fff;
+  display: flex; align-items: center; justify-content: space-between;
+}
+
+.slider-group { margin-bottom: 18px; }
+.slider-label {
+  display: flex; justify-content: space-between; font-size: 11px;
+  font-family: var(--font-m); text-transform: uppercase; color: var(--ink-1);
+  margin-bottom: 6px;
+}
+.slider-label .val { color: var(--gold); font-weight: 700; }
+input[type=range] {
+  -webkit-appearance: none; width: 100%; height: 4px;
+  background: #334155; border-radius: 4px; outline: none;
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 14px; height: 14px; border-radius: 50%;
+  background: var(--gold); cursor: pointer; box-shadow: 0 0 8px var(--gold);
+}
+
+/* Formula Box */
+.formula-box {
+  background: rgba(56, 189, 248, 0.06); border: 1px solid rgba(56, 189, 248, 0.25);
+  border-radius: 8px; padding: 12px 14px; margin-top: 20px; font-size: 11px;
+}
+.formula-title {
+  font-family: var(--font-m); font-size: 10px; color: var(--teal);
+  font-weight: 700; text-transform: uppercase; margin-bottom: 4px;
+}
+.formula-text {
+  color: #cbd5e1; font-family: var(--font-m); font-size: 10px; line-height: 1.5;
+}
+
+/* Real-Time Metrics (Task 5) */
+.metrics-row {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 14px; margin-bottom: 24px;
+}
+.metric-box {
+  background: var(--bg-1); border: 1px solid var(--line); border-radius: 10px;
+  padding: 16px; position: relative; overflow: hidden;
+}
+.metric-box::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+}
+.metric-box.m-red::before { background: var(--red); }
+.metric-box.m-orange::before { background: var(--orange); }
+.metric-box.m-blue::before { background: var(--teal); }
+.metric-box.m-gold::before { background: var(--gold); }
+
+.m-label {
+  font-family: var(--font-m); font-size: 9.5px; text-transform: uppercase;
+  color: var(--ink-2); margin-bottom: 6px; display: block;
+}
+.m-val {
+  font-family: var(--font-d); font-size: 24px; font-weight: 700; color: #fff;
+  line-height: 1; margin-bottom: 4px;
+}
+.m-sub {
+  font-size: 10.5px; color: var(--ink-1);
+}
+
+/* Runout Profile Graphic (Task 5) */
+.profile-canvas-container {
+  background: var(--bg-1); border: 1px solid var(--line); border-radius: 12px;
+  padding: 20px; min-height: 320px;
+}
+#runoutCanvas { width: 100%; height: 280px; display: block; }
+</style>
+</head>
+<body>
+<div class="stars"></div>
+<canvas id="particleCanvas"></canvas>
+<div id="gnavMount"></div>
+
+<div class="sim-container">
+  
+  <div class="sim-header">
+    <span class="sim-tag">Himalayan &amp; Western Ghats Physics Engine</span>
+    <h1>Cascading Multi-Hazard Simulator</h1>
+    <p>Models hydro-kinematic debris runout and reservoir breach chains: Slope Scarp Failure ──► Debris Runout ──► River Inundation Pool.</p>
+  </div>
+
+  <!-- Real-Time Metrics (Task 5) -->
+  <div class="metrics-row">
+    <div class="metric-box m-red">
+      <span class="m-label">Failure Probability</span>
+      <div class="m-val" id="valFp" style="color:#ef4444;">62%</div>
+      <div class="m-sub">High Hazard Level</div>
+    </div>
+    <div class="metric-box m-orange">
+      <span class="m-label">Debris Reach</span>
+      <div class="m-val" id="valDr" style="color:#f97316;">2.4 km</div>
+      <div class="m-sub">Downstream Valley Runout</div>
+    </div>
+    <div class="metric-box m-blue">
+      <span class="m-label">Flood Inundation Area</span>
+      <div class="m-val" id="valFi" style="color:#38bdf8;">0.46 km²</div>
+      <div class="m-sub">Lake Surge Backflow</div>
+    </div>
+    <div class="metric-box m-gold">
+      <span class="m-label">Impacted Khasras</span>
+      <div class="m-val" id="valKi" style="color:#f59e0b;">108 Plots</div>
+      <div class="m-sub">734 Exposed Residents</div>
+    </div>
+  </div>
+
+  <div class="sim-main-grid">
+
+    <!-- Left Controls -->
+    <div class="sim-card">
+      <h3>
+        <span>Scenario Parameters</span>
+        <span style="font-size:10px; font-family:var(--font-m); color:var(--teal);">RICH-DEM v2</span>
+      </h3>
+
+      <div class="slider-group">
+        <div class="slider-label"><span>Rainfall Intensity</span><span class="val" id="dispRain">95 mm/hr</span></div>
+        <input type="range" id="inputRain" min="20" max="140" value="95" oninput="onParamChange()" />
+      </div>
+
+      <div class="slider-group">
+        <div class="slider-label"><span>Antecedent Rain (72h)</span><span class="val" id="dispAnt">280 mm</span></div>
+        <input type="range" id="inputAnt" min="50" max="600" value="280" oninput="onParamChange()" />
+      </div>
+
+      <div class="slider-group">
+        <div class="slider-label"><span>Slope Angle</span><span class="val" id="dispSlope">44.5°</span></div>
+        <input type="range" id="inputSlope" min="15" max="65" value="45" oninput="onParamChange()" />
+      </div>
+
+      <div class="slider-group">
+        <div class="slider-label"><span>Soil Saturation (VWC)</span><span class="val" id="dispSat">75%</span></div>
+        <input type="range" id="inputSat" min="20" max="100" value="75" oninput="onParamChange()" />
+      </div>
+
+      <!-- Cascading Chain Formula Tooltip (Task 5) -->
+      <div class="formula-box">
+        <div class="formula-title">🔬 CASCADING CHAIN FORMULA</div>
+        <div class="formula-text">
+          Pore Pressure (u) &gt; Shear Resistance (τ) ──► Rapid Liquefaction ──► Jhora Stream Damming ──► Outburst Surge.
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Profile Graphic -->
+    <div class="profile-canvas-container">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+        <h3 style="font-family:var(--font-d); font-size:15px; color:#fff;">Visual Runout Profile Graphic</h3>
+        <span style="font-family:var(--font-m); font-size:10px; color:var(--gold);">Scale 1:5,000 · Profile A-A'</span>
+      </div>
+      <canvas id="runoutCanvas"></canvas>
+    </div>
+
+  </div>
+
+</div>
+
+<script src="region-config.js"></script>
+<script src="assets/demo/demo-data.js"></script>
+<script src="api-client.js"></script>
+<script src="auth.js"></script>
+<script src="nav.js"></script>
+
+<script>
+function onParamChange() {
+  const rain = parseFloat(document.getElementById('inputRain').value);
+  const ant = parseFloat(document.getElementById('inputAnt').value);
+  const slope = parseFloat(document.getElementById('inputSlope').value);
+  const sat = parseFloat(document.getElementById('inputSat').value);
+
+  document.getElementById('dispRain').textContent = `${rain} mm/hr`;
+  document.getElementById('dispAnt').textContent = `${ant} mm`;
+  document.getElementById('dispSlope').textContent = `${slope}°`;
+  document.getElementById('dispSat').textContent = `${sat}%`;
+
+  // Compute live physics indicators
+  const fp = Math.min(98, Math.max(10, Math.round((rain/140 * 35) + (ant/600 * 25) + (slope/65 * 25) + (sat/100 * 15))));
+  const dr = ((slope / 40.0) * (rain / 35.0) * 1.8).toFixed(1);
+  const fi = (dr * 0.19).toFixed(2);
+  const ki = Math.round(dr * 45);
+  const residents = Math.round(ki * 6.8);
+
+  document.getElementById('valFp').textContent = `${fp}%`;
+  document.getElementById('valDr').textContent = `${dr} km`;
+  document.getElementById('valFi').textContent = `${fi} km²`;
+  document.getElementById('valKi').textContent = `${ki} Plots`;
+
+  drawRunoutProfile(fp, dr, fi);
+}
+
+function drawRunoutProfile(fp, dr, fi) {
+  const canvas = document.getElementById('runoutCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  canvas.width = canvas.parentElement.clientWidth - 40;
+  canvas.height = 260;
+
+  const W = canvas.width;
+  const H = canvas.height;
+
+  ctx.clearRect(0, 0, W, H);
+
+  // 1. Slope Scarp Stage
+  ctx.beginPath();
+  ctx.moveTo(W * 0.05, H * 0.2);
+  ctx.lineTo(W * 0.32, H * 0.65);
+  ctx.lineTo(W * 0.32, H * 0.9);
+  ctx.lineTo(W * 0.05, H * 0.9);
+  ctx.closePath();
+  ctx.fillStyle = 'rgba(239, 68, 68, 0.15)';
+  ctx.strokeStyle = '#ef4444';
+  ctx.lineWidth = 2;
+  ctx.fill(); ctx.stroke();
+
+  ctx.font = 'bold 12px Space Grotesk';
+  ctx.fillStyle = '#ef4444';
+  ctx.fillText(`Slope Scarp (${fp}% Failure)`, W * 0.07, H * 0.35);
+
+  // 2. Debris Runout Vector
+  ctx.beginPath();
+  ctx.moveTo(W * 0.32, H * 0.65);
+  ctx.lineTo(W * 0.68, H * 0.75);
+  ctx.strokeStyle = '#f97316';
+  ctx.lineWidth = 6;
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.arc(W * 0.50, H * 0.70, 14, 0, Math.PI * 2);
+  ctx.fillStyle = 'rgba(249, 115, 22, 0.2)';
+  ctx.strokeStyle = '#f97316';
+  ctx.lineWidth = 2;
+  ctx.fill(); ctx.stroke();
+
+  ctx.font = 'bold 11px JetBrains Mono';
+  ctx.fillStyle = '#f97316';
+  ctx.fillText(`Debris Runout (${dr} km)`, W * 0.40, H * 0.55);
+
+  // 3. Inundation Surge Pool
+  ctx.beginPath();
+  ctx.ellipse(W * 0.82, H * 0.78, W * 0.14, H * 0.14, 0, 0, Math.PI * 2);
+  ctx.fillStyle = 'rgba(56, 189, 248, 0.2)';
+  ctx.strokeStyle = '#38bdf8';
+  ctx.lineWidth = 2;
+  ctx.fill(); ctx.stroke();
+
+  ctx.font = 'bold 12px Space Grotesk';
+  ctx.fillStyle = '#38bdf8';
+  ctx.fillText(`Inundation Pool (${fi} km²)`, W * 0.72, H * 0.78);
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  const savedRain = localStorage.getItem('geo360_cascade_rain');
+  if (savedRain) {
+    document.getElementById('inputRain').value = savedRain;
+  }
+  onParamChange();
+});
+window.addEventListener('resize', onParamChange);
+</script>
+</body>
+</html>

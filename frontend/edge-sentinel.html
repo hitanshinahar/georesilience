@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>GeoShield 🇮🇳 — Offline Field Sentinel &amp; Tactical Compass</title>
+<meta name="description" content="On-device Edge AI Mobile PWA using MobileNetV3 WASM for offline crack triage and tactical evacuation compass." />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="nav.css">
+<style>
+:root{
+  --bg-0:#060b13;--bg-1:#0d1524;--bg-2:#111b30;
+  --gold:#f59e0b;--gold-soft:rgba(245,158,11,.18);
+  --teal:#38bdf8;--green:#22c55e;--orange:#f97316;--red:#ef4444;
+  --ink-0:#fff;--ink-1:#94a3b8;--ink-2:#64748b;--line:#1e293b;
+  --font-d:'Space Grotesk',sans-serif;--font-b:'Inter',sans-serif;--font-m:'JetBrains Mono',monospace;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg-0);color:var(--ink-0);font-family:var(--font-b);overflow-x:hidden;-webkit-font-smoothing:antialiased}
+::selection{background:var(--gold-soft);color:var(--bg-0)}
+
+.stars{position:fixed;inset:0;z-index:0;pointer-events:none;background-image:radial-gradient(1px 1px at 9% 13%,#fff2 0,transparent 70%),radial-gradient(1px 1px at 79% 8%,#fff1 0,transparent 70%),radial-gradient(1.5px 1.5px at 56% 32%,#fff1 0,transparent 70%),radial-gradient(1px 1px at 23% 63%,#fff1 0,transparent 70%),radial-gradient(1px 1px at 90% 71%,#fff2 0,transparent 70%)}
+
+.sentinel-container{position:relative;z-index:1;max-width:1200px;margin:84px auto 40px;padding:0 20px}
+.header-box{text-align:center;margin-bottom:36px}
+.header-tag{font-family:var(--font-m);font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);background:rgba(245,158,11,0.12);padding:3px 10px;border-radius:4px;border:1px solid rgba(245,158,11,0.3);display:inline-block;margin-bottom:10px}
+.header-box h1{font-family:var(--font-d);font-size:clamp(26px,4vw,40px);font-weight:700;color:#fff;margin-bottom:8px}
+.header-box p{color:var(--ink-1);font-size:14px;max-width:68ch;margin:0 auto}
+
+/* Dual Column Layout */
+.sentinel-grid{display:grid;grid-template-columns:360px 1fr;gap:28px;align-items:start}
+@media(max-width:960px){.sentinel-grid{grid-template-columns:1fr}}
+
+/* Smartphone Frame (Left) */
+.phone-frame{width:100%;max-width:340px;margin:0 auto;background:#0d1524;border:2px solid #334155;border-radius:36px;padding:18px;box-shadow:0 20px 60px rgba(0,0,0,0.8),0 0 30px rgba(56,189,248,0.15)}
+.phone-notch{height:22px;background:#060b13;border-radius:12px;margin:0 auto 14px;width:120px;display:flex;align-items:center;justify-content:center}
+.phone-notch-dot{width:8px;height:8px;border-radius:50%;background:#334155}
+
+.phone-screen{background:#060b13;border:1px solid #1e293b;border-radius:20px;padding:14px}
+.pwa-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;border-bottom:1px solid #1e293b;padding-bottom:8px}
+.pwa-title{font-family:var(--font-d);font-size:13px;font-weight:700;color:#fff}
+.pwa-mode-toggle{background:rgba(34,197,94,0.12);border:1px solid rgba(34,197,94,0.4);color:#22c55e;font-family:var(--font-m);font-size:9.5px;padding:2px 8px;border-radius:100px;cursor:pointer;font-weight:700}
+
+.camera-preview{width:100%;aspect-ratio:4/3;background:#111b30;border:1px dashed #334155;border-radius:12px;position:relative;overflow:hidden;margin-bottom:12px;display:flex;align-items:center;justify-content:center}
+.crack-scarp-overlay{position:absolute;width:70%;height:3px;background:linear-gradient(90deg,transparent,#ef4444,transparent);transform:rotate(-20deg);box-shadow:0 0 10px #ef4444}
+.camera-crosshair{position:absolute;width:40px;height:40px;border:1px solid rgba(245,158,11,0.6)}
+
+.upload-selectors{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:12px}
+.btn-select-sample{background:#111b30;border:1px solid #334155;border-radius:6px;padding:8px 6px;color:#cbd5e1;font-family:var(--font-m);font-size:10px;cursor:pointer;transition:all 0.2s}
+.btn-select-sample.active{border-color:var(--gold);background:rgba(245,158,11,0.1);color:var(--gold)}
+
+.ai-triage-box{background:#111b30;border:1px solid #334155;border-radius:8px;padding:10px;margin-bottom:12px;font-size:11px}
+.btn-submit-pwa{width:100%;background:linear-gradient(135deg,#f59e0b,#d97706);border:none;border-radius:8px;padding:10px;font-family:var(--font-d);font-size:12px;font-weight:700;color:#060b13;cursor:pointer}
+
+/* Right Column: Tactical Compass & Queue */
+.right-card{background:var(--bg-1);border:1px solid var(--line);border-radius:12px;padding:22px;margin-bottom:20px;box-shadow:0 8px 30px rgba(0,0,0,0.6)}
+.right-card h3{font-family:var(--font-d);font-size:16px;margin-bottom:16px;color:#fff;display:flex;justify-content:space-between;align-items:center}
+
+/* 360 Compass Graphic (Task 6) */
+.compass-container{display:flex;flex-direction:column;align-items:center;padding:16px 0}
+#compassSvg{width:220px;height:220px}
+.shelter-meta{margin-top:16px;text-align:center;font-size:12px;color:#cbd5e1}
+
+/* Local Queue */
+.queue-item{background:#111b30;border:1px solid #1e293b;border-radius:8px;padding:12px 14px;display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.queue-badge{font-family:var(--font-m);font-size:9.5px;padding:3px 8px;border-radius:4px;font-weight:700;background:rgba(34,197,94,0.15);color:#22c55e;border:1px solid rgba(34,197,94,0.4)}
+</style>
+</head>
+<body>
+<div class="stars"></div>
+<canvas id="particleCanvas"></canvas>
+<div id="gnavMount"></div>
+
+<div class="sentinel-container">
+  
+  <div class="header-box">
+    <span class="header-tag">Mobile Edge AI &amp; Offline PWA Triage</span>
+    <h1>Offline Field Sentinel &amp; Tactical Compass</h1>
+    <p>Empowers field response personnel and citizens with on-device MobileNetV3 WASM crack triage and real-time shelter navigation when cellular towers fail.</p>
+  </div>
+
+  <div class="sentinel-grid">
+    
+    <!-- LEFT: Mobile Smartphone Viewport Frame (Task 6) -->
+    <div class="phone-wrap">
+      <div class="phone-frame">
+        <div class="phone-notch"><div class="phone-notch-dot"></div></div>
+        
+        <div class="phone-screen">
+          <div class="pwa-header">
+            <span class="pwa-title">📱 Sentinel Edge PWA</span>
+            <button class="pwa-mode-toggle" id="offlineToggleBtn" onclick="toggleOfflineMode()">🟢 ONLINE</button>
+          </div>
+
+          <!-- Camera Viewfinder -->
+          <div class="camera-preview">
+            <div class="camera-crosshair"></div>
+            <div id="crackOverlay" class="crack-scarp-overlay"></div>
+            <span id="camTag" style="position:absolute; bottom:6px; left:8px; font-family:var(--font-m); font-size:9px; color:#f59e0b;">AI FOCUS: ACTIVE</span>
+          </div>
+
+          <!-- Upload Selectors (Task 6) -->
+          <div class="upload-selectors">
+            <button class="btn-select-sample active" id="btnSampleCrack" onclick="selectSample('crack')">⚡ Hillside Crack</button>
+            <button class="btn-select-sample" id="btnSamplePothole" onclick="selectSample('pothole')">📷 Pothole (Spam)</button>
+          </div>
+
+          <!-- On-Device Edge AI Triage Output (Task 6) -->
+          <div class="ai-triage-box" id="aiTriageBox">
+            <div style="font-family:var(--font-m); font-size:10px; color:#22c55e; font-weight:700; margin-bottom:4px;" id="aiTriageStatus">
+              ✓ VALID HAZARD (94.2%)
+            </div>
+            <div id="aiTriageDetails" style="color:#94a3b8; font-size:10px; line-height:1.4;">
+              Identified transverse shear scarp on &gt;38° slope matched to Cadastral Dag #104/A. GPS: 27.3389° N, 88.6065° E (Locked).
+            </div>
+          </div>
+
+          <button class="btn-submit-pwa" id="btnSubmitQueue" onclick="submitToLocalQueue()">
+            [SUBMIT REPORT TO QUEUE]
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: Tactical Evacuation Compass & Local Queue (Task 6) -->
+    <div>
+      
+      <!-- Tactical Evacuation Compass Card -->
+      <div class="right-card">
+        <h3>
+          <span>🧭 Tactical Evacuation Compass</span>
+          <span style="font-size:10px; font-family:var(--font-m); color:var(--teal);">MAGNETIC SENSOR LOCKED</span>
+        </h3>
+
+        <div class="compass-container">
+          <!-- 360° Compass Graphic SVG -->
+          <svg id="compassSvg" viewBox="0 0 200 200">
+            <circle cx="100" cy="100" r="90" fill="#060b13" stroke="#1e293b" stroke-width="2"/>
+            <circle cx="100" cy="100" r="82" fill="none" stroke="rgba(245,158,11,0.2)" stroke-width="1" stroke-dasharray="4,4"/>
+            
+            <!-- Cardinal directions -->
+            <text x="100" y="24" fill="#f59e0b" font-size="12" font-family="Space Grotesk" font-weight="700" text-anchor="middle">N</text>
+            <text x="180" y="104" fill="#94a3b8" font-size="10" font-family="Space Grotesk" text-anchor="middle">E</text>
+            <text x="100" y="186" fill="#94a3b8" font-size="10" font-family="Space Grotesk" text-anchor="middle">S</text>
+            <text x="20" y="104" fill="#94a3b8" font-size="10" font-family="Space Grotesk" text-anchor="middle">W</text>
+            
+            <!-- Compass Needle pointing 048° NE -->
+            <g transform="rotate(48, 100, 100)">
+              <polygon points="100,28 108,100 100,90 92,100" fill="#ef4444"/>
+              <polygon points="100,172 108,100 100,110 92,100" fill="#94a3b8"/>
+              <circle cx="100" cy="100" r="6" fill="#f59e0b"/>
+            </g>
+          </svg>
+
+          <div class="shelter-meta">
+            <strong style="color:#fff; font-size:15px; font-family:var(--font-d);">Target: Burtuk Relief Shelter</strong>
+            <div style="font-family:var(--font-m); font-size:11px; color:#38bdf8; margin-top:4px;">
+              Bearing: <strong>048° NE</strong> · Distance: <strong>620m</strong> · Descent: <strong>-42m</strong> · Walk: <strong>8.5 mins</strong>
+            </div>
+          </div>
+
+          <button onclick="playCompassAudio()" style="margin-top:14px; background:rgba(56,189,248,0.12); border:1px solid rgba(56,189,248,0.4); color:#38bdf8; font-family:var(--font-d); font-size:12px; font-weight:700; padding:8px 16px; border-radius:6px; cursor:pointer; display:flex; align-items:center; gap:6px;">
+            <span>🔊</span> Audio Guidance (Bhashini Voice)
+          </button>
+        </div>
+      </div>
+
+      <!-- PWA Local Queue Card -->
+      <div class="right-card">
+        <h3>
+          <span>📦 PWA Local Offline Queue (IndexedDB)</span>
+          <span style="font-size:10px; font-family:var(--font-m); color:var(--gold);" id="queueCount">1 PENDING SYNC</span>
+        </h3>
+
+        <div id="queueList">
+          <div class="queue-item">
+            <div>
+              <strong style="font-family:var(--font-m); font-size:11.5px; color:#fff;">REP-8821: Tension Crack (Dag #104/A)</strong>
+              <div style="font-size:10px; color:#94a3b8;">GPS: 27.3389° N, 88.6065° E · MobileNetV3: 94.2%</div>
+            </div>
+            <span class="queue-badge">READY_SYNC</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+<script src="region-config.js"></script>
+<script src="assets/demo/demo-data.js"></script>
+<script src="api-client.js"></script>
+<script src="auth.js"></script>
+<script src="nav.js"></script>
+
+<script>
+let isOffline = false;
+let currentSampleType = 'crack';
+let queueItems = 1;
+
+function toggleOfflineMode() {
+  isOffline = !isOffline;
+  const btn = document.getElementById('offlineToggleBtn');
+  if (btn) {
+    if (isOffline) {
+      btn.textContent = '🔴 OFFLINE (PWA)';
+      btn.style.borderColor = '#ef4444';
+      btn.style.color = '#ef4444';
+      btn.style.background = 'rgba(239,68,68,0.15)';
+    } else {
+      btn.textContent = '🟢 ONLINE';
+      btn.style.borderColor = '#22c55e';
+      btn.style.color = '#22c55e';
+      btn.style.background = 'rgba(34,197,94,0.12)';
+    }
+  }
+  if (window.GEO_API) {
+    window.GEO_API.showToast(`Network Status: ${isOffline ? 'OFFLINE (IndexedDB Cache Enabled)' : 'ONLINE (Direct Cloud Sync)'}`);
+  }
+}
+
+function selectSample(type) {
+  currentSampleType = type;
+  document.getElementById('btnSampleCrack').classList.toggle('active', type === 'crack');
+  document.getElementById('btnSamplePothole').classList.toggle('active', type === 'pothole');
+
+  const overlay = document.getElementById('crackOverlay');
+  const statusEl = document.getElementById('aiTriageStatus');
+  const detailsEl = document.getElementById('aiTriageDetails');
+  const submitBtn = document.getElementById('btnSubmitQueue');
+
+  if (type === 'crack') {
+    overlay.style.display = 'block';
+    statusEl.textContent = '✓ VALID HAZARD (94.2%)';
+    statusEl.style.color = '#22c55e';
+    detailsEl.textContent = 'Identified transverse shear scarp on >38° slope matched to Cadastral Dag #104/A. GPS: 27.3389° N, 88.6065° E (Locked).';
+    submitBtn.disabled = false;
+    submitBtn.textContent = '[SUBMIT REPORT TO QUEUE]';
+    submitBtn.style.opacity = '1';
+  } else {
+    overlay.style.display = 'none';
+    statusEl.textContent = '⚠️ SPAM FILTERED (Rejected)';
+    statusEl.style.color = '#f59e0b';
+    detailsEl.textContent = 'Urban asphalt pothole detected without geomorphological hazard signature. Filtered on-device before queue submission.';
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'FILTERED (CANNOT SUBMIT)';
+    submitBtn.style.opacity = '0.5';
+  }
+}
+
+function submitToLocalQueue() {
+  if (currentSampleType === 'pothole') return;
+  queueItems++;
+  document.getElementById('queueCount').textContent = `${queueItems} PENDING SYNC`;
+
+  const newId = `REP-88${20 + queueItems}`;
+  const itemHtml = `
+    <div class="queue-item" style="animation: geoFadeIn 0.3s ease;">
+      <div>
+        <strong style="font-family:var(--font-m); font-size:11.5px; color:#fff;">${newId}: Field Tension Crack (Dag #104/A)</strong>
+        <div style="font-size:10px; color:#94a3b8;">GPS: 27.3389° N, 88.6065° E · MobileNetV3: 94.2%</div>
+      </div>
+      <span class="queue-badge">READY_SYNC</span>
+    </div>
+  `;
+  document.getElementById('queueList').insertAdjacentHTML('afterbegin', itemHtml);
+
+  if (window.GEO_API) {
+    window.GEO_API.showToast(`Report ${newId} saved to Local PWA Queue! 📦`);
+  }
+}
+
+function playCompassAudio() {
+  const text = 'Compass locked. Proceed north-east bearing zero-four-eight degrees toward Burtuk Relief Shelter. Distance six hundred and twenty meters, descent forty-two meters.';
+  if ('speechSynthesis' in window) {
+    const u = new SpeechSynthesisUtterance(text);
+    u.rate = 0.95;
+    window.speechSynthesis.speak(u);
+  }
+  if (window.GEO_API) {
+    window.GEO_API.showToast('🔊 Synthesizing Bhashini Tactical Audio Navigation');
+  }
+}
+</script>
+</body>
+</html>

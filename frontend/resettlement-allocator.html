@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>GeoShield 🇮🇳 — Multi-Criteria Safe Resettlement Allocator</title>
+<meta name="description" content="Multi-Criteria Decision Analysis (MCDA) land allocation engine to identify and rank safe government revenue parcels for long-term disaster rehabilitation." />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="nav.css">
+<style>
+:root{
+  --bg-0:#060b13;--bg-1:#0d1524;--bg-2:#111b30;
+  --gold:#f59e0b;--gold-soft:rgba(245,158,11,.18);
+  --teal:#38bdf8;--green:#22c55e;--orange:#f97316;--red:#ef4444;
+  --ink-0:#fff;--ink-1:#94a3b8;--ink-2:#64748b;--line:#1e293b;
+  --font-d:'Space Grotesk',sans-serif;--font-b:'Inter',sans-serif;--font-m:'JetBrains Mono',monospace;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg-0);color:var(--ink-0);font-family:var(--font-b);overflow-x:hidden;-webkit-font-smoothing:antialiased}
+::selection{background:var(--gold-soft);color:var(--bg-0)}
+
+.stars{position:fixed;inset:0;z-index:0;pointer-events:none;background-image:radial-gradient(1px 1px at 7% 11%,#fff2 0,transparent 70%),radial-gradient(1px 1px at 81% 7%,#fff1 0,transparent 70%),radial-gradient(1.5px 1.5px at 54% 28%,#fff1 0,transparent 70%),radial-gradient(1px 1px at 21% 61%,#fff1 0,transparent 70%),radial-gradient(1px 1px at 92% 69%,#fff2 0,transparent 70%)}
+
+.resettle-container{position:relative;z-index:1;max-width:1200px;margin:84px auto 40px;padding:0 24px}
+.resettle-header{text-align:center;margin-bottom:36px}
+.resettle-tag{font-family:var(--font-m);font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);background:rgba(245,158,11,0.12);padding:3px 10px;border-radius:4px;border:1px solid rgba(245,158,11,0.3);display:inline-block;margin-bottom:10px}
+.resettle-header h1{font-family:var(--font-d);font-size:clamp(26px,4vw,40px);font-weight:700;color:#fff;margin-bottom:8px}
+.resettle-header p{color:var(--ink-1);font-size:14px;max-width:68ch;margin:0 auto}
+
+/* 5 Criteria Weights Grid (Task 8) */
+.criteria-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px;margin-bottom:32px}
+.crit-card{background:var(--bg-1);border:1px solid var(--line);border-radius:10px;padding:16px;position:relative;overflow:hidden}
+.crit-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--gold)}
+.crit-icon{font-size:20px;margin-bottom:8px;display:block}
+.crit-name{font-family:var(--font-m);font-size:9.5px;text-transform:uppercase;color:var(--teal);letter-spacing:1px;margin-bottom:4px;display:block}
+.crit-title{font-family:var(--font-d);font-size:14px;font-weight:600;color:#fff;margin-bottom:6px}
+.crit-desc{font-size:11px;color:var(--ink-1);line-height:1.4;margin-bottom:12px}
+
+.weight-slider-row{display:flex;align-items:center;gap:10px}
+.weight-val{font-family:var(--font-m);font-size:11px;color:var(--gold);font-weight:700;min-width:32px}
+input[type=range]{-webkit-appearance:none;width:100%;height:4px;background:#334155;border-radius:4px;outline:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:12px;height:12px;border-radius:50%;background:var(--gold);cursor:pointer}
+
+/* Candidate Comparison Grid (Task 8) */
+.candidate-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:36px}
+@media(max-width:860px){.candidate-grid{grid-template-columns:1fr}}
+
+.candidate-card{background:var(--bg-1);border:1px solid var(--line);border-radius:14px;padding:24px;position:relative;box-shadow:0 10px 30px rgba(0,0,0,0.6)}
+.candidate-card.primary{border-color:rgba(34,197,94,0.4);background:linear-gradient(180deg,rgba(34,197,94,0.06),transparent)}
+.cand-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px}
+.cand-score{font-family:var(--font-d);font-size:26px;font-weight:700;line-height:1}
+.cand-score.rec{color:#22c55e} .cand-score.sec{color:#f59e0b}
+.cand-badge{font-family:var(--font-m);font-size:9.5px;padding:3px 8px;border-radius:4px;font-weight:700}
+.cb-rec{background:rgba(34,197,94,0.15);color:#22c55e;border:1px solid rgba(34,197,94,0.4)}
+.cb-sec{background:rgba(245,158,11,0.15);color:#f59e0b;border:1px solid rgba(245,158,11,0.4)}
+
+.cand-meta{display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:11.5px;margin-bottom:20px;padding:12px;background:#111b30;border-radius:8px}
+.cand-meta-item span{display:block;color:var(--ink-2);font-size:9.5px;text-transform:uppercase;font-family:var(--font-m);margin-bottom:2px}
+.cand-meta-item strong{color:#cbd5e1}
+
+.btn-alloc{width:100%;border:none;border-radius:8px;padding:12px;font-family:var(--font-d);font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all 0.2s}
+.btn-alloc.primary{background:linear-gradient(135deg,#22c55e,#16a34a);color:#060b13}
+.btn-alloc.secondary{background:#111b30;border:1px solid #334155;color:#cbd5e1}
+</style>
+</head>
+<body>
+<div class="stars"></div>
+<canvas id="particleCanvas"></canvas>
+<div id="gnavMount"></div>
+
+<div class="resettle-container">
+
+  <div class="resettle-header">
+    <span class="resettle-tag">MCDA Spatial Multi-Criteria Optimization</span>
+    <h1>Multi-Criteria Safe Resettlement Allocator</h1>
+    <p>Automates rehabilitation land scoring by evaluating slope stability, flood buffers, arterial access, and undisputed government cadastral tenure.</p>
+  </div>
+
+  <!-- 5 Criteria Weights Grid (Task 8) -->
+  <div class="criteria-grid">
+    <div class="crit-card">
+      <span class="crit-icon">⛰️</span>
+      <span class="crit-name">01. Slope Safety</span>
+      <div class="crit-title">Slope Gradient &lt;15°</div>
+      <div class="crit-desc">Bedrock stability and negligible shear creep.</div>
+      <div class="weight-slider-row">
+        <input type="range" id="wSlope" min="10" max="50" value="30" oninput="onWeightChange()" />
+        <span class="weight-val" id="dispWSlope">30%</span>
+      </div>
+    </div>
+
+    <div class="crit-card">
+      <span class="crit-icon">🌊</span>
+      <span class="crit-name">02. Flood Buffer</span>
+      <div class="crit-title">&gt;150m River Buffer</div>
+      <div class="crit-desc">Clear of Jhora backflow and GLOF surge zones.</div>
+      <div class="weight-slider-row">
+        <input type="range" id="wFlood" min="10" max="50" value="25" oninput="onWeightChange()" />
+        <span class="weight-val" id="dispWFlood">25%</span>
+      </div>
+    </div>
+
+    <div class="crit-card">
+      <span class="crit-icon">🛣️</span>
+      <span class="crit-name">03. Road Access</span>
+      <div class="crit-title">All-Weather Access</div>
+      <div class="crit-desc">Within 2.0 km of arterial state highway.</div>
+      <div class="weight-slider-row">
+        <input type="range" id="wRoad" min="5" max="40" value="20" oninput="onWeightChange()" />
+        <span class="weight-val" id="dispWRoad">20%</span>
+      </div>
+    </div>
+
+    <div class="crit-card">
+      <span class="crit-icon">⚡</span>
+      <span class="crit-name">04. Utility Grid</span>
+      <div class="crit-title">Power &amp; Potable Water</div>
+      <div class="crit-desc">Existing utility lines and primary health access.</div>
+      <div class="weight-slider-row">
+        <input type="range" id="wUtil" min="5" max="30" value="15" oninput="onWeightChange()" />
+        <span class="weight-val" id="dispWUtil">15%</span>
+      </div>
+    </div>
+
+    <div class="crit-card">
+      <span class="crit-icon">📜</span>
+      <span class="crit-name">05. Land Revenue</span>
+      <div class="crit-title">Govt Khasra Title</div>
+      <div class="crit-desc">100% unencumbered state revenue reserve.</div>
+      <div class="weight-slider-row">
+        <input type="range" id="wLand" min="5" max="30" value="10" oninput="onWeightChange()" />
+        <span class="weight-val" id="dispWLand">10%</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Rehabilitation Candidates (Task 8) -->
+  <div class="candidate-grid">
+    
+    <!-- Candidate A: Primary Recommended -->
+    <div class="candidate-card primary">
+      <div class="cand-head">
+        <div>
+          <span class="cand-badge cb-rec">RECOMMENDED PRIMARY ALLOCATION</span>
+          <h2 style="font-family:var(--font-d); font-size:20px; color:#fff; margin:6px 0 2px;">Candidate A: Dag #118/Govt</h2>
+          <div style="font-size:12px; color:#94a3b8;">Burtuk Flat Sector · East District Revenue Pool</div>
+        </div>
+        <div class="cand-score rec" id="scoreCandA">92 / 100</div>
+      </div>
+
+      <div class="cand-meta">
+        <div class="cand-meta-item">
+          <span>Terrain Slope</span>
+          <strong>8.2° (Gentle Flat)</strong>
+        </div>
+        <div class="cand-meta-item">
+          <span>Geotech Safety (Fs)</span>
+          <strong style="color:#22c55e;">2.65 (High Stability)</strong>
+        </div>
+        <div class="cand-meta-item">
+          <span>Hospital Access</span>
+          <strong>1.8 km (Burtuk Hospital)</strong>
+        </div>
+        <div class="cand-meta-item">
+          <span>Capacity</span>
+          <strong>34 Parcels (240 Citizens)</strong>
+        </div>
+      </div>
+
+      <button class="btn-alloc primary" onclick="approveLandTransfer('A')">
+        <span>🏛️</span> [APPROVE LAND TRANSFER &amp; RELOCATION]
+      </button>
+    </div>
+
+    <!-- Candidate B: Contingency Reserve -->
+    <div class="candidate-card">
+      <div class="cand-head">
+        <div>
+          <span class="cand-badge cb-sec">CONTINGENCY SECONDARY</span>
+          <h2 style="font-family:var(--font-d); font-size:20px; color:#fff; margin:6px 0 2px;">Candidate B: Dag #204/Govt</h2>
+          <div style="font-size:12px; color:#94a3b8;">Tadong Upper Ridge · Government Reserve</div>
+        </div>
+        <div class="cand-score sec" id="scoreCandB">74 / 100</div>
+      </div>
+
+      <div class="cand-meta">
+        <div class="cand-meta-item">
+          <span>Terrain Slope</span>
+          <strong>18.4° (Moderate Terrace)</strong>
+        </div>
+        <div class="cand-meta-item">
+          <span>Geotech Safety (Fs)</span>
+          <strong style="color:#f59e0b;">1.48 (Watch Stability)</strong>
+        </div>
+        <div class="cand-meta-item">
+          <span>Hospital Access</span>
+          <strong>4.2 km (Tadong Clinic)</strong>
+        </div>
+        <div class="cand-meta-item">
+          <span>Capacity</span>
+          <strong>18 Parcels (120 Citizens)</strong>
+        </div>
+      </div>
+
+      <button class="btn-alloc secondary" onclick="holdAsContingency('B')">
+        <span>📋</span> [HOLD AS RESERVE CONTINGENCY]
+      </button>
+    </div>
+
+  </div>
+
+</div>
+
+<script src="region-config.js"></script>
+<script src="assets/demo/demo-data.js"></script>
+<script src="api-client.js"></script>
+<script src="auth.js"></script>
+<script src="nav.js"></script>
+
+<script>
+function onWeightChange() {
+  const wSlope = parseFloat(document.getElementById('wSlope').value);
+  const wFlood = parseFloat(document.getElementById('wFlood').value);
+  const wRoad = parseFloat(document.getElementById('wRoad').value);
+  const wUtil = parseFloat(document.getElementById('wUtil').value);
+  const wLand = parseFloat(document.getElementById('wLand').value);
+
+  document.getElementById('dispWSlope').textContent = `${wSlope}%`;
+  document.getElementById('dispWFlood').textContent = `${wFlood}%`;
+  document.getElementById('dispWRoad').textContent = `${wRoad}%`;
+  document.getElementById('dispWUtil').textContent = `${wUtil}%`;
+  document.getElementById('dispWLand').textContent = `${wLand}%`;
+
+  const total = wSlope + wFlood + wRoad + wUtil + wLand;
+  
+  // Calculate dynamic candidate scores
+  const scoreA = Math.round(((wSlope * 0.95) + (wFlood * 0.92) + (wRoad * 0.90) + (wUtil * 0.88) + (wLand * 1.0)) / total * 100);
+  const scoreB = Math.round(((wSlope * 0.72) + (wFlood * 0.78) + (wRoad * 0.75) + (wUtil * 0.70) + (wLand * 0.90)) / total * 100);
+
+  document.getElementById('scoreCandA').textContent = `${scoreA} / 100`;
+  document.getElementById('scoreCandB').textContent = `${scoreB} / 100`;
+}
+
+function approveLandTransfer(candidate) {
+  if (window.GEO_API) {
+    window.GEO_API.showToast(`🏛️ Candidate ${candidate} Approved! Tenure deed transfer queued for 24 displaced residents.`);
+  }
+}
+
+function holdAsContingency(candidate) {
+  if (window.GEO_API) {
+    window.GEO_API.showToast(`📋 Candidate ${candidate} registered as secondary reserve pool.`);
+  }
+}
+</script>
+</body>
+</html>

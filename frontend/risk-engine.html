@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>GeoShield 🇮🇳 — Dynamic Risk Engine</title>
+<meta name="description" content="Khasra-level landslide risk intelligence combining XGBoost static susceptibility with LSTM temporal escalation." />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="nav.css">
+<style>
+:root {
+  --bg-0:#000; --bg-1:#09090b; --bg-2:#111113;
+  --gold:#d4af37; --gold-soft:rgba(212,175,55,.18); --gold-glow:rgba(212,175,55,.06);
+  --teal:#2563eb; --green:#22c55e; --orange:#f97316; --red:#ef4444; --purple:#a855f7;
+  --ink-0:#fff; --ink-1:#a1a1aa; --ink-2:#52525b;
+  --line:#27272a; --card:rgba(9,9,11,.92);
+  --font-d:'Space Grotesk',sans-serif; --font-b:'Inter',sans-serif; --font-m:'JetBrains Mono',monospace;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg-0);color:var(--ink-0);font-family:var(--font-b);overflow-x:hidden;-webkit-font-smoothing:antialiased}
+::selection{background:var(--gold-soft);color:var(--bg-0)}
+
+.stars{position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:
+    radial-gradient(1px 1px at 8% 14%,#fff2 0,transparent 70%),
+    radial-gradient(1px 1px at 80% 9%,#fff1 0,transparent 70%),
+    radial-gradient(1.5px 1.5px at 57% 31%,#fff1 0,transparent 70%),
+    radial-gradient(1px 1px at 24% 64%,#fff1 0,transparent 70%),
+    radial-gradient(1px 1px at 93% 70%,#fff2 0,transparent 70%),
+    radial-gradient(1px 1px at 67% 91%,#fff1 0,transparent 70%)}
+
+nav{position:fixed;top:0;left:0;right:0;z-index:100;height:60px;display:flex;align-items:center;justify-content:space-between;padding:0 32px;background:rgba(0,0,0,.75);backdrop-filter:blur(16px);border-bottom:1px solid var(--line)}
+.nav-brand{font-family:var(--font-m);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-1)}
+.nav-brand b{color:var(--gold);font-weight:500}
+.nav-pill{font-family:var(--font-m);font-size:10px;letter-spacing:.12em;text-transform:uppercase;padding:5px 12px;border:1px solid rgba(212,175,55,.3);border-radius:100px;color:var(--gold);background:var(--gold-glow)}
+.nav-back{display:flex;align-items:center;gap:8px;font-family:var(--font-m);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-1);text-decoration:none;transition:color .2s}
+.nav-back:hover{color:var(--gold)}
+.nav-back svg{width:14px;height:14px}
+
+/* Hero */
+.hero{position:relative;z-index:1;padding-top:60px;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:92vh;text-align:center;padding-bottom:0}
+.module-tag{font-family:var(--font-m);font-size:10.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);margin-bottom:18px;display:flex;align-items:center;gap:10px}
+.module-tag::before,.module-tag::after{content:'';display:block;height:1px;width:36px}
+.module-tag::before{background:linear-gradient(90deg,transparent,var(--gold))}
+.module-tag::after{background:linear-gradient(90deg,var(--gold),transparent)}
+.hero h1{font-family:var(--font-d);font-weight:700;font-size:clamp(32px,5vw,62px);letter-spacing:-.03em;line-height:1.1;margin-bottom:16px}
+.hero h1 span{color:var(--gold)}
+.hero-sub{max-width:52ch;color:var(--ink-1);font-size:15px;line-height:1.65;margin-bottom:48px}
+
+/* Risk Dial */
+.dial-wrap{position:relative;width:240px;height:140px;margin:0 auto 20px}
+#riskDial{width:100%;height:100%}
+.dial-value{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);text-align:center}
+.dial-value .dv-num{font-family:var(--font-d);font-size:36px;font-weight:700;color:var(--ink-0);line-height:1}
+.dial-value .dv-label{font-family:var(--font-m);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-1)}
+
+.risk-badge{display:inline-flex;align-items:center;gap:8px;padding:8px 20px;border-radius:100px;font-family:var(--font-m);font-size:11px;letter-spacing:.14em;text-transform:uppercase;font-weight:600;margin-bottom:24px}
+.risk-badge.high{background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.4);color:#ef4444}
+.risk-badge .blink{width:7px;height:7px;border-radius:50%;background:currentColor;animation:blink 1.2s ease-in-out infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+
+/* Content sections */
+.content{position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:0 24px 80px}
+.section-label{font-family:var(--font-m);font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);margin-bottom:8px}
+.section-title{font-family:var(--font-d);font-size:clamp(20px,2.8vw,30px);font-weight:600;margin-bottom:36px;color:var(--ink-0)}
+.section-sep{height:1px;background:var(--line);margin:64px 0}
+
+/* Feature Vector */
+.fv-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+@media(max-width:640px){.fv-grid{grid-template-columns:1fr}}
+.fv-json{background:var(--bg-2);border:1px solid var(--line);border-radius:12px;padding:24px;font-family:var(--font-m);font-size:12.5px;line-height:1.9;overflow-x:auto}
+.fv-json .key{color:#60a5fa}
+.fv-json .val{color:#86efac}
+.fv-json .unit{color:var(--ink-2)}
+.fv-bars{display:flex;flex-direction:column;gap:14px;background:var(--bg-2);border:1px solid var(--line);border-radius:12px;padding:24px}
+.fv-bar-row{}
+.fv-bar-meta{display:flex;justify-content:space-between;font-family:var(--font-m);font-size:10.5px;margin-bottom:6px}
+.fv-bar-meta .k{color:var(--ink-1)}
+.fv-bar-meta .v{color:var(--gold)}
+.fv-bar-track{height:4px;background:var(--line);border-radius:4px;overflow:hidden}
+.fv-bar-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,#2563eb,#d4af37);animation:bFill 1.2s ease forwards}
+@keyframes bFill{from{width:0}}
+
+/* AI Model Cards */
+.model-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px}
+.model-card{background:var(--bg-2);border:1px solid var(--line);border-radius:12px;padding:28px;position:relative;overflow:hidden;transition:border-color .3s,box-shadow .3s}
+.model-card::after{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.model-card.mc-xgb::after{background:linear-gradient(90deg,#f97316,#eab308)}
+.model-card.mc-lstm::after{background:linear-gradient(90deg,#a855f7,#2563eb)}
+.model-card.mc-fuse::after{background:linear-gradient(90deg,#d4af37,#22c55e)}
+.model-card:hover{border-color:rgba(212,175,55,.3);box-shadow:0 0 32px -8px var(--gold-soft)}
+.mc-tag{font-family:var(--font-m);font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;margin-bottom:12px;display:block}
+.mc-xgb .mc-tag{color:#f97316} .mc-lstm .mc-tag{color:#a855f7} .mc-fuse .mc-tag{color:var(--gold)}
+.model-card h3{font-family:var(--font-d);font-size:18px;font-weight:600;margin-bottom:10px}
+.model-card p{font-size:12.5px;line-height:1.65;color:var(--ink-1);margin-bottom:20px}
+.mc-output{background:var(--bg-1);border:1px solid var(--line);border-radius:8px;padding:14px}
+.mc-output-label{font-family:var(--font-m);font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-2);margin-bottom:8px;display:block}
+.mc-output-val{font-family:var(--font-d);font-size:22px;font-weight:700}
+.mc-xgb .mc-output-val{color:#f97316} .mc-lstm .mc-output-val{color:#a855f7} .mc-fuse .mc-output-val{color:var(--green)}
+
+/* Alert Thresholds */
+.alert-table{width:100%;border-collapse:collapse}
+.alert-table th{font-family:var(--font-m);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-2);text-align:left;padding:0 0 12px;border-bottom:1px solid var(--line)}
+.alert-table td{padding:14px 0;border-bottom:1px solid var(--line);font-size:13px;vertical-align:middle}
+.alert-table tr:last-child td{border-bottom:none}
+.alert-table td:first-child{font-family:var(--font-m);font-size:10.5px;letter-spacing:.08em}
+.at-pill{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:100px;font-family:var(--font-m);font-size:10px;letter-spacing:.1em;font-weight:600}
+.at-watch{background:rgba(212,175,55,.12);color:var(--gold);border:1px solid rgba(212,175,55,.3)}
+.at-warn{background:rgba(249,115,22,.12);color:#f97316;border:1px solid rgba(249,115,22,.3)}
+.at-alert{background:rgba(239,68,68,.12);color:#ef4444;border:1px solid rgba(239,68,68,.3)}
+.at-critical{background:rgba(239,68,68,.25);color:#fca5a5;border:1px solid rgba(239,68,68,.5)}
+
+/* Timeline */
+.timeline{display:flex;flex-direction:column;gap:0}
+.tl-item{display:flex;gap:20px;padding:20px 0;border-bottom:1px solid var(--line)}
+.tl-item:last-child{border-bottom:none}
+.tl-left{display:flex;flex-direction:column;align-items:center;width:40px;flex-shrink:0}
+.tl-dot{width:12px;height:12px;border-radius:50%;background:var(--gold);box-shadow:0 0 8px var(--gold-soft);flex-shrink:0;margin-top:3px}
+.tl-line{width:1px;flex:1;background:var(--line);margin-top:6px}
+.tl-item:last-child .tl-line{display:none}
+.tl-time{font-family:var(--font-m);font-size:10px;color:var(--gold);letter-spacing:.1em;margin-bottom:4px;display:block}
+.tl-title{font-family:var(--font-d);font-size:14px;font-weight:600;margin-bottom:4px}
+.tl-desc{font-size:12px;color:var(--ink-1);line-height:1.5}
+
+footer{position:relative;z-index:1;padding:32px;border-top:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+.f-left{font-family:var(--font-m);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-2)}
+.f-left b{color:var(--gold);font-weight:500}
+.next-module{display:flex;align-items:center;gap:8px;font-family:var(--font-m);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-1);text-decoration:none;padding:10px 18px;border:1px solid var(--line);border-radius:8px;transition:border-color .2s,color .2s}
+.next-module:hover{border-color:var(--gold);color:var(--gold)}
+.next-module svg{width:13px;height:13px}
+.fade-up{opacity:0;transform:translateY(20px);transition:opacity .6s ease,transform .6s ease}
+.fade-up.is-visible{opacity:1;transform:translateY(0)}
+</style>
+</head>
+<body>
+<div class="stars"></div>
+<canvas id="particleCanvas"></canvas>
+<div id="gnavMount"></div>
+
+<section class="hero" style="padding:60px 24px 40px">
+  <div class="module-tag">Dynamic Risk Engine</div>
+  <h1>Khasra-Level <span>Risk Intelligence</span></h1>
+  <p class="hero-sub">Fuses XGBoost static susceptibility with LSTM temporal escalation to produce continuously updated, parcel-level landslide risk scores across the North Eastern pilot region.</p>
+  <div class="risk-badge high"><span class="blink"></span> LIVE · Current Risk: HIGH</div>
+  <div class="dial-wrap">
+    <canvas id="riskDial"></canvas>
+    <div class="dial-value">
+      <div class="dv-num anim-counter" id="dialNum" data-target="74">0</div>
+      <div class="dv-label">Risk Score / 100</div>
+    </div>
+  </div>
+</section>
+
+<div class="content">
+
+  <!-- Feature Vector -->
+  <div class="fade-up">
+    <div class="section-label">Geospatial Intelligence</div>
+    <div class="section-title">Active Feature Vector — Khasra #GK-4821</div>
+    <div class="fv-grid">
+      <div class="fv-json">
+        <div><span class="key">"slope_deg"</span>: <span class="val">34.2</span><span class="unit">,  // ° from DEM</span></div>
+        <div><span class="key">"elevation_m"</span>: <span class="val">1420</span><span class="unit">,</span></div>
+        <div><span class="key">"aspect_deg"</span>: <span class="val">210</span><span class="unit">,  // SW-facing</span></div>
+        <div><span class="key">"terrain_wetness"</span>: <span class="val">9.8</span><span class="unit">,</span></div>
+        <div><span class="key">"rainfall_1h"</span>: <span class="val">28</span><span class="unit">,   // mm/hr</span></div>
+        <div><span class="key">"rainfall_24h"</span>: <span class="val">142</span><span class="unit">,</span></div>
+        <div><span class="key">"rainfall_72h"</span>: <span class="val">315</span><span class="unit">,</span></div>
+        <div><span class="key">"soil_moisture_pct"</span>: <span class="val">78</span><span class="unit">,</span></div>
+        <div><span class="key">"vegetation_index"</span>: <span class="val">0.42</span><span class="unit">,</span></div>
+        <div><span class="key">"hist_landslide_density"</span>: <span class="val">0.71</span></div>
+      </div>
+      <div class="fv-bars">
+        <div class="fv-bar-row"><div class="fv-bar-meta"><span class="k">Slope</span><span class="v">34.2°</span></div><div class="fv-bar-track"><div class="fv-bar-fill" style="width:52%"></div></div></div>
+        <div class="fv-bar-row"><div class="fv-bar-meta"><span class="k">Terrain Wetness</span><span class="v">9.8 / 15</span></div><div class="fv-bar-track"><div class="fv-bar-fill" style="width:65%;animation-delay:.1s"></div></div></div>
+        <div class="fv-bar-row"><div class="fv-bar-meta"><span class="k">Rainfall 1-hr</span><span class="v">28 mm/hr</span></div><div class="fv-bar-track"><div class="fv-bar-fill" style="width:35%;animation-delay:.2s"></div></div></div>
+        <div class="fv-bar-row"><div class="fv-bar-meta"><span class="k">Rainfall 24-hr</span><span class="v">142 mm</span></div><div class="fv-bar-track"><div class="fv-bar-fill" style="width:58%;animation-delay:.3s"></div></div></div>
+        <div class="fv-bar-row"><div class="fv-bar-meta"><span class="k">Rainfall 72-hr</span><span class="v">315 mm</span></div><div class="fv-bar-track"><div class="fv-bar-fill" style="width:78%;animation-delay:.4s"></div></div></div>
+        <div class="fv-bar-row"><div class="fv-bar-meta"><span class="k">Soil Moisture</span><span class="v">78%</span></div><div class="fv-bar-track"><div class="fv-bar-fill" style="width:78%;animation-delay:.5s"></div></div></div>
+        <div class="fv-bar-row"><div class="fv-bar-meta"><span class="k">Historical Landslide Density</span><span class="v">0.71</span></div><div class="fv-bar-track"><div class="fv-bar-fill" style="width:71%;animation-delay:.6s"></div></div></div>
+        <div class="fv-bar-row"><div class="fv-bar-meta"><span class="k">Vegetation Index</span><span class="v">0.42 (NDVI)</span></div><div class="fv-bar-track"><div class="fv-bar-fill" style="width:42%;animation-delay:.7s"></div></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-sep"></div>
+
+  <!-- AI Models -->
+  <div class="fade-up">
+    <div class="section-label">Hybrid AI Architecture</div>
+    <div class="section-title">Three-Layer Model Stack</div>
+    <div class="model-grid stagger-parent">
+      <div class="model-card mc-xgb tilt-card">
+        <span class="mc-tag">Model 01 · Static Intelligence</span>
+        <h3>XGBoost Susceptibility</h3>
+        <p>Gradient-boosted ensemble trained on terrain, geology, historical landslide inventory and anthropogenic factors. Produces a static susceptibility score per Khasra cell.</p>
+        <div class="mc-output">
+          <span class="mc-output-label">Static Risk Score</span>
+          <div class="mc-output-val">68 / 100</div>
+        </div>
+      </div>
+      <div class="model-card mc-lstm tilt-card">
+        <span class="mc-tag">Model 02 · Temporal Intelligence</span>
+        <h3>LSTM Escalation Engine</h3>
+        <p>Processes 72-hour sequences of rainfall, soil moisture and InSAR ground deformation readings to detect rapid risk escalation patterns missed by static models.</p>
+        <div class="mc-output">
+          <span class="mc-output-label">Temporal Escalation Δ</span>
+          <div class="mc-output-val">+18 pts · ↑ Rising</div>
+        </div>
+      </div>
+      <div class="model-card mc-fuse tilt-card">
+        <span class="mc-tag">Model 03 · Fusion Output</span>
+        <h3>Geo-Evidence Fusion</h3>
+        <p>Bayesian fusion of XGBoost static score, LSTM delta, and validated field/citizen evidence. Outputs final risk + confidence + natural-language explanation per Khasra.</p>
+        <div class="mc-output">
+          <span class="mc-output-label">Final Fused Risk Score</span>
+          <div class="mc-output-val">74 · HIGH · 87% conf.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-sep"></div>
+
+  <!-- Alert Thresholds -->
+  <div class="fade-up">
+    <div class="section-label">Response Protocol</div>
+    <div class="section-title">Alert Level Thresholds</div>
+    <table class="alert-table">
+      <thead><tr><th>Score Range</th><th>Level</th><th>Action Required</th><th>Notification Channel</th></tr></thead>
+      <tbody>
+        <tr><td>0 – 35</td><td><span class="at-pill at-watch">🟢 Watch</span></td><td style="color:var(--ink-1)">Routine monitoring. No immediate action.</td><td style="color:var(--ink-1);font-size:12px">Dashboard log only</td></tr>
+        <tr><td>36 – 55</td><td><span class="at-pill at-warn">🟡 Warning</span></td><td style="color:var(--ink-1)">District DDMA notified. Field team alerted.</td><td style="color:var(--ink-1);font-size:12px">SMS + App push</td></tr>
+        <tr><td>56 – 75</td><td><span class="at-pill at-alert">🟠 Alert</span></td><td style="color:var(--ink-1)">Evacuation advisory issued. Lifeline routes checked.</td><td style="color:var(--ink-1);font-size:12px">Bhashini voice + SMS</td></tr>
+        <tr><td>76 – 100</td><td><span class="at-pill at-critical">🔴 Critical</span></td><td style="color:var(--ink-1)">Mandatory evacuation. NDRF coordination. Road block.</td><td style="color:var(--ink-1);font-size:12px">All channels + siren</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section-sep"></div>
+
+  <!-- Timeline -->
+  <div class="fade-up">
+    <div class="section-label">Recent Activity</div>
+    <div class="section-title">Risk Escalation Timeline — Last 12 hrs</div>
+    <div class="timeline">
+      <div class="tl-item"><div class="tl-left"><div class="tl-dot"></div><div class="tl-line"></div></div><div><span class="tl-time">22:14 IST · Risk: 74</span><div class="tl-title">ALERT issued — Khasra #GK-4821</div><div class="tl-desc">Fused score crossed 56 threshold. DDMA Gangtok notified via SMS. Field sentinel tasked.</div></div></div>
+      <div class="tl-item"><div class="tl-left"><div class="tl-dot" style="background:var(--orange)"></div><div class="tl-line"></div></div><div><span class="tl-time" style="color:var(--orange)">19:40 IST · Risk: 58</span><div class="tl-title">LSTM escalation spike detected</div><div class="tl-desc">72-hr antecedent rainfall crossed 300 mm. LSTM delta jumped +14 pts in 3 hours.</div></div></div>
+      <div class="tl-item"><div class="tl-left"><div class="tl-dot" style="background:var(--teal)"></div><div class="tl-line"></div></div><div><span class="tl-time" style="color:var(--teal)">14:05 IST · Risk: 44</span><div class="tl-title">Field sentinel report received</div><div class="tl-desc">Citizen reported hairline cracks on NH-10 shoulder. MobileNetV3 scored crack image: 0.82 confidence. Bayesian weight updated.</div></div></div>
+      <div class="tl-item"><div class="tl-left"><div class="tl-dot" style="background:var(--ink-2)"></div></div><div><span class="tl-time" style="color:var(--ink-2)">10:00 IST · Risk: 31</span><div class="tl-title">Routine XGBoost refresh</div><div class="tl-desc">Daily feature vector refresh from Open-Meteo and Sentinel-2 NDVI pass. Static score: 31 (Watch).</div></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     INTERACTIVE LAND PARCEL RISK & RAINFALL SIMULATION (POINTS 3,4,5)
+     ============================================================ -->
+<div class="section-sep"></div>
+
+<div class="section-label">DEMONSTRATION WORKFLOW — LAND SELECTION & RISK SIMULATOR</div>
+<h2 class="section-title">Rainfall Stress Test & Khasra Inspector</h2>
+
+<div class="fv-grid" style="margin-bottom:30px;">
+  <!-- Rainfall Control Slider Panel -->
+  <div style="background:var(--bg-2); border:1px solid var(--line); border-radius:12px; padding:24px;">
+    <div style="font-family:var(--font-m); font-size:11px; color:var(--gold); letter-spacing:.15em; text-transform:uppercase; margin-bottom:8px;">🌧️ Dynamic Hydrological Stresser</div>
+    <h3 style="font-family:var(--font-d); font-size:18px; color:#fff; margin-bottom:12px;">Simulated Rainfall Rate</h3>
+    <p style="font-size:13px; color:var(--ink-1); margin-bottom:20px;">Adjust simulated precipitation intensity to trigger real-time physical slope equilibrium calculations (Factor of Safety - FoS):</p>
+    
+    <div style="display:flex; justify-content:space-between; font-family:var(--font-m); font-size:12px; margin-bottom:8px;">
+      <span>Intensity Level</span>
+      <span id="rainValDisplay" style="color:var(--gold); font-weight:700; font-size:14px;">30 mm/hr (Moderate)</span>
+    </div>
+    
+    <input type="range" id="rainSlider" min="30" max="95" step="5" value="30" style="width:100%; accent-color:var(--gold); cursor:pointer;" oninput="updateRainfallStress(this.value)">
+
+    <div style="display:flex; justify-content:space-between; font-size:11px; color:var(--ink-2); font-family:var(--font-m); margin-top:6px;">
+      <span>30 mm/hr (Watch)</span>
+      <span>60 mm/hr (Warning)</span>
+      <span style="color:#ef4444; font-weight:700;">95 mm/hr (Torrential)</span>
+    </div>
+
+    <div style="margin-top:24px; padding:12px; background:rgba(0,0,0,0.6); border:1px solid rgba(255,255,255,0.06); border-radius:8px;">
+      <div style="font-size:11px; font-family:var(--font-m); color:var(--ink-1);">Saturated Hydraulic Conductivity:</div>
+      <div style="font-size:13px; color:#e4e4e7; font-weight:600; margin-top:2px;" id="hydroStatus">Pore Pressure Normal (Ksat = 4.2e-5 m/s)</div>
+    </div>
+  </div>
+
+  <!-- Interactive Khasra Map Grid -->
+  <div style="background:var(--bg-2); border:1px solid var(--line); border-radius:12px; padding:24px;">
+    <div style="font-family:var(--font-m); font-size:11px; color:var(--gold); letter-spacing:.15em; text-transform:uppercase; margin-bottom:8px;">🗺️ Gangtok Pilot Cadastral Sector</div>
+    <h3 style="font-family:var(--font-d); font-size:18px; color:#fff; margin-bottom:12px;">Select Khasra Parcel to Inspect</h3>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:16px;" id="khasraGrid">
+      <div class="khasra-card" id="kc-104A" onclick="inspectKhasra('104A')" style="background:rgba(34,197,94,0.1); border:1px solid rgba(34,197,94,0.4); padding:14px; border-radius:8px; cursor:pointer; transition:all .2s;">
+        <div style="display:flex; justify-content:space-between; font-family:var(--font-m); font-size:12px;">
+          <strong>Khasra #104/A</strong>
+          <span class="status-tag" style="color:#22c55e;">STABLE</span>
+        </div>
+        <div style="font-size:11px; color:var(--ink-1); margin-top:4px;">Slope: 38° | FoS: <span class="fos-val">1.42</span></div>
+      </div>
+
+      <div class="khasra-card" id="kc-104B" onclick="inspectKhasra('104B')" style="background:rgba(34,197,94,0.1); border:1px solid rgba(34,197,94,0.4); padding:14px; border-radius:8px; cursor:pointer; transition:all .2s;">
+        <div style="display:flex; justify-content:space-between; font-family:var(--font-m); font-size:12px;">
+          <strong>Khasra #104/B</strong>
+          <span class="status-tag" style="color:#22c55e;">STABLE</span>
+        </div>
+        <div style="font-size:11px; color:var(--ink-1); margin-top:4px;">Slope: 42° | FoS: <span class="fos-val">1.38</span></div>
+      </div>
+
+      <div class="khasra-card" id="kc-104C" onclick="inspectKhasra('104C')" style="background:rgba(34,197,94,0.1); border:1px solid rgba(34,197,94,0.4); padding:14px; border-radius:8px; cursor:pointer; transition:all .2s;">
+        <div style="display:flex; justify-content:space-between; font-family:var(--font-m); font-size:12px;">
+          <strong>Khasra #104/C</strong>
+          <span class="status-tag" style="color:#22c55e;">STABLE</span>
+        </div>
+        <div style="font-size:11px; color:var(--ink-1); margin-top:4px;">Slope: 24° | FoS: <span class="fos-val">1.85</span></div>
+      </div>
+
+      <div class="khasra-card" id="kc-104D" onclick="inspectKhasra('104D')" style="background:rgba(34,197,94,0.1); border:1px solid rgba(34,197,94,0.4); padding:14px; border-radius:8px; cursor:pointer; transition:all .2s;">
+        <div style="display:flex; justify-content:space-between; font-family:var(--font-m); font-size:12px;">
+          <strong>Khasra #104/D</strong>
+          <span class="status-tag" style="color:#22c55e;">STABLE</span>
+        </div>
+        <div style="font-size:11px; color:var(--ink-1); margin-top:4px;">Slope: 19° | FoS: <span class="fos-val">2.10</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Detailed Khasra Inspector Panel -->
+<div style="background:var(--bg-2); border:1px solid var(--line); border-radius:12px; padding:28px; margin-bottom:40px;" id="inspectorPanel">
+  <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px; margin-bottom:20px; border-bottom:1px solid var(--line); padding-bottom:16px;">
+    <div>
+      <span style="font-family:var(--font-m); font-size:10px; color:var(--gold); letter-spacing:.18em; text-transform:uppercase;">INSPECTOR PANEL</span>
+      <h3 style="font-family:var(--font-d); font-size:22px; color:#fff; margin-top:2px;" id="inspTitle">Selected: Khasra #104/A (Upper Gangtok Ridge)</h3>
+    </div>
+    <div id="inspBadge" style="background:rgba(34,197,94,0.15); border:1px solid rgba(34,197,94,0.4); color:#22c55e; padding:6px 14px; border-radius:100px; font-family:var(--font-m); font-size:11px; font-weight:700;">
+      STATUS: SAFE (FoS 1.42)
+    </div>
+  </div>
+
+  <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:16px; margin-bottom:24px;">
+    <div style="background:rgba(0,0,0,0.5); padding:14px; border-radius:8px; border:1px solid rgba(255,255,255,0.06);">
+      <div style="font-size:11px; color:var(--ink-1); font-family:var(--font-m);">Factor of Safety (FoS)</div>
+      <div style="font-size:24px; font-weight:700; color:#fff; margin-top:4px;" id="inspFos">1.42</div>
+      <div style="font-size:11px; color:var(--ink-2); margin-top:2px;">Limit-Equilibrium Standard</div>
+    </div>
+
+    <div style="background:rgba(0,0,0,0.5); padding:14px; border-radius:8px; border:1px solid rgba(255,255,255,0.06);">
+      <div style="font-size:11px; color:var(--ink-1); font-family:var(--font-m);">Soil Moisture Content</div>
+      <div style="font-size:24px; font-weight:700; color:#60a5fa; margin-top:4px;" id="inspSoil">32%</div>
+      <div style="font-size:11px; color:var(--ink-2); margin-top:2px;">Volumetric Water Content</div>
+    </div>
+
+    <div style="background:rgba(0,0,0,0.5); padding:14px; border-radius:8px; border:1px solid rgba(255,255,255,0.06);">
+      <div style="font-size:11px; color:var(--ink-1); font-family:var(--font-m);">InSAR Line-of-Sight Displacement</div>
+      <div style="font-size:24px; font-weight:700; color:#f97316; margin-top:4px;" id="inspInsar">-4.2 mm/yr</div>
+      <div style="font-size:11px; color:var(--ink-2); margin-top:2px;">Sentinel-1 Interferometry</div>
+    </div>
+
+    <div style="background:rgba(0,0,0,0.5); padding:14px; border-radius:8px; border:1px solid rgba(255,255,255,0.06);">
+      <div style="font-size:11px; color:var(--ink-1); font-family:var(--font-m);">Registered Residents</div>
+      <div style="font-size:24px; font-weight:700; color:var(--gold); margin-top:4px;" id="inspResidents">9 Persons</div>
+      <div style="font-size:11px; color:var(--ink-2); margin-top:2px;">State Disaster Registry</div>
+    </div>
+  </div>
+
+  <div style="background:rgba(212,175,55,0.06); border:1px solid rgba(212,175,55,0.2); border-radius:8px; padding:16px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:14px;">
+    <div>
+      <div style="font-family:var(--font-m); font-size:11px; color:var(--gold);">📱 Field Sentinel AI Crack Verification Attached</div>
+      <div style="font-size:13px; color:#e4e4e7; margin-top:2px;">Report #CRK-882: Hairline tensile crack detected near highway shoulder (MobileNetV3 Score: 0.88)</div>
+    </div>
+    <button class="gnav-cta" onclick="triggerCascadeFlow()" style="background:linear-gradient(135deg,#ef4444,#dc2626); color:#fff; border:none; cursor:pointer; padding:10px 18px; border-radius:8px; font-weight:700; display:flex; align-items:center; gap:8px;">
+      <span>🌊</span>
+      <span>TRIGGER CASCADE SIMULATION</span>
+    </button>
+  </div>
+</div>
+
+<footer>
+  <div class="f-left">GeoResilience-<b>360</b> · Module 02 of 05</div>
+  <a href="cascading-simulator.html" class="next-module">
+    Next: Cascading Simulator
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+  </a>
+</footer>
+
+<script>
+function updateRainfallStress(rainVal) {
+  const display = document.getElementById('rainValDisplay');
+  const hydro = document.getElementById('hydroStatus');
+  
+  if (rainVal < 50) {
+    display.textContent = `${rainVal} mm/hr (Moderate)`;
+    display.style.color = 'var(--gold)';
+    hydro.textContent = 'Pore Pressure Normal (Ksat = 4.2e-5 m/s)';
+  } else if (rainVal < 80) {
+    display.textContent = `${rainVal} mm/hr (Heavy Rain)`;
+    display.style.color = '#f97316';
+    hydro.textContent = 'Pore Pressure Rising — Soil Shear Strength Reduced';
+  } else {
+    display.textContent = `${rainVal} mm/hr (CRITICAL TORRENTIAL)`;
+    display.style.color = '#ef4444';
+    hydro.textContent = 'CRITICAL PORE PRESSURE SATURATION — Slope Instability Triggered!';
+  }
+
+  // Update Khasra Cards & Factor of Safety
+  const isCritical = rainVal >= 85;
+  const isWarning = rainVal >= 55;
+
+  const cardA = document.getElementById('kc-104A');
+  const cardB = document.getElementById('kc-104B');
+
+  if (isCritical) {
+    cardA.style.background = 'rgba(239,68,68,0.2)';
+    cardA.style.borderColor = '#ef4444';
+    cardA.querySelector('.status-tag').textContent = 'RED ALERT 🔴';
+    cardA.querySelector('.status-tag').style.color = '#ef4444';
+    cardA.querySelector('.fos-val').textContent = '0.84';
+
+    cardB.style.background = 'rgba(239,68,68,0.2)';
+    cardB.style.borderColor = '#ef4444';
+    cardB.querySelector('.status-tag').textContent = 'RED ALERT 🔴';
+    cardB.querySelector('.status-tag').style.color = '#ef4444';
+    cardB.querySelector('.fos-val').textContent = '0.91';
+
+    // Update Dial Target
+    dialTarget = 92;
+  } else if (isWarning) {
+    cardA.style.background = 'rgba(249,115,22,0.15)';
+    cardA.style.borderColor = '#f97316';
+    cardA.querySelector('.status-tag').textContent = 'WARNING 🟡';
+    cardA.querySelector('.status-tag').style.color = '#f97316';
+    cardA.querySelector('.fos-val').textContent = '1.08';
+
+    cardB.style.background = 'rgba(34,197,94,0.1)';
+    cardB.style.borderColor = 'rgba(34,197,94,0.4)';
+    cardB.querySelector('.status-tag').textContent = 'STABLE';
+    cardB.querySelector('.status-tag').style.color = '#22c55e';
+    cardB.querySelector('.fos-val').textContent = '1.25';
+
+    dialTarget = 64;
+  } else {
+    cardA.style.background = 'rgba(34,197,94,0.1)';
+    cardA.style.borderColor = 'rgba(34,197,94,0.4)';
+    cardA.querySelector('.status-tag').textContent = 'STABLE';
+    cardA.querySelector('.status-tag').style.color = '#22c55e';
+    cardA.querySelector('.fos-val').textContent = '1.42';
+
+    cardB.style.background = 'rgba(34,197,94,0.1)';
+    cardB.style.borderColor = 'rgba(34,197,94,0.4)';
+    cardB.querySelector('.status-tag').textContent = 'STABLE';
+    cardB.querySelector('.status-tag').style.color = '#22c55e';
+    cardB.querySelector('.fos-val').textContent = '1.38';
+
+    dialTarget = 42;
+  }
+
+  // Animate dial to new target
+  dialCurrent = 0;
+  animateDial();
+  inspectKhasra('104A');
+}
+
+function inspectKhasra(khasraId) {
+  const rainVal = parseInt(document.getElementById('rainSlider').value);
+  const isCritical = rainVal >= 85;
+
+  const inspTitle = document.getElementById('inspTitle');
+  const inspBadge = document.getElementById('inspBadge');
+  const inspFos = document.getElementById('inspFos');
+  const inspSoil = document.getElementById('inspSoil');
+  const inspInsar = document.getElementById('inspInsar');
+  const inspResidents = document.getElementById('inspResidents');
+
+  if (khasraId === '104A' || khasraId === '104B') {
+    inspTitle.textContent = `Selected: Khasra #${khasraId} (Upper Gangtok Ridge)`;
+    if (isCritical) {
+      inspBadge.textContent = 'STATUS: CRITICAL FAILURE (FoS < 1.0) 🔴';
+      inspBadge.style.background = 'rgba(239,68,68,0.2)';
+      inspBadge.style.borderColor = '#ef4444';
+      inspBadge.style.color = '#ef4444';
+      inspFos.textContent = '0.84';
+      inspFos.style.color = '#ef4444';
+      inspSoil.textContent = '88%';
+      inspInsar.textContent = '-18.4 mm/yr';
+      inspResidents.textContent = khasraId === '104A' ? '5 Persons' : '4 Persons';
+    } else {
+      inspBadge.textContent = 'STATUS: SAFE (FoS 1.42)';
+      inspBadge.style.background = 'rgba(34,197,94,0.15)';
+      inspBadge.style.borderColor = 'rgba(34,197,94,0.4)';
+      inspBadge.style.color = '#22c55e';
+      inspFos.textContent = '1.42';
+      inspFos.style.color = '#fff';
+      inspSoil.textContent = '32%';
+      inspInsar.textContent = '-4.2 mm/yr';
+      inspResidents.textContent = khasraId === '104A' ? '5 Persons' : '4 Persons';
+    }
+  } else {
+    inspTitle.textContent = `Selected: Khasra #${khasraId} (Valley Floor Sector)`;
+    inspBadge.textContent = 'STATUS: SAFE & STABLE';
+    inspBadge.style.background = 'rgba(34,197,94,0.15)';
+    inspBadge.style.borderColor = 'rgba(34,197,94,0.4)';
+    inspBadge.style.color = '#22c55e';
+    inspFos.textContent = khasraId === '104C' ? '1.85' : '2.10';
+    inspFos.style.color = '#fff';
+    inspSoil.textContent = '24%';
+    inspInsar.textContent = '-1.1 mm/yr';
+    inspResidents.textContent = '0 Persons (Agriculture)';
+  }
+}
+
+function triggerCascadeFlow() {
+  if (window.navigateTo) {
+    window.navigateTo('cascading-simulator.html');
+  } else {
+    window.location.href = 'cascading-simulator.html';
+  }
+}
+</script>
+
+<script>
+/* Risk Dial */
+function drawDial(score) {
+  const c = document.getElementById('riskDial');
+  const W = c.offsetWidth, H = c.offsetHeight;
+  c.width = W; c.height = H;
+  const ctx = c.getContext('2d');
+  const cx = W/2, cy = H - 10;
+  const R = Math.min(W, H*1.8) * 0.42;
+
+  const startA = Math.PI, endA = 0;
+  const zones = [
+    { end: 0.35, color: '#22c55e' },
+    { end: 0.55, color: '#eab308' },
+    { end: 0.75, color: '#f97316' },
+    { end: 1.0,  color: '#ef4444' },
+  ];
+
+  let prev = 0;
+  zones.forEach(z => {
+    const s = startA + prev * Math.PI;
+    const e = startA + z.end * Math.PI;
+    ctx.beginPath();
+    ctx.arc(cx, cy, R, s, e);
+    ctx.strokeStyle = z.color;
+    ctx.lineWidth = 12;
+    ctx.lineCap = 'butt';
+    ctx.stroke();
+    prev = z.end;
+  });
+
+  // Needle
+  const angle = Math.PI + (score / 100) * Math.PI;
+  const nx = cx + Math.cos(angle) * (R - 16);
+  const ny = cy + Math.sin(angle) * (R - 16);
+  ctx.beginPath();
+  ctx.moveTo(cx, cy);
+  ctx.lineTo(nx, ny);
+  ctx.strokeStyle = '#fff';
+  ctx.lineWidth = 2;
+  ctx.lineCap = 'round';
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.arc(cx, cy, 7, 0, Math.PI * 2);
+  ctx.fillStyle = '#fff';
+  ctx.fill();
+}
+
+/* Animate dial from 0 to score */
+let dialTarget = 74, dialCurrent = 0;
+function animateDial() {
+  if (dialCurrent < dialTarget) {
+    dialCurrent = Math.min(dialTarget, dialCurrent + 1.5);
+    document.getElementById('dialNum').textContent = Math.round(dialCurrent);
+    drawDial(dialCurrent);
+    requestAnimationFrame(animateDial);
+  }
+}
+
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('is-visible'); });
+}, { threshold: 0.1 });
+document.querySelectorAll('.fade-up').forEach(el => obs.observe(el));
+
+window.addEventListener('load', () => {
+  drawDial(0);
+  setTimeout(animateDial, 400);
+});
+window.addEventListener('resize', () => drawDial(dialCurrent));
+</script>
+<script src="region-config.js"></script>
+<script src="assets/demo/demo-data.js"></script>
+<script src="api-client.js"></script>
+<script src="auth.js"></script>
+<script src="nav.js"></script>
+</body>
+</html>

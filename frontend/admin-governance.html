@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GeoShield 🇮🇳 — District Magistrate Admin &amp; Governance</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="nav.css">
+<style>
+:root {
+  --bg-0: #060b13; --bg-1: #0d1524; --bg-2: #111b30;
+  --gold: #f59e0b; --gold-glow: rgba(245,158,11,0.25);
+  --ink-0: #f8fafc; --ink-1: #94a3b8; --ink-2: #64748b;
+  --line: #1e293b; --red: #ef4444; --green: #22c55e; --teal: #38bdf8;
+  --font-d: 'Space Grotesk', sans-serif; --font-b: 'Inter', sans-serif; --font-m: 'JetBrains Mono', monospace;
+}
+body { margin: 0; background: var(--bg-0); color: var(--ink-0); font-family: var(--font-b); overflow-x: hidden; }
+
+.stars {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background-image: radial-gradient(1px 1px at 10% 15%, #fff2 0, transparent 70%), radial-gradient(1px 1px at 80% 10%, #fff1 0, transparent 70%);
+}
+
+.admin-wrapper {
+  position: relative; z-index: 1; max-width: 1200px; margin: 84px auto 40px; padding: 0 24px;
+}
+
+/* Header Banner */
+.gov-header {
+  background: var(--bg-1); border: 1px solid var(--line); border-radius: 14px;
+  padding: 24px 28px; margin-bottom: 24px; display: flex; justify-content: space-between;
+  align-items: center; flex-wrap: wrap; gap: 20px;
+}
+.gov-title .tag {
+  font-family: var(--font-m); font-size: 10.5px; color: var(--gold);
+  letter-spacing: 1.5px; text-transform: uppercase; font-weight: 700;
+}
+.gov-title h1 { font-family: var(--font-d); font-size: 26px; margin: 6px 0 4px; color: #fff; }
+.gov-title p { color: var(--ink-1); margin: 0; font-size: 13px; }
+
+/* Sector Crisis Status Badges */
+.crisis-status-group { display: flex; gap: 10px; flex-wrap: wrap; }
+.badge-crisis {
+  padding: 6px 12px; border-radius: 6px; font-family: var(--font-m); font-size: 11px; font-weight: 700;
+  display: flex; align-items: center; gap: 6px;
+}
+.bc-red { background: rgba(239,68,68,0.15); border: 1px solid #ef4444; color: #f87171; }
+.bc-gold { background: rgba(245,158,11,0.15); border: 1px solid #f59e0b; color: #f59e0b; }
+
+/* 3 Action Cards (Task 7) */
+.action-cards-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 16px; margin-bottom: 28px;
+}
+.gov-action-card {
+  background: var(--bg-1); border: 1px solid var(--line); border-radius: 12px;
+  padding: 20px; display: flex; flex-direction: column; justify-content: space-between;
+  transition: border-color 0.2s;
+}
+.gov-action-card:hover { border-color: rgba(245,158,11,0.4); }
+.gac-num { font-family: var(--font-m); font-size: 10px; color: var(--teal); font-weight: 700; margin-bottom: 6px; }
+.gov-action-card h3 { font-family: var(--font-d); font-size: 16px; margin-bottom: 6px; color: #fff; }
+.gov-action-card p { font-size: 12px; color: var(--ink-1); line-height: 1.5; margin-bottom: 16px; }
+
+.btn-gov {
+  border: none; border-radius: 6px; padding: 10px 14px; font-family: var(--font-d);
+  font-size: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center;
+  justify-content: center; gap: 8px; transition: all 0.2s;
+}
+.btn-gov-red { background: linear-gradient(135deg, #ef4444, #b91c1c); color: #fff; }
+.btn-gov-gold { background: linear-gradient(135deg, #f59e0b, #d97706); color: #060b13; }
+.btn-gov-teal { background: linear-gradient(135deg, #38bdf8, #0284c7); color: #060b13; }
+
+/* Cadastral Compensation Table (Task 7) */
+.table-card {
+  background: var(--bg-1); border: 1px solid var(--line); border-radius: 14px;
+  padding: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+}
+.table-header-row {
+  display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;
+  flex-wrap: wrap; gap: 12px;
+}
+.table-header-row h2 { font-family: var(--font-d); font-size: 18px; color: #fff; margin: 0; }
+
+.btn-export-csv {
+  background: rgba(34,197,94,0.12); border: 1px solid rgba(34,197,94,0.4);
+  color: #22c55e; font-family: var(--font-m); font-size: 11px; font-weight: 700;
+  padding: 8px 16px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 6px;
+  transition: all 0.2s;
+}
+.btn-export-csv:hover { background: rgba(34,197,94,0.25); }
+
+.compensation-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.compensation-table th {
+  padding: 10px 12px; background: #111b30; color: var(--gold);
+  font-family: var(--font-m); font-size: 10.5px; text-transform: uppercase;
+  border-bottom: 1px solid var(--line); text-align: left;
+}
+.compensation-table td {
+  padding: 12px; border-bottom: 1px solid var(--line); color: #cbd5e1;
+}
+.compensation-table tr:hover td { background: rgba(255,255,255,0.02); }
+</style>
+</head>
+<body>
+<div class="stars"></div>
+<canvas id="particleCanvas"></canvas>
+<div id="gnavMount"></div>
+
+<div class="admin-wrapper">
+
+  <!-- Executive District Magistrate Header (Task 7) -->
+  <div class="gov-header">
+    <div class="gov-title">
+      <span class="tag">GOVT OF INDIA • DISASTER GOVERNANCE CONSOLE</span>
+      <h1>Executive District Magistrate Workspace</h1>
+      <p id="admSubtext">Target Region: Sikkim (East Gangtok Sector) · Legal Jurisdiction: Disaster Management Act 2005</p>
+    </div>
+    <div class="crisis-status-group">
+      <span class="badge-crisis bc-red">🚨 LEVEL-3 RED ALERT</span>
+      <span class="badge-crisis bc-gold">👥 24 CITIZENS EXPOSED</span>
+      <span class="badge-crisis bc-red">⚠️ 2 CRITICAL PLOTS</span>
+    </div>
+  </div>
+
+  <!-- 3 Administrative Action Cards (Task 7) -->
+  <div class="action-cards-grid">
+    
+    <!-- Action 1: Evacuation Order -->
+    <div class="gov-action-card">
+      <div>
+        <span class="gac-num">ACTION 01 · EMERGENCY ORDER</span>
+        <h3>01. Evacuation Order</h3>
+        <p>Dispatches automated localized Bhashini multi-lingual voice broadcast calls to all residents on critical plots.</p>
+      </div>
+      <button class="btn-gov btn-gov-red" onclick="triggerEvacuationOrder()">
+        <span>🚨</span> [AUTHORIZE EVACUATION ORDER]
+      </button>
+    </div>
+
+    <!-- Action 2: Signed DBT Ledger -->
+    <div class="gov-action-card">
+      <div>
+        <span class="gac-num">ACTION 02 · PFMS INTEGRATION</span>
+        <h3>02. Generate Signed DBT Relief</h3>
+        <p>Digitally signs and releases interim disaster ex-gratia compensation via Aadhaar-linked PFMS banking rails.</p>
+      </div>
+      <button class="btn-gov btn-gov-gold" onclick="triggerSignDbt()">
+        <span>🏛️</span> [SIGN &amp; APPROVE DBT RELIEF]
+      </button>
+    </div>
+
+    <!-- Action 3: Slope-Cut Violation Notice -->
+    <div class="gov-action-card">
+      <div>
+        <span class="gac-num">ACTION 03 · STATUTORY ENFORCEMENT</span>
+        <h3>03. Slope-Cut Violation Notice</h3>
+        <p>Issues official municipal stop-work injunctions for unauthorized excavation on &gt;35° slopes under Sec 51 DM Act.</p>
+      </div>
+      <button class="btn-gov btn-gov-teal" onclick="triggerViolationNotice()">
+        <span>⚖️</span> [ISSUE VIOLATION NOTICE]
+      </button>
+    </div>
+
+  </div>
+
+  <!-- Cadastral Compensation Table (Task 7) -->
+  <div class="table-card">
+    <div class="table-header-row">
+      <div>
+        <h2>Verified Cadastral Compensation &amp; DBT Relief Ledger</h2>
+        <span style="font-size:11px; color:#94a3b8;">PostGIS Satellite Damage Scar Overlay × Revenue Department RoR Records</span>
+      </div>
+      <button class="btn-export-csv" onclick="exportSignedNdmaCsv()">
+        <span>📥</span> [EXPORT SIGNED NDMA LEDGER (.CSV)]
+      </button>
+    </div>
+
+    <div style="overflow-x:auto;">
+      <table class="compensation-table">
+        <thead>
+          <tr>
+            <th>Khasra ID</th>
+            <th>Legal Landowner</th>
+            <th>Aadhaar Status</th>
+            <th>Damage %</th>
+            <th>Relief Amount (INR)</th>
+            <th>Disaster Category</th>
+            <th>PFMS Status</th>
+          </tr>
+        </thead>
+        <tbody id="compensationTableBody">
+          <tr>
+            <td><strong style="font-family:var(--font-m); color:#fff;">Dag #104/A</strong></td>
+            <td>Tashi Lepcha</td>
+            <td><span style="color:#22c55e;">VERIFIED (9812-XXXX-7701)</span></td>
+            <td><strong style="color:#ef4444;">85% Scarp Washout</strong></td>
+            <td><strong style="color:var(--gold); font-family:var(--font-m);">₹ 4,50,000</strong></td>
+            <td>Landslide Severance</td>
+            <td><span style="color:#22c55e; font-family:var(--font-m); font-weight:700;">READY_FOR_DISBURSEMENT</span></td>
+          </tr>
+          <tr>
+            <td><strong style="font-family:var(--font-m); color:#fff;">Dag #104/B</strong></td>
+            <td>Pem Bhutia</td>
+            <td><span style="color:#22c55e;">VERIFIED (4409-XXXX-2198)</span></td>
+            <td><strong style="color:#ef4444;">65% Slope Failure</strong></td>
+            <td><strong style="color:var(--gold); font-family:var(--font-m);">₹ 3,20,000</strong></td>
+            <td>Debris Mudflow</td>
+            <td><span style="color:#22c55e; font-family:var(--font-m); font-weight:700;">READY_FOR_DISBURSEMENT</span></td>
+          </tr>
+          <tr>
+            <td><strong style="font-family:var(--font-m); color:#fff;">Dag #108</strong></td>
+            <td>Karma Tsering</td>
+            <td><span style="color:#22c55e;">VERIFIED (7611-XXXX-9023)</span></td>
+            <td><strong style="color:#f59e0b;">35% Terrace Scour</strong></td>
+            <td><strong style="color:var(--gold); font-family:var(--font-m);">₹ 1,50,000</strong></td>
+            <td>Jhora Stream Overflow</td>
+            <td><span style="color:#38bdf8; font-family:var(--font-m);">QUEUED_AUDIT</span></td>
+          </tr>
+          <tr>
+            <td><strong style="font-family:var(--font-m); color:#fff;">Dag #112</strong></td>
+            <td>Sonam Dorjee</td>
+            <td><span style="color:#22c55e;">VERIFIED (3102-XXXX-5541)</span></td>
+            <td><strong style="color:#f59e0b;">20% Road Buffer Encroach</strong></td>
+            <td><strong style="color:var(--gold); font-family:var(--font-m);">₹ 80,000</strong></td>
+            <td>Drainage Surcharge</td>
+            <td><span style="color:#94a3b8; font-family:var(--font-m);">UNDER_REVIEW</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<script src="region-config.js"></script>
+<script src="assets/demo/demo-data.js"></script>
+<script src="api-client.js"></script>
+<script src="auth.js"></script>
+<script src="nav.js"></script>
+
+<script>
+function triggerEvacuationOrder() {
+  const reg = window.getDefaultRegion ? window.getDefaultRegion() : { name: 'Sikkim' };
+  if (window.GEO_AUTH && !window.GEO_AUTH.hasRole('admin')) {
+    window.GEO_AUTH.requireRole('admin', 'Authorize Evacuation Broadcast');
+    return;
+  }
+  
+  if (window.GEO_API) {
+    window.GEO_API.showToast(`🚨 Level-3 Evacuation Order Executed for ${reg.name}! Bhashini calls dispatched.`);
+  }
+}
+
+function triggerSignDbt() {
+  if (window.GEO_AUTH && !window.GEO_AUTH.hasRole('admin')) {
+    window.GEO_AUTH.requireRole('admin', 'Sign PFMS DBT Relief');
+    return;
+  }
+  if (window.GEO_API) {
+    window.GEO_API.showToast('🏛️ ₹ 10,00,000 Interim Relief Digitally Signed via PFMS Rails 🟢');
+  }
+}
+
+function triggerViolationNotice() {
+  if (window.GEO_AUTH && !window.GEO_AUTH.hasRole('admin')) {
+    window.GEO_AUTH.requireRole('admin', 'Issue Municipal Violation Notice');
+    return;
+  }
+  if (window.GEO_API) {
+    window.GEO_API.showToast('⚖️ Municipal Stop-Work Injunction Issued under DM Act Sec 51!');
+  }
+}
+
+function exportSignedNdmaCsv() {
+  const csvContent = 
+`KHASRA_ID,LEGAL_LANDOWNER,AADHAAR_STATUS,DAMAGE_PERCENT,RELIEF_INR,DISASTER_CATEGORY,PFMS_STATUS,DIGITAL_SIGNATURE
+Dag #104/A,Tashi Lepcha,VERIFIED,85%,450000,Landslide Severance,READY_FOR_DISBURSEMENT,SIG-DM-8821-NDMA-2026
+Dag #104/B,Pem Bhutia,VERIFIED,65%,320000,Debris Mudflow,READY_FOR_DISBURSEMENT,SIG-DM-8821-NDMA-2026
+Dag #108,Karma Tsering,VERIFIED,35%,150000,Jhora Stream Overflow,QUEUED_AUDIT,SIG-DM-8821-NDMA-2026
+Dag #112,Sonam Dorjee,VERIFIED,20%,80000,Drainage Surcharge,UNDER_REVIEW,SIG-DM-8821-NDMA-2026`;
+
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.setAttribute('href', url);
+  link.setAttribute('download', 'NDMA_Signed_Cadastral_DBT_Ledger_2026.csv');
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+
+  if (window.GEO_API) {
+    window.GEO_API.showToast('📥 Signed NDMA Ledger CSV Exported Successfully!');
+  }
+}
+</script>
+</body>
+</html>
