@@ -40,6 +40,7 @@ class HazardIntelligence(BaseModel):
     temporal_change: TemporalChangeEnum = Field(default=TemporalChangeEnum.unknown)
     recommended_action: str = Field(default="continue_monitoring")
     model_available: bool = Field(default=True)
+    provenance: str = Field(default="qwen_slm")
 
 def safe_extract_json(text: str) -> dict:
     """
@@ -56,43 +57,79 @@ def safe_extract_json(text: str) -> dict:
             return d
         if "hazard_type" in d and isinstance(d["hazard_type"], str):
             ht = d["hazard_type"].lower().strip()
-            # Order matters: check more specific ones first if they overlap, 
-            # though here we just group them by hazard type.
-            if any(x in ht for x in ["crack", "fracture"]):
+            # Strict mapping to Canonical HazardTypeEnum values
+            if any(x in ht for x in ["crack", "fracture", "slope crack"]):
                 d["hazard_type"] = "slope_crack"
-            elif any(x in ht for x in ["rock", "boulder"]):
+            elif any(x in ht for x in ["debris flow", "mud flow", "debris_flow"]):
+                d["hazard_type"] = "debris_flow"
+            elif any(x in ht for x in ["rock fall", "rockfall", "boulder"]):
                 d["hazard_type"] = "rockfall"
-            elif any(x in ht for x in ["mudslide", "landslide", "slide", "sliding", "soil movement", "earth movement", "moving soil"]):
+            elif any(x in ht for x in ["mudslide", "mud slide", "landslide", "land slide", "slope collapse", "slide", "earth movement"]):
                 d["hazard_type"] = "landslide"
-            elif any(x in ht for x in ["road block", "blocked", "blockage"]):
+            elif any(x in ht for x in ["road block", "road_blocked", "blocked_road", "blocked road", "road_blockage", "blockage"]):
                 d["hazard_type"] = "road_blockage"
             elif any(x in ht for x in ["flood"]):
                 d["hazard_type"] = "flooding"
-            elif any(x in ht for x in ["seep", "wet ground", "leak"]):
+            elif any(x in ht for x in ["erosion"]):
+                d["hazard_type"] = "erosion"
+            elif any(x in ht for x in ["seep", "seepage", "leak"]):
                 d["hazard_type"] = "seepage"
+            else:
+                valid_types = [e.value for e in HazardTypeEnum]
+                if d["hazard_type"] not in valid_types:
+                    d["hazard_type"] = "unknown"
 
         if "severity" in d and isinstance(d["severity"], str):
             sev = d["severity"].lower().strip()
-            if sev in ["moderate", "medium_risk"]:
+            if sev in ["moderate", "medium_risk", "medium"]:
                 d["severity"] = "medium"
-            elif sev in ["extreme", "severe", "catastrophic", "dangerous"]:
+            elif sev in ["extreme", "severe", "catastrophic", "dangerous", "critical"]:
                 d["severity"] = "critical"
-            elif sev in ["elevated", "high_risk"]:
+            elif sev in ["elevated", "high_risk", "high"]:
                 d["severity"] = "high"
+            elif sev in ["low", "minor", "minimal"]:
+                d["severity"] = "low"
+            else:
+                valid_sev = [e.value for e in SeverityEnum]
+                if d["severity"] not in valid_sev:
+                    d["severity"] = "low"
 
         if "urgency" in d and isinstance(d["urgency"], str):
             urg = d["urgency"].lower().strip()
-            if urg in ["urgent", "critical", "high", "asap", "emergency"]:
+            if urg in ["urgent", "critical", "high", "asap", "emergency", "immediate"]:
                 d["urgency"] = "immediate"
-            elif urg in ["investigate", "check"]:
+            elif urg in ["investigate", "check", "inspect"]:
                 d["urgency"] = "inspect"
+            elif urg in ["monitor", "routine", "low"]:
+                d["urgency"] = "monitor"
+            else:
+                valid_urg = [e.value for e in UrgencyEnum]
+                if d["urgency"] not in valid_urg:
+                    d["urgency"] = "monitor"
 
         if "temporal_change" in d and isinstance(d["temporal_change"], str):
             tc = d["temporal_change"].lower().strip()
-            if tc in ["worsening", "escalating", "deteriorating", "increasing"]:
+            if tc in ["worsening", "escalating", "deteriorating", "increasing", "getting worse"]:
                 d["temporal_change"] = "worsening"
-            elif tc in ["improving", "decreasing", "receding"]:
+            elif tc in ["improving", "decreasing", "receding", "better"]:
                 d["temporal_change"] = "improving"
+            elif tc in ["stable", "unchanged", "no change", "steady"]:
+                d["temporal_change"] = "stable"
+            else:
+                valid_tc = [e.value for e in TemporalChangeEnum]
+                if d["temporal_change"] not in valid_tc:
+                    d["temporal_change"] = "unknown"
+                    
+        # Graceful type-casting for floats to prevent validation errors on slight model glitches
+        if "hazard_confidence" in d:
+            try:
+                d["hazard_confidence"] = float(d["hazard_confidence"])
+            except (ValueError, TypeError):
+                d["hazard_confidence"] = 0.5
+                
+        # Graceful handling for observations lists that came as strings
+        if "observations" in d and isinstance(d["observations"], str):
+            d["observations"] = [d["observations"]]
 
         return d
 

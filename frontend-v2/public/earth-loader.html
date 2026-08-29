@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>GeoShield 🇮🇳 — National Disaster Resilience Platform</title>
+
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<!-- Three.js (globe) + GSAP -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+
+<style>
+  :root {
+    --bg-0: #040812;
+    --bg-1: #0f172a;
+    --teal: #38bdf8;
+    --ink-0: #ffffff;
+    --ink-1: #94a3b8;
+    --line: #1e293b;
+
+    --font-display: 'Space Grotesk', sans-serif;
+    --font-body: 'Inter', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg-0);
+    color: var(--ink-0);
+    font-family: var(--font-body);
+    overflow: hidden;
+    height: 100vh;
+    width: 100vw;
+  }
+
+  .stars {
+    position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background-image:
+      radial-gradient(1px 1px at 12% 18%, #ffffff33 0, transparent 60%),
+      radial-gradient(1px 1px at 82% 8%, #ffffff22 0, transparent 60%),
+      radial-gradient(1.5px 1.5px at 60% 32%, #38bdf833 0, transparent 60%),
+      radial-gradient(1px 1px at 25% 65%, #ffffff15 0, transparent 60%),
+      radial-gradient(1px 1px at 90% 70%, #ffffff25 0, transparent 60%),
+      radial-gradient(1200px 800px at 50% 50%, #0f172a99 0%, transparent 60%);
+  }
+
+  #globeCanvas {
+    position: fixed; inset: 0; z-index: 1;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .loader-overlay {
+    position: fixed; inset: 0; z-index: 10;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center; padding: 24px;
+    background: radial-gradient(circle at center, rgba(4, 8, 18, 0.4) 0%, rgba(4, 8, 18, 0.85) 100%);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+  }
+
+  .loader-overlay.fade-out {
+    opacity: 0; transform: scale(1.1); pointer-events: none;
+  }
+
+  .brand-badge {
+    font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.22em;
+    text-transform: uppercase; color: var(--teal);
+    background: rgba(56, 189, 248, 0.12); border: 1px solid rgba(56, 189, 248, 0.35);
+    padding: 6px 16px; border-radius: 20px; margin-bottom: 20px;
+    box-shadow: 0 0 20px rgba(56, 189, 248, 0.2);
+  }
+
+  .hero-title {
+    font-family: var(--font-display); font-size: clamp(32px, 5vw, 56px);
+    font-weight: 700; margin: 0 0 12px; letter-spacing: -0.02em;
+  }
+
+  .hero-sub {
+    font-size: 14px; color: var(--ink-1); margin: 0 0 40px; max-width: 500px;
+    line-height: 1.6;
+  }
+
+  .progress-box {
+    width: 100%; max-width: 460px; margin-bottom: 28px;
+  }
+
+  .progress-bar-bg {
+    width: 100%; height: 6px; background: rgba(15, 23, 42, 0.9);
+    border-radius: 10px; overflow: hidden; border: 1px solid rgba(56, 189, 248, 0.2);
+    position: relative; margin-bottom: 12px;
+  }
+
+  .progress-fill {
+    height: 100%; width: 0%; background: linear-gradient(90deg, #0284c7, var(--teal), #818cf8);
+    border-radius: 10px; transition: width 0.15s ease-out;
+  }
+
+  .status-row {
+    display: flex; justify-content: space-between; align-items: center;
+    font-family: var(--font-mono); font-size: 11px;
+  }
+
+  .status-msg { color: var(--ink-1); }
+  .status-pct { color: var(--teal); font-weight: 700; }
+
+  .enter-btn {
+    background: rgba(15, 23, 42, 0.8); border: 1px solid var(--teal);
+    color: var(--teal); font-family: var(--font-display); font-weight: 700;
+    font-size: 13px; padding: 12px 26px; border-radius: 8px; cursor: pointer;
+    backdrop-filter: blur(10px); transition: all 0.2s ease;
+    box-shadow: 0 4px 20px rgba(56, 189, 248, 0.25);
+  }
+
+  .enter-btn:hover {
+    background: var(--teal); color: var(--bg-0);
+    transform: translateY(-2px); box-shadow: 0 6px 24px rgba(56, 189, 248, 0.4);
+  }
+</style>
+</head>
+<body>
+
+<div class="stars"></div>
+<div id="globeCanvas"></div>
+
+<div class="loader-overlay" id="loaderOverlay">
+  <div class="brand-badge">🇮🇳 GOVT OF INDIA • MDoNER × MoRD | GeoShield</div>
+  <h1 class="hero-title">Resilience in Every Khasra</h1>
+  <p class="hero-sub">National Disaster Resilience & Landslide Hazard Analytics Platform</p>
+
+  <div class="progress-box">
+    <div class="progress-bar-bg">
+      <div class="progress-fill" id="progressFill"></div>
+    </div>
+    <div class="status-row">
+      <span class="status-msg" id="statusMsg">Initializing 3D Spatial Canvas...</span>
+      <span class="status-pct" id="statusPct">0%</span>
+    </div>
+  </div>
+
+  <button class="enter-btn" onclick="transitionToCommandCenter()">
+    ENTER COMMAND CENTER NOW →
+  </button>
+</div>
+
+<script>
+let scene, camera, renderer, globeGroup, cloudsMesh;
+let progress = 0;
+
+function initGlobe() {
+  const container = document.getElementById('globeCanvas');
+  const w = window.innerWidth, h = window.innerHeight;
+
+  scene = new THREE.Scene();
+  camera = new THREE.PerspectiveCamera(45, w / h, 0.1, 100);
+  camera.position.z = 5.2;
+
+  renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setSize(w, h);
+  container.appendChild(renderer.domElement);
+
+  globeGroup = new THREE.Group();
+  scene.add(globeGroup);
+
+  const ambient = new THREE.AmbientLight(0xffffff, 0.4);
+  scene.add(ambient);
+
+  const sun = new THREE.DirectionalLight(0xffffff, 1.8);
+  sun.position.set(5, 3, 5);
+  scene.add(sun);
+
+  const rim = new THREE.DirectionalLight(0x4466aa, 0.6);
+  rim.position.set(-5, -1, -3);
+  scene.add(rim);
+
+  const earthGeo = new THREE.SphereGeometry(1.6, 64, 64);
+  const earthMat = new THREE.MeshPhongMaterial({ color: 0xffffff, specular: 0x222222, shininess: 12 });
+  const earth = new THREE.Mesh(earthGeo, earthMat);
+  globeGroup.add(earth);
+
+  const cloudGeo = new THREE.SphereGeometry(1.61, 64, 64);
+  const cloudMat = new THREE.MeshPhongMaterial({ color: 0xffffff, transparent: true, opacity: 0.4, depthWrite: false });
+  cloudsMesh = new THREE.Mesh(cloudGeo, cloudMat);
+  globeGroup.add(cloudsMesh);
+
+  const atmGeo = new THREE.SphereGeometry(1.8, 64, 64);
+  const atmMat = new THREE.ShaderMaterial({
+    vertexShader: `varying vec3 vNormal; void main(){ vNormal=normalize(normalMatrix*normal); gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0); }`,
+    fragmentShader: `varying vec3 vNormal; void main(){ float i=pow(0.72-dot(vNormal,vec3(0,0,1)),3.5); gl_FragColor=vec4(0.25,0.55,1.0,1.0)*i*1.6; }`,
+    blending: THREE.AdditiveBlending, side: THREE.FrontSide, transparent: true, depthWrite: false
+  });
+  globeGroup.add(new THREE.Mesh(atmGeo, atmMat));
+
+  const loader = new THREE.TextureLoader();
+  const cdnBase = 'https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/';
+  loader.load(cdnBase + 'earth_atmos_2048.jpg', (tex) => { earthMat.map = tex; earthMat.needsUpdate = true; });
+  loader.load(cdnBase + 'earth_specular_2048.jpg', (tex) => { earthMat.specularMap = tex; earthMat.needsUpdate = true; });
+  loader.load(cdnBase + 'earth_normal_2048.jpg', (tex) => { earthMat.normalMap = tex; earthMat.normalScale = new THREE.Vector2(0.5, 0.5); earthMat.needsUpdate = true; });
+  loader.load(cdnBase + 'earth_clouds_1024.png', (tex) => { cloudMat.map = tex; cloudMat.needsUpdate = true; });
+
+  function animate() {
+    requestAnimationFrame(animate);
+    globeGroup.rotation.y += 0.0025;
+    if (cloudsMesh) cloudsMesh.rotation.y += 0.0032;
+    renderer.render(scene, camera);
+  }
+  animate();
+
+  window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+  });
+}
+
+function startLoaderSequence() {
+  const fill = document.getElementById('progressFill');
+  const msg = document.getElementById('statusMsg');
+  const pct = document.getElementById('statusPct');
+
+  const interval = setInterval(() => {
+    progress += 2;
+    if (progress > 100) progress = 100;
+
+    fill.style.width = progress + '%';
+    pct.textContent = progress + '%';
+
+    if (progress < 25) msg.textContent = 'Initializing 3D Spatial Canvas...';
+    else if (progress < 55) msg.textContent = 'Loading 74,320 Cadastral Parcels (Khasra 104/A, 104/B, 108)...';
+    else if (progress < 80) msg.textContent = 'Connecting Sentinel-1 SAR & Weather Feeds...';
+    else if (progress < 98) msg.textContent = 'Calibrating Geotechnical Limit Equilibrium Engine...';
+    else msg.textContent = 'System Ready • Transitioning to Command Center...';
+
+    if (progress >= 100) {
+      clearInterval(interval);
+      setTimeout(transitionToCommandCenter, 500);
+    }
+  }, 45);
+}
+
+function transitionToCommandCenter() {
+  const overlay = document.getElementById('loaderOverlay');
+  overlay.classList.add('fade-out');
+
+  gsap.to(camera.position, {
+    z: 2.2,
+    duration: 1.2,
+    ease: 'power2.inOut',
+    onComplete: () => {
+      window.location.href = '/command-center';
+    }
+  });
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  initGlobe();
+  startLoaderSequence();
+});
+</script>
+</body>
+</html>

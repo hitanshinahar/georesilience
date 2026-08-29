@@ -20,7 +20,8 @@ router = APIRouter()
 @router.post("/analyze")
 def analyze_field_intelligence(request: FieldIntelligenceRequest) -> Dict[str, Any]:
     if slm_predictor is None:
-        raise HTTPException(status_code=503, detail="SLM model artifacts not found. Please download the model first.")
+        from ml.models.slm.predictor import deterministic_rule_fallback
+        return deterministic_rule_fallback(request.report_text)
         
     try:
         result = slm_predictor.analyze(request.report_text)

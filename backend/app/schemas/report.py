@@ -6,6 +6,7 @@ from enum import Enum
 class ReporterType(str, Enum):
     citizen = "citizen"
     field_officer = "field_officer"
+    official = "official"
 
 
 class ReportCreate(BaseModel):

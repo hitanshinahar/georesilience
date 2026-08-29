@@ -1,0 +1,33 @@
+.app-shell {
+  display: flex;
+  height: 100vh;
+  width: 100%;
+  overflow: hidden;
+  background: var(--background);
+  position: relative;
+}
+
+.main-content {
+  flex: 1;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.page-container {
+  flex: 1;
+  position: relative;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Adjust topbar position based on sidebar state */
+.app-shell.sidebar-expanded .topbar {
+  left: clamp(240px, 18vw, 260px);
+}
+
+.app-shell.sidebar-collapsed .topbar {
+  left: 88px;
+}

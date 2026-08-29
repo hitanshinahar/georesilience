@@ -82,3 +82,17 @@ def update_incident_status(incident_id: str, update: StatusUpdateRequest):
     if not result:
         raise HTTPException(status_code=404, detail="Incident not found")
     return result
+
+
+@router.patch("/{incident_id}", response_model=IncidentResponse)
+def patch_incident_status(incident_id: str, update: StatusUpdateRequest):
+    """Alias for POST /{incident_id}/status using RESTful PATCH convention."""
+    result = incident_service.update_status(
+        incident_id=incident_id,
+        status=update.status,
+        reviewer_id=update.reviewer_id,
+        note=update.note,
+    )
+    if not result:
+        raise HTTPException(status_code=404, detail="Incident not found")
+    return result

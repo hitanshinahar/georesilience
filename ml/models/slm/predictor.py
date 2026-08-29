@@ -1,13 +1,69 @@
 import os
-from transformers import AutoModelForCausalLM, AutoTokenizer
-import torch
+import logging
 from ml.models.slm.model_config import SLM_MODEL_NAME, ARTIFACTS_DIR
 from ml.models.slm.prompts import build_prompt
 from ml.models.slm.schemas import safe_extract_json, HazardIntelligence
-import logging
+
+
+def deterministic_rule_fallback(report_text: str) -> dict:
+    text = report_text.lower()
+    
+    # Check road blockage first to prioritize routing/transportation disruption
+    hazard_type = "unknown"
+    if any(x in text for x in [
+        "road completely blocked", "road blocked", "highway blocked", 
+        "nh-10 blocked", "nh10 blocked", "road blockage", "vehicles stranded", 
+        "road closed", "blocked road", "route blocked"
+    ]):
+        hazard_type = "road_blockage"
+    elif any(x in text for x in [
+        "mudslide", "mud slide", "slope collapse", "landslide", 
+        "debris flow", "slope failure", "slide", "earth movement"
+    ]):
+        hazard_type = "landslide"
+    elif any(x in text for x in ["rockfall", "rock fall", "boulder", "falling rock", "falling rocks"]):
+        hazard_type = "rockfall"
+    elif any(x in text for x in ["slope crack", "crack", "fissure", "fracture"]):
+        hazard_type = "slope_crack"
+    elif any(x in text for x in ["seepage", "water gushing", "groundwater", "seep"]):
+        hazard_type = "seepage"
+
+    severity = "low"
+    urgency = "monitor"
+    
+    if any(x in text for x in ["crack", "moderate", "slow movement"]):
+        severity = "medium"
+        urgency = "monitor"
+
+    if any(x in text for x in ["massive", "major", "severe", "continuous", "expanding", "significant"]):
+        severity = "high"
+        urgency = "inspect"
+        
+    if any(x in text for x in [
+        "houses at risk", "house at risk", "people trapped", "vehicles stranded",
+        "evacuate", "trapped", "injured", "casualties", "completely blocked",
+        "critical", "emergency"
+    ]):
+        severity = "critical"
+        urgency = "immediate"
+
+    fallback = HazardIntelligence(
+        hazard_type=hazard_type,
+        hazard_confidence=0.85 if hazard_type != "unknown" else 0.3,
+        severity=severity,
+        urgency=urgency,
+        observations=["deterministic_rule_fallback_activated"],
+        temporal_change="worsening" if severity in ["high", "critical"] else "unknown",
+        recommended_action="immediate_evacuation_and_road_closure" if severity == "critical" else ("field_inspection" if severity == "high" else "continue_monitoring"),
+        model_available=True,
+        provenance="deterministic_rule_fallback"
+    )
+    return fallback.model_dump() if hasattr(fallback, "model_dump") else fallback.dict()
 
 class SLMPredictor:
     def __init__(self):
+        import torch
+        from transformers import AutoModelForCausalLM, AutoTokenizer
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
         
         if not os.path.exists(ARTIFACTS_DIR) or not os.listdir(ARTIFACTS_DIR):
@@ -64,18 +120,25 @@ class SLMPredictor:
             extracted_dict = safe_extract_json(output_text)
             # Validate via Pydantic
             validated = HazardIntelligence(**extracted_dict)
+            
+            # Post-validation safety check:
+            # If Qwen produces 'unknown' hazard_type or low confidence or low severity despite strong evidence in report_text, override!
+            text_lower = report_text.lower()
+            has_critical_indicators = any(x in text_lower for x in [
+                "houses at risk", "house at risk", "people trapped", "vehicles stranded",
+                "evacuate", "trapped", "injured", "casualties", "completely blocked",
+                "mudslide", "landslide", "rockfall", "road blocked", "highway blocked", 
+                "nh-10 blocked", "nh10 blocked", "road completely blocked"
+            ])
+            
+            if (validated.hazard_type.value == "unknown" or validated.hazard_confidence < 0.4 or 
+                (has_critical_indicators and validated.severity.value in ["low", "medium"] and validated.hazard_type.value in ["unknown", "none"])):
+                if has_critical_indicators:
+                    return deterministic_rule_fallback(report_text)
+                    
+            validated.provenance = "qwen_slm"
             return validated.model_dump() if hasattr(validated, "model_dump") else validated.dict()
         except Exception as e:
             # Return a controlled error instead of crashing
             logging.warning(f"Failed to extract/validate JSON. Raw output: {output_text}. Error: {e}")
-            fallback = HazardIntelligence(
-                hazard_type="unknown",
-                hazard_confidence=0.0,
-                severity="low",
-                urgency="monitor",
-                observations=["parsing_failed"],
-                temporal_change="unknown",
-                recommended_action="manual_review",
-                model_available=True
-            )
-            return fallback.model_dump() if hasattr(fallback, "model_dump") else fallback.dict()
+            return deterministic_rule_fallback(report_text)

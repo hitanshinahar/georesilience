@@ -1,0 +1,198 @@
+.incidents-page {
+  padding: clamp(16px, 2vw, 32px);
+  height: calc(100vh - 76px);
+  margin-top: 76px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(16px, 2vw, 24px);
+}
+
+.incidents-layout {
+  display: grid;
+  grid-template-columns: minmax(300px, 0.4fr) minmax(400px, 1fr);
+  gap: clamp(16px, 2vw, 24px);
+  flex: 1;
+  min-height: 0;
+}
+
+.inc-list-panel {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  overflow: hidden;
+  min-height: 0;
+}
+
+.inc-filters {
+  display: flex;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  overflow-x: auto;
+}
+
+.filter-tab {
+  flex: 1;
+  padding: 12px;
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.filter-tab:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.filter-tab.active {
+  color: #fff;
+  border-bottom-color: #0A84FF;
+  background: rgba(10, 132, 255, 0.05);
+}
+
+.inc-search {
+  padding: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.inc-search input {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  color: #fff;
+  font-size: 13px;
+}
+
+.inc-list {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.inc-row {
+  display: flex;
+  padding: 12px 16px;
+  gap: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.02);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.inc-row:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.inc-row.selected {
+  background: rgba(255, 255, 255, 0.05);
+  border-left: 3px solid #0A84FF;
+}
+
+.inc-severity-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-top: 4px;
+}
+.inc-severity-dot.critical { background: var(--risk-critical); box-shadow: 0 0 8px rgba(255, 59, 48, 0.5); }
+.inc-severity-dot.high { background: var(--risk-high); }
+.inc-severity-dot.low, .inc-severity-dot.normal { background: var(--risk-low); }
+
+.inc-row-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.inc-title {
+  font-size: 13px;
+  font-weight: 500;
+  color: #fff;
+}
+
+.inc-time {
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.inc-meta {
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.inc-detail-panel {
+  padding: clamp(16px, 2vw, 32px);
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.badge {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+.badge.critical { background: rgba(255, 59, 48, 0.15); color: var(--risk-critical); border: 1px solid rgba(255, 59, 48, 0.3); }
+.badge.high { background: rgba(255, 149, 0, 0.15); color: var(--risk-high); border: 1px solid rgba(255, 149, 0, 0.3); }
+
+.detail-section {
+  margin-bottom: 24px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.metadata-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.md-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.md-lbl {
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.md-val {
+  font-size: 13px;
+  color: #fff;
+  font-weight: 500;
+}
+
+.detail-actions {
+  margin-top: auto;
+  display: flex;
+  gap: 12px;
+}
+
+.detail-actions button {
+  padding: 10px 16px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 500;
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+.btn-primary { background: #0A84FF; color: #fff; border: none; }
+.btn-primary:hover { background: #0070E0; }
+
+.btn-secondary { background: rgba(255, 255, 255, 0.1); color: #fff; border: 1px solid rgba(255, 255, 255, 0.2); }
+.btn-secondary:hover { background: rgba(255, 255, 255, 0.15); }
+
+.btn-danger { background: transparent; color: var(--risk-critical); border: 1px solid rgba(255, 59, 48, 0.3); margin-left: auto; }
+.btn-danger:hover { background: rgba(255, 59, 48, 0.1); }

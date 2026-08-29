@@ -87,6 +87,27 @@ def init_db():
         );
     """)
 
+    # Seed initial demo report if empty so field report feeds display data out-of-the-box
+    cursor.execute("SELECT COUNT(*) FROM reports")
+    if cursor.fetchone()[0] == 0:
+        now_str = "2026-08-29T00:00:00Z"
+        cursor.execute(
+            """INSERT INTO reports 
+               (report_id, report_text, latitude, longitude, location_name, reporter_type, timestamp, status, slm_analysis, created_at)
+               VALUES (?, ?, ?, ?, ?, ?, ?, 'PROCESSED', ?, ?)""",
+            (
+                "RPT-INIT-001",
+                "Slope instability & minor rockfall observed along NH-10 near Dag 104/A.",
+                27.335,
+                88.60,
+                "NH-10 Km 42 (Dag 104/A)",
+                "field_officer",
+                now_str,
+                '{"hazard_type": "slope_crack", "severity": "medium", "urgency": "inspect", "observations": ["rockfall", "slope_instability"]}',
+                now_str
+            )
+        )
+
     conn.commit()
     conn.close()
     logger.info("Database initialized at %s", DB_PATH)

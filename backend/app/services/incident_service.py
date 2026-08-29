@@ -119,7 +119,10 @@ def update_incident_from_report(
     new_requires_review = bool(row["requires_human_review"])
     if slm_analysis:
         severity = (slm_analysis.get("severity") or "low").lower()
-        if severity in ("critical", "high") and row["risk_level"] in ("GREEN", "YELLOW"):
+        if severity == "critical":
+            new_risk_level = "RED"
+            new_requires_review = True
+        elif severity == "high" and row["risk_level"] in ("GREEN", "YELLOW"):
             new_risk_level = "ORANGE"
             new_requires_review = True
 

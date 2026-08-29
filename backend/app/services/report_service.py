@@ -25,13 +25,23 @@ def create_report(data: Dict[str, Any], slm_predictor=None) -> Dict[str, Any]:
     now = datetime.now(timezone.utc).isoformat()
     timestamp = data.get("timestamp") or now
 
-    # Run SLM analysis
+    # Run SLM analysis or fallback
     slm_analysis = None
     if slm_predictor is not None:
         try:
             slm_analysis = slm_predictor.analyze(data["report_text"])
+            if slm_analysis and (slm_analysis.get("hazard_type") == "unknown" or "error" in slm_analysis):
+                from ml.models.slm.predictor import deterministic_rule_fallback
+                fallback = deterministic_rule_fallback(data["report_text"])
+                if fallback.get("hazard_type") != "unknown":
+                    slm_analysis = fallback
         except Exception as e:
-            slm_analysis = {"error": str(e), "model_available": False}
+            slm_analysis = None
+            
+    if not slm_analysis:
+        from ml.models.slm.predictor import deterministic_rule_fallback
+        slm_analysis = deterministic_rule_fallback(data["report_text"])
+
 
     # Persist report
     conn = get_connection()
@@ -119,6 +129,7 @@ def _link_to_incident(
             "recommended_action": (slm_analysis or {}).get("recommended_action", "field_inspection"),
             "source": "field_report",
             "linked_report_ids": [report_id],
+            "assessment_data": slm_analysis
         })
 
         if incident:
@@ -135,13 +146,29 @@ def _should_create_incident(slm_analysis: Optional[Dict]) -> bool:
         return False
 
     severity = (slm_analysis.get("severity") or "low").lower()
+    urgency = (slm_analysis.get("urgency") or "monitor").lower()
     hazard_type = (slm_analysis.get("hazard_type") or "none").lower()
 
-    # Create incident for medium+ severity or identified hazards
-    if severity in ("medium", "high", "critical"):
+    # Rule 1: CRITICAL severity
+    if severity == "critical":
         return True
-    if hazard_type not in ("none", "unknown", ""):
+        
+    # Rule 2: HIGH severity + IMMEDIATE urgency
+    if severity == "high" and urgency == "immediate":
         return True
+        
+    # Rule 3: Explicit road blockage
+    if hazard_type == "road_blockage":
+        return True
+        
+    # Rule 4: People / houses / vehicles at risk
+    # This should be extracted into 'observations' by SLM, but we can also check the raw text
+    # if passed. For now, since we only have slm_analysis, check observations.
+    observations = slm_analysis.get("observations", [])
+    if isinstance(observations, list):
+        obs_text = " ".join(observations).lower()
+        if any(x in obs_text for x in ["people", "house", "vehicle", "strande", "evacuat"]):
+            return True
 
     return False
 

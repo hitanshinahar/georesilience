@@ -1,0 +1,147 @@
+.system-health-page {
+  padding: 32px;
+  height: calc(100vh - 76px);
+  margin-top: 76px;
+  overflow-y: auto;
+}
+
+.page-header {
+  margin-bottom: 32px;
+}
+
+.page-header h1 {
+  font-size: 24px;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 4px;
+}
+
+.health-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: clamp(16px, 2vw, 24px);
+}
+
+.health-card {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+}
+
+.health-list, .data-source-list, .model-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 8px;
+}
+
+.health-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+}
+
+.h-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #fff;
+}
+
+.status-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.status-dot.success {
+  background: var(--risk-low);
+  box-shadow: 0 0 8px var(--risk-low);
+}
+
+.status-dot.warning {
+  background: var(--risk-medium);
+  box-shadow: 0 0 8px var(--risk-medium);
+}
+
+.status-dot.error {
+  background: transparent;
+  border: 2px solid var(--text-secondary);
+}
+
+.h-right {
+  font-weight: 500;
+}
+
+.ds-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+.ds-row:last-child {
+  border-bottom: none;
+}
+
+.ds-name {
+  font-size: 14px;
+  color: #fff;
+}
+
+.ds-provider {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.ds-provider.active {
+  color: var(--risk-low);
+}
+
+.ds-provider.inactive {
+  color: var(--text-secondary);
+}
+
+.model-item {
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+.model-item:last-child {
+  border-bottom: none;
+}
+
+.model-name {
+  font-size: 14px;
+  color: #fff;
+}
+
+.badge {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.badge.success {
+  background: rgba(52, 199, 89, 0.15);
+  color: var(--risk-low);
+  border: 1px solid rgba(52, 199, 89, 0.3);
+}
+
+.badge.warning {
+  background: rgba(255, 204, 0, 0.15);
+  color: var(--risk-medium);
+  border: 1px solid rgba(255, 204, 0, 0.3);
+}
+
+.badge.error {
+  background: rgba(255, 59, 48, 0.15);
+  color: var(--risk-critical);
+  border: 1px solid rgba(255, 59, 48, 0.3);
+}
