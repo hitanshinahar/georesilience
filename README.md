@@ -31,26 +31,26 @@ The system fuses static terrain GIS rasters, real-time meteorological feeds, lim
 
 ```mermaid
 flowchart TD
-    subgraph Data Sources & Telemetry
+    subgraph DataSources ["Data Sources & Telemetry"]
         A1[Sentinel-1 SAR & Weather Feeds]
         A2[DEM Spatial Raster / Elevation]
         A3[Citizen & Field Reports]
     end
 
-    subgraph AI & Geotechnical Analytics Core
+    subgraph AICore ["AI & Geotechnical Analytics Core"]
         B1[Limit Equilibrium Physics Engine<br/>Factor of Safety Fs, Pore Pressure, Shear]
         B2[XGBoost Susceptibility + SHAP]
         B3[LSTM & Transformer Temporal Risk]
         B4[SLM Field Intelligence Parser<br/>Qwen2.5-0.5B]
     end
 
-    subgraph Decision Engine
+    subgraph Decision ["Decision Engine"]
         C1[Confidence-Aware Risk Fusion]
         C2[Operational Incident & Alert Manager]
         C3[A* Emergency Route Planner]
     end
 
-    subgraph Presentation & Client Layer
+    subgraph Presentation ["Presentation & Client Layer"]
         D1[Operations Command Center]
         D2[Risk Analysis & Simulation]
         D3[Field Sentinel Mobile App]

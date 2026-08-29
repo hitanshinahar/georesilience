@@ -8,26 +8,26 @@ Guidelines for building, testing, and extending the GeoShield AI codebase.
 
 ```mermaid
 flowchart TD
-    subgraph Frontend-V2
+    subgraph Frontend ["Frontend-V2"]
         F1[React 19 Dashboard]
         F2[Three.js 3D Earth Loader]
         F3[Leaflet Spatial Maps]
     end
 
-    subgraph Backend
+    subgraph Backend ["Backend"]
         B1[FastAPI REST API]
         B2[Geotechnical Physics Engine]
         B3[A* Routing Solver]
     end
 
-    subgraph Machine Learning
+    subgraph MachineLearning ["Machine Learning"]
         M1[XGBoost + SHAP Engine]
         M2[LSTM / Transformer Sequences]
         M3[SLM Qwen NLP Parser]
     end
 
-    Frontend-V2 <-->|REST API / CORS| Backend
-    Backend <-->|Inference Pipelines| Machine Learning
+    Frontend <-->|REST API / CORS| Backend
+    Backend <-->|Inference Pipelines| MachineLearning
 ```
 
 ---

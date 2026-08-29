@@ -8,26 +8,26 @@ GeoShield AI is engineered as a decoupled, multi-modal microservices architectur
 
 ```mermaid
 flowchart TD
-    subgraph Data Layer
+    subgraph Data ["Data Layer"]
         D1[Sentinel-1 SAR & Weather Feeds]
         D2[Digital Elevation Models DEM]
         D3[Field Reports & Ground Truth]
     end
 
-    subgraph Analytics & Physics Engines
+    subgraph Analytics ["Analytics & Physics Engines"]
         P1[Geotechnical Physics Engine<br/>Limit Equilibrium Method]
         M1[XGBoost Susceptibility<br/>+ SHAP Explainability]
         M2[LSTM / Transformer<br/>72h Temporal Forecasting]
         M3[SLM Field Intelligence Parser<br/>Qwen2.5-0.5B]
     end
 
-    subgraph Evidence Fusion & Decisioning
+    subgraph Fusion ["Evidence Fusion & Decisioning"]
         F1[Confidence-Aware Risk Fusion]
         O1[Incident Generator & Deduplicator]
         R1[A* Emergency Route Planner]
     end
 
-    subgraph Client Application Layer
+    subgraph Client ["Client Application Layer"]
         C1[Command Center Panel]
         C2[Risk Analysis & Simulation]
         C3[Field Sentinel Reporting Interface]
@@ -129,7 +129,7 @@ stateDiagram-v2
 
 ```mermaid
 flowchart LR
-    subgraph Host Laptop (Single Source of Truth)
+    subgraph Host ["Host Laptop (Single Source of Truth)"]
         B[Backend FastAPI Server<br/>Host: 0.0.0.0 : 8000]
         F[Frontend Vite Dev Server<br/>Host: 0.0.0.0 : 5173]
         DB[(SQLite Database<br/>georesilience.db)]
@@ -137,7 +137,7 @@ flowchart LR
         F <-->|VITE_API_BASE_URL| B
     end
 
-    subgraph Client Machine (Friend's Mac / Mobile)
+    subgraph Client ["Client Machine (Friend's Mac / Mobile)"]
         C[Browser Only<br/>http://LAN_IP:5173]
     end
 
