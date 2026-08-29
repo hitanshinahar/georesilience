@@ -1,17 +1,41 @@
-# GeoResilience Backend
+# GeoShield Backend API Server (FastAPI)
 
-The backend is built with FastAPI. It handles API requests, orchestrates data from the ML and Geospatial engines, and evaluates priority scoring.
+The central orchestrator for GeoShield AI, built with **FastAPI**, **Uvicorn**, **Pydantic**, and **SQLite**.
 
-## Getting Started
+---
 
-```bash
-python -m venv venv
-source venv/bin/activate  # Windows: venv\Scripts\activate
-pip install -r requirements.txt
-uvicorn app.main:app --reload
+## ⚡ Architecture Flow
+
+```mermaid
+flowchart LR
+    Client[Web Client] <-->|REST API| Routers[FastAPI Routers]
+    Routers <--> Physics[Geotechnical Physics Engine]
+    Routers <--> ML[XGBoost / LSTM / SLM Predictors]
+    Routers <--> DB[(SQLite DB georesilience.db)]
 ```
 
-## Structure
-- `app/routers/`: API endpoints
-- `app/services/`: Business logic
-- `app/schemas/`: Pydantic models (matching `shared/contracts/`)
+---
+
+## 🚀 Getting Started
+
+```bash
+# Activate environment
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+
+# Install requirements
+pip install -r requirements.txt
+
+# Run backend server
+python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+```
+
+---
+
+## 📁 Project Structure
+
+- `app/main.py`: Entrypoint & Uvicorn runner
+- `app/routers/`: API endpoints (`risk`, `routing`, `slm`, `weather`, `spatial`, `incidents`, `alerts`, `reports`)
+- `app/services/`: Geotechnical physics calculations, A* routing, incident deduplication
+- `app/core/database.py`: SQLite database initialization and schemas
+- `app/schemas/`: Pydantic data validation schemas

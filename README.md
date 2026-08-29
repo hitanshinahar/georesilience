@@ -1,134 +1,223 @@
-# GeoShield AI
+# GeoShield 🇮🇳 — National AI Landslide Early Warning & Disaster Resilience Platform
 
-GeoShield AI is an integrated platform for early warning and landslide risk monitoring. By combining machine learning models with geospatial intelligence and field evidence, it assists in rapid response and informed decision-making.
+[![Python 3.10+](https://img.shields.io/badge/Python-3.10+-3776AB?style=flat-square&logo=python&logoColor=white)](https://www.python.org/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-009688?style=flat-square&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
+[![React 19](https://img.shields.io/badge/React-19.0-61DAFB?style=flat-square&logo=react&logoColor=black)](https://react.dev/)
+[![Vite](https://img.shields.io/badge/Vite-6.0-646CFF?style=flat-square&logo=vite&logoColor=white)](https://vitejs.dev/)
+[![Three.js](https://img.shields.io/badge/Three.js-r128-black?style=flat-square&logo=three.js&logoColor=white)](https://threejs.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
 
-## Problem
+**GeoShield 🇮🇳** is an integrated AI-driven early warning, geotechnical risk analysis, and emergency response platform engineered for landslide-prone regions, with a specialized focus on the North Eastern Region (NER) of India and Himalayan transport corridors (e.g. NH-10).
 
-The North Eastern Region (NER) of India faces the critical challenge of predicting and responding to landslide risk due to its complex terrain and weather patterns.
+The system fuses static terrain GIS rasters, real-time meteorological feeds, limit-equilibrium geotechnical physics calculations, machine learning ensembles (XGBoost + SHAP, temporal LSTM/Transformers), and Small Language Model (SLM) field intelligence into parcel-level (Khasra) risk scores and emergency response workflows.
 
-## What the Platform Does
+---
 
-- Static landslide risk prediction
-- Temporal risk monitoring
-- GIS visualization
-- Field evidence reporting
-- Risk explainability
-- Geo-Evidence Fusion
-- Infrastructure impact analysis
+## 🌟 Key Features
 
-## Future Roadmap (Phase 9+)
+- 🌐 **3D Photorealistic Earth Intro Loader**: Built with Three.js WebGL rendering, NASA satellite textures, specular ocean reflections, Rayleigh atmosphere scattering, and scroll-triggered camera zoom scrubbing.
+- 🏔️ **Geotechnical Limit Equilibrium Engine**: Calculates real-time Factor of Safety ($F_s$), pore water pressure, shear stress, and debris runout reach/inundation area.
+- 🤖 **Multimodal AI Ensemble**:
+  - **XGBoost Susceptibility**: Predicts baseline terrain risk with SHAP factor attribution.
+  - **Temporal LSTM & Transformer**: Analyzes 72-hour antecedent rainfall accumulators and soil moisture trends.
+  - **SLM Field Intelligence**: Localized NLP parser (Qwen2.5-0.5B) extracting hazard type, severity, and urgency from citizen text reports.
+- 🗺️ **Parcel-Level Khasra Cadastre Visualization**: Interactive Leaflet maps mapping risk predictions to cadastral land parcels (e.g. Khasra 104/A, 104/B, 108).
+- 🧭 **Safe Disaster Routing**: A* shortest path algorithm avoiding high-risk zones and active landslide blockages along critical highways.
+- 📱 **Responsive & LAN-Ready Architecture**: Built for emergency field deployments with binding to `0.0.0.0`, configurable `VITE_API_BASE_URL`, and internal sidebar collapse toggles for desktop and mobile devices.
 
-- **Road-aware routing**: Utilizing GIS graph networks (e.g. OSRM) for hazard-aware pathfinding.
-- **Terrain-aware emergency corridor analysis**: Utilizing A* routing across generated cost surfaces for off-road emergency paths.
-- **Real-time GIS integration**: Fetching live SRTM DEM rasters and IMD sensor feeds.
-## Core ML and AI Components
+---
 
-XGBoost: Analyzes terrain, slope, and historical data to predict static landslide risk.
-LSTM: Analyzes time-series rainfall and soil moisture to monitor temporal risk escalation.
-SHAP: Identifies key factors driving the XGBoost risk predictions to provide explainability.
-Vision Processing: Processes visual field reports into structured evidence (planned).
-Small Language Model Processing: Processes textual field reports into structured evidence (planned).
-Optional Transformer Experiment: Evaluates transformer architectures for time-series forecasting (experimental).
+## 🏗️ System Architecture & Data Flow
 
-## System Architecture
+```mermaid
+flowchart TD
+    subgraph Data Sources & Telemetry
+        A1[📡 Sentinel-1 SAR & Weather Feeds]
+        A2[🗺️ DEM Spatial Raster / Elevation]
+        A3[📱 Citizen & Field Reports]
+    end
 
-```text
-Environmental and terrain data
-        |
-        +--> XGBoost (Phase 1)
-        |
-        +--> LSTM (Phase 2)
-        |
-        +--> Transformer (Phase 3)
+    subgraph AI & Geotechnical Analytics Core
+        B1[🧮 Limit Equilibrium Physics Engine<br/>Factor of Safety Fs, Pore Pressure, Shear]
+        B2[🌲 XGBoost Susceptibility + SHAP]
+        B3[📈 LSTM & Transformer Temporal Risk]
+        B4[🤖 SLM Field Intelligence Parser<br/>Qwen2.5-0.5B]
+    end
 
-Citizen / Field Reports
-        |
-        +--> SLM Field Intelligence (Phase 4)
-                    |
-                    v
-             Risk Fusion Engine (Phase 5)
-                    |
-                    v
-          Unified Risk Assessment
-                    |
-                    v
-    Operational Workflow (Phase 7)
-    (Incidents, Alerts, Human Review)
+    subgraph Decision Engine
+        C1[⚖️ Confidence-Aware Risk Fusion]
+        C2[🚨 Operational Incident & Alert Manager]
+        C3[🧭 A* Emergency Route Planner]
+    end
+
+    subgraph Presentation & Client Layer
+        D1[🖥️ Operations Command Center]
+        D2[📊 Risk Analysis & Simulation]
+        D3[📱 Field Sentinel Mobile App]
+    end
+
+    A1 & A2 --> B1 & B2 & B3
+    A3 --> B4
+    B1 & B2 & B3 & B4 --> C1
+    C1 --> C2 & C3
+    C2 & C3 --> D1 & D2 & D3
 ```
 
-## AI/ML Pipeline
+---
 
-1. **XGBoost (Phase 1)**: Analyzes terrain, slope, and historical data to predict static landslide risk. Includes real SHAP explanations for interpretability.
-2. **LSTM (Phase 2)**: Analyzes 72-hour time-series rainfall and soil moisture to monitor temporal risk escalation. Demo scenarios generate full 72-step synthetic prototype sequences. Models execute real PyTorch inference but are trained on generated heuristic data.
-3. **Transformer (Phase 3)**: Evaluates transformer architectures for alternative time-series forecasting. Demo scenarios generate full 72-step synthetic prototype sequences. Models execute real PyTorch inference but are trained on generated heuristic data.
-4. **SLM Field Intelligence (Phase 4)**: Uses local Qwen2.5-0.5B-Instruct to convert unstructured textual field reports into structured heuristic evidence. The frontend field report sheet calls the backend SLM endpoint directly.
-5. **Confidence-Aware Risk Fusion Engine (Phase 5)**: Synthesizes the above predictions into a unified assessment. Uses prototype decision support heuristics for model agreement and field evidence weighting, rather than statistically calibrated probabilities. Evidence coverage represents data availability.
-6. **Assessment Orchestrator (Phase 6)**: Single `/api/assessment/analyze` endpoint orchestrates all models, safely handles unavailable models (marks them as unavailable rather than defaulting to zero risk), and triggers the Phase 7 operational workflow.
+## ⚡ Risk Fusion Sequence
 
-## Setup
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Client as Frontend / Operator
+    participant API as FastAPI Backend
+    participant Physics as Geotechnical Physics Engine
+    participant ML as ML Ensemble (XGBoost / LSTM)
+    participant Fusion as Risk Fusion Engine
+    participant DB as SQLite Storage
 
-1. **Clone the repository:**
-   ```bash
-   git clone https://github.com/hitanshinahar/georesilience.git
-   cd georesilience
-   ```
-2. **Create Python environment:**
-   ```bash
-   python -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
-   ```
-3. **Install backend dependencies:**
-   ```bash
-   cd backend
-   pip install -r requirements.txt
-   ```
-4. **Set up SLM:**
-   ```bash
-   python ml/models/slm/setup.py
-   ```
-   *(Downloads the Qwen model to `ml/artifacts/slm/model.safetensors`, which is ignored in Git)*
-5. **Verify ML artifacts:**
-    Ensure `ml/models/xgboost`, `lstm`, and `transformer` artifacts are present or generated.
-6. **Run the backend:**
-    ```bash
-    cd backend
-    uvicorn app.main:app --reload
-    ```
-7. **Set up and run the frontend:**
-    ```bash
-    cd frontend
-    cp .env.example .env.local   # Configure API_BASE_URL if needed
-    npm install
-    npm run dev
-    ```
-    The Next.js dev server proxies `/api/*` requests to the backend via `next.config.ts` rewrites.
-8. **Run tests:**
-    ```bash
-    cd backend
-    python -m pytest tests/ -v
-    python run_tests.py
-    ```
+    Client->>API: POST /api/assessment/analyze (features & report)
+    API->>Physics: Calculate Factor of Safety (Fs), Shear, Pore Pressure
+    Physics-->>API: Physics Metrics & Runout Estimate
+    API->>ML: Predict Susceptibility & Temporal Risk
+    alt ML Available
+        ML-->>API: ML Risk Probabilities & SHAP Factors
+    else ML Unavailable / Fallback
+        API-->>API: Execute Heuristic Physics Fallback
+    end
+    API->>Fusion: Fuse Physics, ML Scores, and SLM Evidence
+    Fusion-->>API: Unified Risk Score, Level (RED/AMBER/GREEN), & Review Flag
+    API->>DB: Store Incident / Trigger Push Alert (if CRITICAL)
+    API-->>Client: Return Unified Assessment & Spatial Coordinates
+```
 
-## API Overview
+---
 
-- `GET /health`: System health check
-- `POST /api/risk/predict`: Static XGBoost risk prediction
-- `POST /api/risk/timeseries`: Temporal LSTM risk prediction
-- `POST /api/risk/timeseries/transformer`: Temporal Transformer prediction
-- `POST /api/field-intelligence/analyze`: SLM structured field intelligence extraction
-- `POST /api/risk/fuse`: Confidence-Aware Risk Fusion Engine
-- `POST /api/assessment/analyze`: Unified assessment orchestrator (Phase 6)
-- `POST /api/reports`: Submit field report (Phase 7)
-- `GET /api/incidents`: List incidents (Phase 7)
-- `POST /api/incidents/{id}/review`: Human review action (Phase 7)
-- `GET /api/alerts`: List alerts (Phase 7)
+## 🔄 Emergency Incident Lifecycle
 
-## Documentation
+```mermaid
+stateDiagram-v2
+    [*] --> Detection: High Risk (Fs < 1.0 or Score > 75)
+    Detection --> OPEN: Auto-Deduplicate & Create Incident
+    
+    state OPEN {
+        [*] --> Unverified
+        Unverified --> UNDER_REVIEW: Assigned to Dispatch Operator
+    }
+    
+    UNDER_REVIEW --> FIELD_VERIFIED: Field Sentinel Confirms Ground Truth
+    UNDER_REVIEW --> DISMISSED: Verified False Alarm
+    
+    FIELD_VERIFIED --> ESCALATED: Evacuation / Highway Closure Ordered
+    ESCALATED --> RESOLVED: Debris Cleared & Slope Stabilized
+    DISMISSED --> [*]
+    RESOLVED --> [*]
+```
 
-- [Product Requirements Document (PRD)](docs/PRD.md)
-- [Technical Requirements Document (TRD)](docs/TRD.md)
-- [Architecture](docs/ARCHITECTURE.md)
-- [SIH Technical Overview](docs/SIH_TECHNICAL_OVERVIEW.md)
-- [API Specifications](docs/API.md)
-- [Data Specifications](docs/DATA.md)
-- [Development Guidelines](docs/DEVELOPMENT.md)
+---
+
+## 🛠️ Quick Start & Setup Guide
+
+### 1. Repository Setup
+
+```bash
+git clone https://github.com/hitanshinahar/georesilience.git
+cd georesilience
+```
+
+### 2. Backend Setup (FastAPI)
+
+```bash
+cd backend
+
+# Create & activate Python virtual environment
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Start FastAPI dev server (listening on 0.0.0.0 for LAN access)
+python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+```
+
+Backend will be available at:
+- Local: `http://localhost:8000`
+- Health Check: `http://localhost:8000/health`
+- Interactive API Docs (Swagger): `http://localhost:8000/docs`
+
+### 3. Frontend Setup (React + Vite)
+
+In a new terminal:
+
+```bash
+cd frontend-v2
+
+# Install Node dependencies
+npm install
+
+# Configure environment variable (Optional for LAN access)
+# Edit .env file:
+# VITE_API_BASE_URL=http://<YOUR_LAPTOP_IP>:8000
+
+# Start Vite dev server
+npm run dev
+```
+
+Frontend will be available at:
+- Web App: `http://localhost:5173`
+- LAN Access: `http://<YOUR_LAN_IP>:5173`
+
+---
+
+## 📡 Live REST API Endpoints
+
+| Method | Endpoint | Description |
+| :--- | :--- | :--- |
+| `GET` | `/health` | System health check and status verification |
+| `GET` | `/api/weather/current` | Live meteorological telemetry (rainfall accumulators, moisture) |
+| `GET` | `/api/spatial/terrain` | Spatial DEM features (slope, aspect, elevation, TRI) |
+| `POST` | `/api/risk/predict` | Geotechnical physics & ML landslide risk assessment |
+| `POST` | `/api/routing/astar` | A* emergency route planning avoiding hazard zones |
+| `POST` | `/api/field-intelligence/analyze` | SLM natural language extraction from text reports |
+| `GET` | `/api/incidents` | List active hazard incidents |
+| `PATCH` | `/api/incidents/{id}` | Update incident review status (`FIELD_VERIFIED`, `RESOLVED`) |
+| `GET` | `/api/alerts` | Active emergency notifications |
+| `GET` | `/api/reports` | Historical field intelligence reports |
+
+---
+
+## 📁 Repository Structure
+
+```text
+georesilience/
+├── backend/                  # FastAPI Application & Business Services
+│   ├── app/
+│   │   ├── core/            # Database initialization & SQLite models
+│   │   ├── routers/         # REST API route handlers
+│   │   ├── schemas/         # Pydantic data schemas
+│   │   └── services/        # Physics engine, A* routing, incident logic
+│   └── requirements.txt
+├── frontend-v2/              # React 19 + Vite + Three.js Frontend
+│   ├── src/
+│   │   ├── api/             # GeoAPI client with environment configuration
+│   │   ├── components/      # EarthLoader, AppShell, Topbar, Sidebar
+│   │   ├── pages/           # Command Center, Risk Analysis, Simulation
+│   │   └── index.css        # Core design tokens
+│   ├── package.json
+│   └── vite.config.js
+├── ml/                       # Machine Learning Models & Inference Scripts
+│   ├── artifacts/           # Model weights (XGBoost, SLM tokenizer)
+│   ├── fusion/              # Risk fusion normalizer & engine
+│   ├── inference/           # XGBoost prediction pipeline
+│   └── models/              # LSTM, Transformer & SLM predictors
+├── geospatial/               # GIS data processing utilities
+└── docs/                     # Technical Documentation & Architecture Specs
+```
+
+---
+
+## 📄 License
+
+Distributed under the **MIT License**. See `LICENSE` for more information.

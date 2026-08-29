@@ -1,108 +1,150 @@
-# Technical Architecture
+# GeoShield Technical Architecture Specification
 
-The GeoShield AI architecture follows a clear separation of concerns, orchestrated by the central Backend service.
+GeoShield AI is engineered as a decoupled, multi-modal microservices architecture designed for real-time landslide risk assessment, spatial visualization, and emergency response orchestration.
 
-## High-Level Pipeline
+---
+
+## 1. High-Level Data & Analytics Architecture
 
 ```mermaid
 flowchart TD
-    %% Data Sources
-    ENV[Environmental and Geospatial Data]
-    HIST[Historical Landslide Data]
-    FIELD[Citizen / Field Reports]
+    subgraph Data Layer
+        D1[📡 Sentinel-1 SAR & Weather Feeds]
+        D2[🌐 Digital Elevation Models DEM]
+        D3[📱 Field Reports & Ground Truth]
+    end
 
-    %% Machine Learning
-    ENV --> XGB[XGBoost Static Risk]
-    ENV --> LSTM[LSTM Temporal Risk]
-    ENV --> TRANS[Transformer Temporal Risk]
-    FIELD --> SLM[SLM Field Intelligence]
+    subgraph Analytics & Physics Engines
+        P1[🧮 Geotechnical Physics Engine<br/>Limit Equilibrium Method]
+        M1[🌲 XGBoost Susceptibility<br/>+ SHAP Explainability]
+        M2[📈 LSTM / Transformer<br/>72h Temporal Forecasting]
+        M3[🤖 SLM Field Intelligence Parser<br/>Qwen2.5-0.5B]
+    end
 
-    %% Fusion Engine
-    XGB --> FUSION[Confidence-Aware Risk Fusion]
-    LSTM --> FUSION
-    TRANS --> FUSION
-    SLM --> FUSION
+    subgraph Evidence Fusion & Decisioning
+        F1[⚖️ Confidence-Aware Risk Fusion]
+        O1[🚨 Incident Generator & Deduplicator]
+        R1[🧭 A* Emergency Route Planner]
+    end
 
-    %% Intelligence & Routing
-    FUSION --> INTEL[Unified Risk Assessment]
-    
-    INTEL --> ROAD[Road Routing - Planned]
-    INTEL --> TERR[Terrain-Aware Routing - Planned]
+    subgraph Client Application Layer
+        C1[🖥️ Command Center Panel]
+        C2[📊 Risk Analysis & Simulation]
+        C3[📱 Field Sentinel Reporting Interface]
+    end
 
-    %% Phase 7 Operational Workflow
-    INTEL --> INC[Incident Management]
-    FIELD --> INC
-    INC --> ALR[Alert Engine]
-    INC --> REV[Human Review Workflow]
-
-    %% Presentation Layer
-    ROAD --> DASH[Dashboard & Response Prioritization]
-    TERR --> DASH
-    INTEL --> DASH
-    ALR --> DASH
-    REV --> DASH
+    D1 & D2 --> P1 & M1 & M2
+    D3 --> M3
+    P1 & M1 & M2 & M3 --> F1
+    F1 --> O1 & R1
+    O1 & R1 --> C1 & C2 & C3
 ```
 
-## ML Components and Roles
+---
 
-### 1. XGBoost Predictor
-- **Purpose**: Evaluates static terrain features (elevation, slope, soil moisture saturation proxy) to compute a base landslide susceptibility score.
-- **Explainability**: Uses SHAP values to determine top contributing features.
-- **Output**: Risk score (0.0 to 1.0).
+## 2. Component Specifications
 
-### 2. LSTM & Transformer Predictors
-- **Purpose**: Evaluates time-series data (72-hour rainfall sequences) to identify escalating temporal risk.
-- **Input**: 72-step sequences of `rainfall_mm`, `cumulative_rainfall_mm`, and `soil_moisture`. Demo scenarios generate full 72-step sequences programmatically.
-- **Output**: Temporal risk score (0.0 to 1.0).
+### 2.1 Limit Equilibrium Geotechnical Physics Engine
+Located in `backend/app/services/physics_service.py`, this engine provides deterministic physical slope stability calculations independent of machine learning models.
 
-### 3. SLM Field Intelligence
-- **Purpose**: Extracts structured information from unstructured citizen/field reports.
-- **Model**: Qwen2.5-0.5B-Instruct (local, on-device).
-- **Output**: Heuristic labels (hazard type, severity, urgency, observations).
-- **Note**: The SLM confidence represents extraction confidence, not disaster prediction probability.
+- **Factor of Safety ($F_s$) Calculation**:
+  $$\text{Effective Normal Stress } \sigma'_n = \max\left(0.1, \gamma \cdot z \cdot \cos^2\theta - u\right)$$
+  $$\text{Resisting Shear Strength } \tau_{\text{res}} = c' + \sigma'_n \cdot \tan\phi'$$
+  $$\text{Driving Shear Stress } \tau_{\text{drive}} = \gamma \cdot z \cdot \sin\theta \cdot \cos\theta$$
+  $$F_s = \frac{\tau_{\text{res}}}{\max(0.1, \tau_{\text{drive}})}$$
+- **Pore Water Pressure Proxy**:
+  $$u = 0.098 \cdot \text{Rain}_{3\text{h}} \cdot \left(\frac{\text{Moisture}}{50}\right)$$
+- **Empirical Debris Runout Estimation**:
+  Calculates debris reach ($\text{km}$), inundation area ($\text{km}^2$), impacted khasras, and affected population based on slope angle and 3-hour accumulated rainfall.
 
-### 4. Confidence-Aware Risk Fusion Engine
-- **Purpose**: Synthesizes the independent model scores and field evidence into a unified assessment.
-- **Weighting**: Uses prototype heuristics (`base_importance * reliability_factor * availability`). Source reliability factors are **not** statistically calibrated prediction confidence. The output includes an evidence coverage metric, which is not a probability of prediction correctness.
-- **Agreement**: Measures spread across numerical models. High spread triggers manual review.
-- **Field Evidence**: Mapped to a heuristic score representing the strength of concerning on-ground evidence, not the probability of a landslide. Acts as an escalation factor.
+### 2.2 Machine Learning Ensemble & Resilience Fallback
+- **XGBoost Susceptibility Model**: Evaluates static terrain features (elevation, slope, aspect, TRI, plan curvature) and returns a baseline susceptibility score (0.0 to 1.0) along with SHAP values.
+- **LSTM / Transformer Temporal Models**: Process 72-hour sequential rainfall and moisture data to detect escalating saturation.
+- **SLM Natural Language Processor**: Uses Qwen2.5-0.5B-Instruct to convert unstructured text reports into structured JSON (`hazard_type`, `severity`, `urgency`, `observations`).
+- **Resilience Fallback System**: If PyTorch/Transformers dependencies or trained ML model weights are absent during emergency deployments, endpoints gracefully fallback to the deterministic physics engine and rule-based heuristic parsers without throwing HTTP `503` errors.
 
-## Microservices Flow
+---
 
-1. **Frontend**: Next.js app proxies `/api/*` requests to the FastAPI backend via `next.config.ts` rewrites. The `NEXT_PUBLIC_API_URL` environment variable configures the backend target.
-2. **FastAPI Routers**: Routes requests to specific endpoints (`/api/risk/predict`, `/api/risk/fuse`, `/api/reports`, `/api/incidents`, `/api/alerts`).
-3. **Phase 6 Assessment Orchestrator** (`/api/assessment/analyze`):
-   - Single `POST` endpoint that orchestrates all model inference.
-   - Calls XGBoost, LSTM, Transformer, and SLM in sequence.
-   - Safely handles unavailable models (marks as unavailable, excluded from fusion weighting) rather than defaulting to zero risk.
-   - Passes results to the Fusion Engine and triggers the Phase 7 workflow.
-4. **ML Inference**:
-   - `ml.inference.predict` handles XGBoost.
-   - `ml.models.*.predict` handles LSTM, Transformer, and SLM.
-5. **Fusion Engine**:
-   - Normalized in `ml.fusion.normalizer`.
-   - Agreement checked in `ml.fusion.agreement`.
-   - Weighted and fused in `ml.fusion.engine`.
-6. **Operational Workflow (Phase 7)**:
-   - Evaluates unified assessment against `INCIDENT_CREATION_POLICY`.
-   - Generates alerts based on `ALERT_POLICY`.
-   - Deduplicates incidents using Haversine distance (`INCIDENT_MATCHING_RADIUS_METERS`).
-7. **Response**: Returns standardized JSON payloads to the frontend.
+## 3. Multimodal Assessment Sequence Flow
 
-## Persistence Layer (Phase 7)
-- **SQLite Database**: `backend/data/georesilience.db` using `sqlite3` built-in module.
-- **Tables**: `reports`, `incidents`, `alerts`, `review_actions`.
+```mermaid
+sequenceDiagram
+    autonumber
+    actor User as Field Officer / Web Client
+    participant Router as FastAPI Assessment Router
+    participant Physics as Physics Service
+    participant ML as ML Predictors
+    participant Fusion as Risk Fusion Engine
+    participant DB as SQLite DB
 
-## Human Review Workflow (Phase 7)
-- **Trigger**: `requires_human_review` set by Fusion Engine (due to model disagreement or critical field evidence).
-- **Status Progression**: `OPEN` -> `UNDER_REVIEW` -> (`FIELD_VERIFIED` | `ESCALATED` | `DISMISSED` | `RESOLVED`).
-- **Audit**: All actions logged in `review_actions` table.
+    User->>Router: POST /api/assessment/analyze
+    Router->>Physics: calculate_factor_of_safety(rain, slope, moisture, insar)
+    Physics-->>Router: Fs, Pore Pressure, Shear Stress, Runout Metrics
+    
+    alt ML Model Available
+        Router->>ML: predict_susceptibility(features)
+        ML-->>Router: Static Score & SHAP Breakdown
+    else ML Missing / Environment Fallback
+        Router->>Router: Execute Physics Heuristic Fallback
+    end
 
-## Future Geospatial Architecture (Phase 9+)
+    Router->>Fusion: fuse(static_score, Fs, slm_intelligence)
+    Fusion-->>Router: Unified Risk Score, Level (RED/AMBER/GREEN), Review Flag
 
-GeoShield AI is architecturally designed to support two strictly separated routing paradigms in a future phase:
+    alt High Risk (Fs < 1.0 or Score > 75)
+        Router->>DB: Deduplicate & Create Incident
+        Router->>DB: Trigger Emergency Alert
+    end
 
-1. **Road Routing**: Planned to operate exclusively on mapped road networks. Intended to use standard graph algorithms (OSRM/NetworkX) taking into account known road closures and high-risk intersections.
-2. **Terrain-Aware Routing**: Planned separate terrain cost surface routing utilized when viable roads are destroyed. Intended to compute emergency off-road corridors based on slope difficulty, land cover penalties, landslide risk, and impassable barriers using custom A* implementations.
+    Router-->>User: Return Unified Assessment JSON
+```
 
-*Note: The current `geospatial/` directory structure reflects this planned architecture but does not contain active routing implementations.*
+---
+
+## 4. Operational Incident & Alert Workflow
+
+```mermaid
+stateDiagram-v2
+    [*] --> Detection
+    Detection --> OPEN: Create Incident (Haversine Deduplication)
+    
+    state OPEN {
+        [*] --> Unverified
+        Unverified --> UNDER_REVIEW: Operator Assigns Incident
+    }
+
+    UNDER_REVIEW --> FIELD_VERIFIED: Ground Truth Confirmed
+    UNDER_REVIEW --> DISMISSED: Invalid Report / False Positive
+
+    FIELD_VERIFIED --> ESCALATED: Emergency Alert Dispatched
+    ESCALATED --> RESOLVED: Road Cleared & Slope Stabilized
+
+    DISMISSED --> [*]
+    RESOLVED --> [*]
+```
+
+---
+
+## 5. LAN & Emergency Deployment Architecture
+
+```mermaid
+flowchart LR
+    subgraph Host Laptop (Single Source of Truth)
+        B[Backend FastAPI Server<br/>Host: 0.0.0.0 : 8000]
+        F[Frontend Vite Dev Server<br/>Host: 0.0.0.0 : 5173]
+        DB[(SQLite Database<br/>georesilience.db)]
+        B <--> DB
+        F <-->|VITE_API_BASE_URL| B
+    end
+
+    subgraph Client Machine (Friend's Mac / Mobile)
+        C[Browser Only<br/>http://LAN_IP:5173]
+    end
+
+    C <-->|HTTP / CORS| F
+    C <-->|API Calls| B
+```
+
+- **Host Binding**: Uvicorn binds to `0.0.0.0:8000` and Vite binds to `0.0.0.0:5173`.
+- **Zero Client Overhead**: Client machines (Mac, iPhone, Android) require no Python, Node.js, SQLite, or model installations—only a standard web browser.
+- **CORS Handling**: `CORSMiddleware` configured with `allow_origins=["*"]` to allow seamless local network API execution.

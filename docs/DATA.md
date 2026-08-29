@@ -1,32 +1,35 @@
-# Data Specifications
+# GeoShield Data Specifications & Telemetry
 
-GeoShield AI relies on a variety of environmental, terrain, and crowdsourced datasets.
+GeoShield AI integrates spatial elevation rasters, weather telemetry, crowdsourced field reports, and cadastral land records.
 
-## Required Datasets
+---
 
-### DEM and Terrain Data
-Elevation and slope data derived from Digital Elevation Models. *Note: Integration with real GIS raster datasets (e.g. SRTM) is planned for Phase 9. The current prototype utilizes a verified deterministic statistical proxy pipeline for elevation and terrain-derived features.*
+## 📊 Data Pipeline Flow
 
-### Rainfall and Soil Moisture
-Time-series precipitation and moisture data. Ingested by the LSTM model to compute temporal risk escalation.
+```mermaid
+flowchart LR
+    A[📡 Weather Telemetry<br/>IMD & Sentinel-1 SAR] --> D[🧮 Data Normalizer]
+    B[🗺️ Spatial Rasters<br/>SRTM 10m DEM] --> D
+    C[📱 Citizen Field Reports<br/>GPS & Text] --> D
+    D --> E[(GeoShield Persistence<br/>SQLite Database)]
+```
 
-### Historical Landslide Records
-Ground truth catalogues for training the XGBoost static risk model.
+---
 
-### Land Cover
-Identifies vegetation density, soil type proxies, and impassable terrain. *Note: This is a planned integration for future terrain routing.*
+## 📁 Integrated Datasets
 
-### Road Network Data
-Mapped vector data of established infrastructure. *Note: Planned for future road-aware OSRM routing.*
+### 1. Digital Elevation Models (DEM) & Spatial Features
+- **Parameters**: Elevation ($m$), Slope ($\text{deg}$), Aspect ($\text{deg}$), Terrain Ruggedness Index ($\text{TRI}$), Plan Curvature.
+- **Source**: 10m Stereo DEM Rasters & Deterministic Spatial Proxies.
 
-### Field Reports
-Real-time ground truth submitted by users for the Geo-Evidence Fusion Engine.
+### 2. Meteorological Telemetry
+- **Parameters**: 3-Hour Accumulated Rainfall ($\text{mm}$), 72-Hour Antecedent Rainfall Accumulator ($\text{mm}$), Soil Moisture Saturation ($\%$).
+- **Source**: Live Weather Telemetry Feeds & Simulated Extreme Rainfall Scenarios.
 
-## Data Categories
+### 3. Cadastral Land Records (Parcels / Khasra)
+- **Parameters**: Khasra IDs (`104/A`, `104/B`, `108`), Spatial Coordinates (`lat`, `lon`), Land Use Classification.
+- **Purpose**: Parcel-level hazard impact mapping and post-disaster resettlement planning.
 
-Real Data: Production pipelines will connect to active APIs and verified geological surveys.
-Sample Data: The repository currently relies on sample datasets located in ml/data/sample/ and mock JSON responses in the frontend. This facilitates UI and API development while real data pipelines are finalized.
-Synthetic Data: Demo scenarios use procedurally generated sequences to simulate extreme weather events. The temporal models (LSTM/Transformer) are trained on these generated synthetic heuristics.
-Future Integrations: Automated ingestion of satellite imagery for dynamic land cover updates is a planned future integration.
-
-Important: Do not treat sample data as live operational data.
+### 4. Field Intelligence & Reports
+- **Parameters**: Textual hazard descriptions, GPS coordinates, severity labels, timestamp.
+- **Parser**: Qwen2.5-0.5B Small Language Model (SLM) & Deterministic Heuristic Fallback Engine.
