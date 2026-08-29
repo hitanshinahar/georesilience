@@ -4,33 +4,33 @@ GeoShield AI is engineered as a decoupled, multi-modal microservices architectur
 
 ---
 
-## 1. High-Level Data & Analytics Architecture
+## 1. High-Level Data and Analytics Architecture
 
 ```mermaid
 flowchart TD
     subgraph Data Layer
-        D1[📡 Sentinel-1 SAR & Weather Feeds]
-        D2[🌐 Digital Elevation Models DEM]
-        D3[📱 Field Reports & Ground Truth]
+        D1[Sentinel-1 SAR & Weather Feeds]
+        D2[Digital Elevation Models DEM]
+        D3[Field Reports & Ground Truth]
     end
 
     subgraph Analytics & Physics Engines
-        P1[🧮 Geotechnical Physics Engine<br/>Limit Equilibrium Method]
-        M1[🌲 XGBoost Susceptibility<br/>+ SHAP Explainability]
-        M2[📈 LSTM / Transformer<br/>72h Temporal Forecasting]
-        M3[🤖 SLM Field Intelligence Parser<br/>Qwen2.5-0.5B]
+        P1[Geotechnical Physics Engine<br/>Limit Equilibrium Method]
+        M1[XGBoost Susceptibility<br/>+ SHAP Explainability]
+        M2[LSTM / Transformer<br/>72h Temporal Forecasting]
+        M3[SLM Field Intelligence Parser<br/>Qwen2.5-0.5B]
     end
 
     subgraph Evidence Fusion & Decisioning
-        F1[⚖️ Confidence-Aware Risk Fusion]
-        O1[🚨 Incident Generator & Deduplicator]
-        R1[🧭 A* Emergency Route Planner]
+        F1[Confidence-Aware Risk Fusion]
+        O1[Incident Generator & Deduplicator]
+        R1[A* Emergency Route Planner]
     end
 
     subgraph Client Application Layer
-        C1[🖥️ Command Center Panel]
-        C2[📊 Risk Analysis & Simulation]
-        C3[📱 Field Sentinel Reporting Interface]
+        C1[Command Center Panel]
+        C2[Risk Analysis & Simulation]
+        C3[Field Sentinel Reporting Interface]
     end
 
     D1 & D2 --> P1 & M1 & M2
@@ -146,5 +146,5 @@ flowchart LR
 ```
 
 - **Host Binding**: Uvicorn binds to `0.0.0.0:8000` and Vite binds to `0.0.0.0:5173`.
-- **Zero Client Overhead**: Client machines (Mac, iPhone, Android) require no Python, Node.js, SQLite, or model installations—only a standard web browser.
+- **Zero Client Overhead**: Client machines (Mac, iPhone, Android) require no Python, Node.js, SQLite, or model installations - only a standard web browser.
 - **CORS Handling**: `CORSMiddleware` configured with `allow_origins=["*"]` to allow seamless local network API execution.

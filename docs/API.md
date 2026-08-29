@@ -4,7 +4,7 @@ The GeoShield AI FastAPI backend provides RESTful endpoints for real-time hazard
 
 ---
 
-## 🛰️ Request Flow Sequence
+## Request Flow Sequence
 
 ```mermaid
 sequenceDiagram
@@ -21,7 +21,7 @@ sequenceDiagram
 
 ---
 
-## 📋 Endpoint Reference
+## Endpoint Reference
 
 ### 1. System Health Check
 - **Endpoint**: `GET /health`
@@ -69,7 +69,7 @@ sequenceDiagram
 
 ---
 
-### 4. Geotechnical & ML Risk Prediction
+### 4. Geotechnical and ML Risk Prediction
 - **Endpoint**: `POST /api/risk/predict`
 - **Request Body**:
 ```json
@@ -166,7 +166,7 @@ sequenceDiagram
 
 ---
 
-### 7. Active Incidents Query & Review
+### 7. Active Incidents Query and Review
 - **Query List Endpoint**: `GET /api/incidents`
 - **Update Review Endpoint**: `PATCH /api/incidents/{incident_id}`
 - **Request Body (`PATCH`)**:

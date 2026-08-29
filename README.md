@@ -1,4 +1,4 @@
-# GeoShield 🇮🇳 — National AI Landslide Early Warning & Disaster Resilience Platform
+# GeoShield - National AI Landslide Early Warning & Disaster Resilience Platform
 
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10+-3776AB?style=flat-square&logo=python&logoColor=white)](https://www.python.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-009688?style=flat-square&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
@@ -7,53 +7,53 @@
 [![Three.js](https://img.shields.io/badge/Three.js-r128-black?style=flat-square&logo=three.js&logoColor=white)](https://threejs.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
 
-**GeoShield 🇮🇳** is an integrated AI-driven early warning, geotechnical risk analysis, and emergency response platform engineered for landslide-prone regions, with a specialized focus on the North Eastern Region (NER) of India and Himalayan transport corridors (e.g. NH-10).
+**GeoShield** is an integrated AI-driven early warning, geotechnical risk analysis, and emergency response platform engineered for landslide-prone regions, with a specialized focus on the North Eastern Region (NER) of India and Himalayan transport corridors (e.g. NH-10).
 
 The system fuses static terrain GIS rasters, real-time meteorological feeds, limit-equilibrium geotechnical physics calculations, machine learning ensembles (XGBoost + SHAP, temporal LSTM/Transformers), and Small Language Model (SLM) field intelligence into parcel-level (Khasra) risk scores and emergency response workflows.
 
 ---
 
-## 🌟 Key Features
+## Key Features
 
-- 🌐 **3D Photorealistic Earth Intro Loader**: Built with Three.js WebGL rendering, NASA satellite textures, specular ocean reflections, Rayleigh atmosphere scattering, and scroll-triggered camera zoom scrubbing.
-- 🏔️ **Geotechnical Limit Equilibrium Engine**: Calculates real-time Factor of Safety ($F_s$), pore water pressure, shear stress, and debris runout reach/inundation area.
-- 🤖 **Multimodal AI Ensemble**:
+- **3D Photorealistic Earth Intro Loader**: Built with Three.js WebGL rendering, NASA satellite textures, specular ocean reflections, Rayleigh atmosphere scattering, and scroll-triggered camera zoom scrubbing.
+- **Geotechnical Limit Equilibrium Engine**: Calculates real-time Factor of Safety ($F_s$), pore water pressure, shear stress, and debris runout reach/inundation area.
+- **Multimodal AI Ensemble**:
   - **XGBoost Susceptibility**: Predicts baseline terrain risk with SHAP factor attribution.
   - **Temporal LSTM & Transformer**: Analyzes 72-hour antecedent rainfall accumulators and soil moisture trends.
   - **SLM Field Intelligence**: Localized NLP parser (Qwen2.5-0.5B) extracting hazard type, severity, and urgency from citizen text reports.
-- 🗺️ **Parcel-Level Khasra Cadastre Visualization**: Interactive Leaflet maps mapping risk predictions to cadastral land parcels (e.g. Khasra 104/A, 104/B, 108).
-- 🧭 **Safe Disaster Routing**: A* shortest path algorithm avoiding high-risk zones and active landslide blockages along critical highways.
-- 📱 **Responsive & LAN-Ready Architecture**: Built for emergency field deployments with binding to `0.0.0.0`, configurable `VITE_API_BASE_URL`, and internal sidebar collapse toggles for desktop and mobile devices.
+- **Parcel-Level Khasra Cadastre Visualization**: Interactive Leaflet maps mapping risk predictions to cadastral land parcels (e.g. Khasra 104/A, 104/B, 108).
+- **Safe Disaster Routing**: A* shortest path algorithm avoiding high-risk zones and active landslide blockages along critical highways.
+- **Responsive & LAN-Ready Architecture**: Built for emergency field deployments with binding to `0.0.0.0`, configurable `VITE_API_BASE_URL`, and internal sidebar collapse toggles for desktop and mobile devices.
 
 ---
 
-## 🏗️ System Architecture & Data Flow
+## System Architecture and Data Flow
 
 ```mermaid
 flowchart TD
     subgraph Data Sources & Telemetry
-        A1[📡 Sentinel-1 SAR & Weather Feeds]
-        A2[🗺️ DEM Spatial Raster / Elevation]
-        A3[📱 Citizen & Field Reports]
+        A1[Sentinel-1 SAR & Weather Feeds]
+        A2[DEM Spatial Raster / Elevation]
+        A3[Citizen & Field Reports]
     end
 
     subgraph AI & Geotechnical Analytics Core
-        B1[🧮 Limit Equilibrium Physics Engine<br/>Factor of Safety Fs, Pore Pressure, Shear]
-        B2[🌲 XGBoost Susceptibility + SHAP]
-        B3[📈 LSTM & Transformer Temporal Risk]
-        B4[🤖 SLM Field Intelligence Parser<br/>Qwen2.5-0.5B]
+        B1[Limit Equilibrium Physics Engine<br/>Factor of Safety Fs, Pore Pressure, Shear]
+        B2[XGBoost Susceptibility + SHAP]
+        B3[LSTM & Transformer Temporal Risk]
+        B4[SLM Field Intelligence Parser<br/>Qwen2.5-0.5B]
     end
 
     subgraph Decision Engine
-        C1[⚖️ Confidence-Aware Risk Fusion]
-        C2[🚨 Operational Incident & Alert Manager]
-        C3[🧭 A* Emergency Route Planner]
+        C1[Confidence-Aware Risk Fusion]
+        C2[Operational Incident & Alert Manager]
+        C3[A* Emergency Route Planner]
     end
 
     subgraph Presentation & Client Layer
-        D1[🖥️ Operations Command Center]
-        D2[📊 Risk Analysis & Simulation]
-        D3[📱 Field Sentinel Mobile App]
+        D1[Operations Command Center]
+        D2[Risk Analysis & Simulation]
+        D3[Field Sentinel Mobile App]
     end
 
     A1 & A2 --> B1 & B2 & B3
@@ -65,7 +65,7 @@ flowchart TD
 
 ---
 
-## ⚡ Risk Fusion Sequence
+## Risk Fusion Sequence
 
 ```mermaid
 sequenceDiagram
@@ -94,7 +94,7 @@ sequenceDiagram
 
 ---
 
-## 🔄 Emergency Incident Lifecycle
+## Emergency Incident Lifecycle
 
 ```mermaid
 stateDiagram-v2
@@ -117,7 +117,7 @@ stateDiagram-v2
 
 ---
 
-## 🛠️ Quick Start & Setup Guide
+## Quick Start & Setup Guide
 
 ### 1. Repository Setup
 
@@ -171,7 +171,7 @@ Frontend will be available at:
 
 ---
 
-## 📡 Live REST API Endpoints
+## Live REST API Endpoints
 
 | Method | Endpoint | Description |
 | :--- | :--- | :--- |
@@ -188,7 +188,7 @@ Frontend will be available at:
 
 ---
 
-## 📁 Repository Structure
+## Repository Structure
 
 ```text
 georesilience/
@@ -218,6 +218,6 @@ georesilience/
 
 ---
 
-## 📄 License
+## License
 
 Distributed under the **MIT License**. See `LICENSE` for more information.

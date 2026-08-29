@@ -62,8 +62,13 @@ def deterministic_rule_fallback(report_text: str) -> dict:
 
 class SLMPredictor:
     def __init__(self):
-        import torch
-        from transformers import AutoModelForCausalLM, AutoTokenizer
+        try:
+            import torch
+            from transformers import AutoModelForCausalLM, AutoTokenizer
+        except ImportError as e:
+            raise ImportError(f"PyTorch or Transformers missing: {e}")
+            
+        self.torch = torch
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
         
         if not os.path.exists(ARTIFACTS_DIR) or not os.listdir(ARTIFACTS_DIR):
@@ -102,7 +107,7 @@ class SLMPredictor:
         
         inputs = self.tokenizer([text], return_tensors="pt").to(self.device)
         
-        with torch.no_grad():
+        with self.torch.no_grad():
             outputs = self.model.generate(
                 **inputs,
                 max_new_tokens=256,

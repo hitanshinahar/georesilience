@@ -13,7 +13,7 @@ The purpose of this component is to extract structured hazard intelligence from 
 - Extremely lightweight (~0.5B parameters, <1.5GB disk, <2GB RAM).
 - CPU-capable inference with reasonable latency.
 - Highly capable of following instruction constraints and generating valid JSON schema.
-- Keeps the hackathon prototype hardware requirements minimal without relying on external cloud LLM APIs.
+- Keeps the system hardware requirements minimal without relying on external cloud LLM APIs.
 
 ## Setup Instructions
 
@@ -29,7 +29,7 @@ python -m ml.models.slm.setup
 3. The local `Qwen2.5-0.5B-Instruct` model performs generation.
 4. The raw text is passed to an extraction pipeline that strips markdown fences, attempts raw JSON parsing, and gracefully falls back to extracting the first balanced JSON bracket object.
 5. The extracted dictionary is validated against the Pydantic schema `HazardIntelligence`.
-6. If the model output is malformed, a controlled fallback (with `"parsing_failed"` observation) is returned instead of crashing the API.
+6. If the model output is malformed or PyTorch is not installed, a controlled deterministic rule fallback is returned instead of crashing the API.
 
 ## API Endpoint
 `POST /api/field-intelligence/analyze`
@@ -48,6 +48,6 @@ python -m ml.models.slm.setup
 Conforms to `HazardIntelligence` Pydantic model (see `schemas.py`).
 
 ## Fallback Behavior & Limitations
-- If the model is not downloaded, the API will fail gracefully and return a `HTTP 503 Service Unavailable` response.
+- If the model is not downloaded or PyTorch is unavailable, the API will execute a deterministic rule fallback.
 - The pipeline does not fabricate evidence. It will output `unknown` when details are omitted from the text.
-- Do not expect deep deductive reasoning. The model simply translates raw sentences into categorized schema slots.
+- The model simply translates raw sentences into categorized schema slots.

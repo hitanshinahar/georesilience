@@ -1,4 +1,4 @@
-# Machine Learning Subsystem — Landslide Static Susceptibility Core
+# Machine Learning Subsystem - Landslide Static Susceptibility Core
 
 ## 1. Overview & Scope
 This directory contains the baseline **Static Landslide Susceptibility Model** built on XGBoost. 

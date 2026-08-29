@@ -4,7 +4,7 @@ The user interface layer for GeoShield AI, built with **React 19**, **Vite**, **
 
 ---
 
-## 🎨 UI Architecture
+## UI Architecture
 
 ```mermaid
 flowchart TD
@@ -19,7 +19,7 @@ flowchart TD
 
 ---
 
-## 🌟 Key Components
+## Key Components
 
 - **3D Earth Intro Loader** (`EarthLoader.jsx`): Renders a Three.js WebGL Earth sphere with NASA satellite textures, specular ocean mapping, Rayleigh atmosphere glow, and interactive scroll scrubbing.
 - **Operations Command Center** (`CommandCenter.jsx`): Interactive spatial map rendering land cadastre parcels (Khasra 104/A, 104/B, 108), weather alerts, and incident review tools.
@@ -29,7 +29,7 @@ flowchart TD
 
 ---
 
-## 🚀 Running Locally
+## Running Locally
 
 ```bash
 # Install dependencies

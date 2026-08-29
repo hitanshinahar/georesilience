@@ -4,7 +4,7 @@ The central orchestrator for GeoShield AI, built with **FastAPI**, **Uvicorn**, 
 
 ---
 
-## ⚡ Architecture Flow
+## Architecture Flow
 
 ```mermaid
 flowchart LR
@@ -16,7 +16,7 @@ flowchart LR
 
 ---
 
-## 🚀 Getting Started
+## Getting Started
 
 ```bash
 # Activate environment
@@ -32,7 +32,7 @@ python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 - `app/main.py`: Entrypoint & Uvicorn runner
 - `app/routers/`: API endpoints (`risk`, `routing`, `slm`, `weather`, `spatial`, `incidents`, `alerts`, `reports`)

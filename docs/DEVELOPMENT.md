@@ -1,10 +1,10 @@
-# GeoShield Development & Contribution Guidelines
+# GeoShield Development and Contribution Guidelines
 
 Guidelines for building, testing, and extending the GeoShield AI codebase.
 
 ---
 
-## 🏗️ Repository Architecture
+## Repository Architecture
 
 ```mermaid
 flowchart TD
@@ -32,7 +32,7 @@ flowchart TD
 
 ---
 
-## 🛠️ Development Workflows
+## Development Workflows
 
 ### 1. Environment Setup
 - Python version: **3.10+**
@@ -62,8 +62,8 @@ python -m pytest tests/ -v
 
 ---
 
-## 📝 Code Conventions
+## Code Conventions
 
-- **Linting & Formatting**: Follow PEP 8 for Python code and ESLint/Oxlint rules for React JavaScript/JSX.
+- **Linting and Formatting**: Follow PEP 8 for Python code and ESLint/Oxlint rules for React JavaScript/JSX.
 - **Error Handling**: Every ML inference call must provide a deterministic fallback so API routes return `200 OK` during emergency deployments.
 - **Git Commit Messages**: Use conventional commits (`feat:`, `fix:`, `docs:`, `style:`, `refactor:`).
