@@ -45,7 +45,6 @@ export function Sidebar({ isOpen, onToggle }) {
           {isOpen && (
             <div className="logo-text">
               <div className="brand">GeoShield</div>
-              <div className="subtitle">AI Landslide Intelligence</div>
             </div>
           )}
         </div>
